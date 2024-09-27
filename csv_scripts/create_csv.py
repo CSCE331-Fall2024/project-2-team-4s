@@ -2,7 +2,13 @@ import csv
 import random
 import datetime as dt
 
+# TODO: write function to add items in order based on meal type (e.g. a bowl will have itself added, plus the entree and side associated with it)
+# TODO: write function to generate the transaction/junction table data and save to csv file
+# TODO: create header list for menuitem_transaction table
+
+
 # constants
+# NOTE: can add more prices as needed, this is just a starting point
 MENU_ITEMS = {
     "bowl": 8.30,
     "plate": 9.80,
@@ -13,6 +19,7 @@ MENU_ITEMS = {
     "drink": 2.10
 }
 
+# NOTE: subject to change based on actual menu_item table
 MENU_ITEM_IDS = {
     "bowl": 1,
     "plate": 2,
@@ -23,13 +30,13 @@ MENU_ITEM_IDS = {
     "drinks": 18
 }
 
-HEADER = ["transaction_id", "total_cost", "transaction_time",
-          "transaction_date", "transaction_type", "customer_id", "employee_id"]
+TRANSACTION_HEADER = ["transaction_id", "total_cost", "transaction_time",
+                      "transaction_date", "transaction_type", "customer_id", "employee_id"]
 
 TRANSACTION_TYPES = ["Maroon Meal",
                      "Dining Dollars", "Credit/Debit", "Gift Card"]
 
-TRANSACTION_COUNT = 65000
+TRANSACTION_COUNT = 65000  # NOTE: not sure if this is needed right now
 TOTAL_REVENUE = 750000
 CUSTOMER_ID_RANGE = range(1, 101)
 EMPLOYEE_ID_RANGE = range(1, 31)
@@ -67,6 +74,3 @@ def get_transaction_type(total_cost):
 
     # maroon meals are not available for transactions over $9
     return random.choice(TRANSACTION_TYPES[1:])
-
-# TODO: write function to add items in order based on meal type (e.g. a bowl will have itself added, plus the entree and side associated with it)
-# TODO: write function to generate the transaction/junction table data and save to csv file
