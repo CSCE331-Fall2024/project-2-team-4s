@@ -16,6 +16,8 @@ int main()
     string order_types[] = {"Bowl", "Plate", "Bigger plate", "Appetizer", "Drink", "Ala cart"};
     string meal_items[] = {"chow mein", "fried rice", "teriyaki chicken", "mushroom chicken", "orange chicken", "broccoli beef", "black pepper chicken", "beijing beef"};
     double meal_costs[] = {8.50, 10, 12.50, 4.50};
+    int select_meal[] = {0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3}
+    double* costs_of_meal = new double[total_transactions];
 
     ofstream transactionFile("transactions.csv");
     transactionFile << "transaction_id, total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id";
