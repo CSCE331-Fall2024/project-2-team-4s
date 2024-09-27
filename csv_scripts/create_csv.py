@@ -4,7 +4,8 @@ import datetime as dt
 
 # TODO: write function to add items in order based on meal type (e.g. a bowl will have itself added, plus the entree and side associated with it)
 # TODO: write function to generate the transaction/junction table data and save to csv file
-# TODO: create header list for menuitem_transaction table
+
+
 
 
 # constants
@@ -32,6 +33,10 @@ MENU_ITEM_IDS = {
 
 TRANSACTION_HEADER = ["transaction_id", "total_cost", "transaction_time",
                       "transaction_date", "transaction_type", "customer_id", "employee_id"]
+
+MENU_ITEM_HEADER = ["menu_item_id", "current_servings", "item_name", "item_price", "item_category"]
+
+MENU_TRANSACTION_JOIN_HEADER = ["menu_item_id", "transaction_id", "item_quantity"]
 
 TRANSACTION_TYPES = ["Maroon Meal",
                      "Dining Dollars", "Credit/Debit", "Gift Card"]
