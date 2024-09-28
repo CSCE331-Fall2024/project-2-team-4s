@@ -28,7 +28,7 @@ MENU_ITEM_IDS = {
     "drink": 18
 }
 
-ITEM_TYPE_WEIGHTS = {
+MENU_ITEM_WEIGHTS = {
     "bowl": 5,
     "plate": 5,
     "bigger_plate": 3,
@@ -39,8 +39,8 @@ ITEM_TYPE_WEIGHTS = {
 }
 
 CUSTOMER_ID_WEIGHTS = {
-    "customer_id": 3, 
-    "NULL": 5  
+    "customer_id": 3,
+    "NULL": 5
 }
 
 TRANSACTION_HEADER = ["transaction_id", "total_cost", "transaction_time",
@@ -66,6 +66,21 @@ END_TIME = dt.timedelta(hours=22)
 
 
 # helper functions
+def weighted_random_choice(weights_dict):
+    """returns a random key from a dictionary based on the weights provided"""
+    total_weight = sum(weights_dict.values())
+    rand_value = random.uniform(0, total_weight)
+    cumulative_weight = 0
+
+    for item, weight in weights_dict.items():
+        cumulative_weight += weight
+
+        if rand_value <= cumulative_weight:
+            return item
+
+    return list(weights_dict.keys())[0]
+
+
 def generate_random_time(start_time, end_time):
     """generates a random time between the start and end time"""
     delta = end_time - start_time
@@ -94,15 +109,6 @@ def generate_transaction_type(total_cost):
     # maroon meals are not available for transactions over $9
     return random.choice(TRANSACTION_TYPES[1:])
 
-def weighted_random_choice(weights_dict):
-    total_weight = sum(weights_dict.values())
-    rand_value = random.uniform(0, total_weight)
-    cumulative_weight = 0
-    for item, weight in weights_dict.items():
-        cumulative_weight += weight
-        if rand_value <= cumulative_weight:
-            return item
-    return list(weights_dict.keys())[0]
 
 def generate_transaction_items(item_type):
     """generates a list of menu items based on the meal type"""
@@ -138,11 +144,14 @@ def generate_transaction_history():
     menu_item_transactions = []
 
     for i in range(1, TRANSACTION_COUNT):
+        if current_revenue >= TOTAL_REVENUE:
+            break
+
         date = generate_random_date(START_DATE, END_DATE)
         time = generate_random_time(START_TIME, END_TIME)
-        
         customer_choice = weighted_random_choice(CUSTOMER_ID_WEIGHTS)
-        customer_id = random.choice(CUSTOMER_ID_RANGE) if customer_choice == "customer_id" else "NULL"
+        customer_id = random.choice(
+            CUSTOMER_ID_RANGE) if customer_choice == "customer_id" else "NULL"
         employee_id = random.choice(EMPLOYEE_ID_RANGE)
 
         num_items = random.randint(1, 3)
@@ -151,20 +160,17 @@ def generate_transaction_history():
 
         # generate transaction items (currently only 1-3 items per transaction)
         for n in range(num_items):
-            menu_items = list(MENU_ITEMS.keys())
-            item_type = weighted_random_choice(ITEM_TYPE_WEIGHTS)
+            item_type = weighted_random_choice(MENU_ITEM_WEIGHTS)
             item_ids = generate_transaction_items(item_type)
 
             all_item_ids.extend(item_ids)
             all_item_types.append(item_type)
 
-        # calculate total cost of transaction
         total_cost = round(sum([MENU_ITEMS[item]
                            for item in all_item_types]), 2)
-        if current_revenue + total_cost > TOTAL_REVENUE:
-            break
+
         current_revenue += total_cost
-        # generate transaction type
+
         transaction_type = generate_transaction_type(total_cost)
 
         # format of row: [transaction_id, total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id]
