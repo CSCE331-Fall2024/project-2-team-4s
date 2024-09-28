@@ -6,8 +6,6 @@ import datetime as dt
 # TODO: write function to generate the transaction/junction table data and save to csv file
 
 
-
-
 # constants
 # NOTE: can add more prices as needed, this is just a starting point
 MENU_ITEMS = {
@@ -34,9 +32,11 @@ MENU_ITEM_IDS = {
 TRANSACTION_HEADER = ["transaction_id", "total_cost", "transaction_time",
                       "transaction_date", "transaction_type", "customer_id", "employee_id"]
 
-MENU_ITEM_HEADER = ["menu_item_id", "current_servings", "item_name", "item_price", "item_category"]
+MENU_ITEM_HEADER = ["menu_item_id", "current_servings",
+                    "item_name", "item_price", "item_category"]
 
-MENU_TRANSACTION_JOIN_HEADER = ["menu_item_id", "transaction_id", "item_quantity"]
+MENU_TRANSACTION_JOIN_HEADER = [
+    "menu_item_id", "transaction_id", "item_quantity"]
 
 TRANSACTION_TYPES = ["Maroon Meal",
                      "Dining Dollars", "Credit/Debit", "Gift Card"]
@@ -79,3 +79,28 @@ def get_transaction_type(total_cost):
 
     # maroon meals are not available for transactions over $9
     return random.choice(TRANSACTION_TYPES[1:])
+
+
+def get_transaction_items(meal_type):
+    """generates a list of menu items based on the meal type"""
+    items = []
+
+    if meal_type == "bowl":
+        items.append(MENU_ITEM_IDS["bowl"])
+        items.append(random.choice(MENU_ITEM_IDS["entrees"]))
+        items.append(random.choice(MENU_ITEM_IDS["sides"]))
+    elif meal_type == "plate":
+        items.append(MENU_ITEM_IDS["plate"])
+        items.append(random.choice(MENU_ITEM_IDS["entrees"]))
+        items.append(random.choice(MENU_ITEM_IDS["entrees"]))
+        items.append(random.choice(MENU_ITEM_IDS["sides"]))
+    elif meal_type == "bigger_plate":
+        items.append(MENU_ITEM_IDS["bigger_plate"])
+        items.append(random.choice(MENU_ITEM_IDS["entrees"]))
+        items.append(random.choice(MENU_ITEM_IDS["entrees"]))
+        items.append(random.choice(MENU_ITEM_IDS["entrees"]))
+        items.append(random.choice(MENU_ITEM_IDS["sides"]))
+    else:
+        items.append(MENU_ITEM_IDS[meal_type])
+
+    return items
