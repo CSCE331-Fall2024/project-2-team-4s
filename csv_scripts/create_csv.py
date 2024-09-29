@@ -14,7 +14,8 @@ MENU_ITEMS = {
     "alc_entree": 5.20,
     "alc_side": 4.40,
     "appetizer": 2.00,
-    "drink": 2.10
+    "fountain_drink": 2.10,
+    "bottled_drink": 3.00
 }
 
 # NOTE: subject to change based on actual menu_item table
@@ -28,7 +29,8 @@ MENU_ITEM_IDS = {
     "entree": [5, 6, 7, 8, 9, 10],
     "side": [1, 2, 3, 4],
     "appetizers": [11, 12, 13, 14],
-    "drink": [15, 16]
+    "fountain_drink": 15,
+    "bottled_drink": 16
 }
 
 MENU_ITEM_WEIGHTS = {
@@ -38,7 +40,8 @@ MENU_ITEM_WEIGHTS = {
     "alc_entree": 1,
     "alc_side": 1,
     "appetizer": 2,
-    "drink": 3
+    "fountain_drink": 3,
+    "bottled_drink": 1
 }
 
 ITEM_QUANTITY_WEIGHTS = {
@@ -48,7 +51,8 @@ ITEM_QUANTITY_WEIGHTS = {
     "alc_entree": {1: 3, 2: 2, 3: 1},
     "alc_side": {1: 2, 2: 1},
     "appetizer": {1: 5, 2: 3, 3: 2},
-    "drink": {1: 13, 2: 1}
+    "fountain_drink": {1: 13, 2: 1},
+    "bottled_drink": {1: 6, 2: 1}
 }
 
 CUSTOMER_ID_WEIGHTS = {
@@ -155,9 +159,9 @@ def generate_transaction_items(item_type):
             items.append(MENU_ITEM_IDS["appetizer"])
             items.append(random.choice(MENU_ITEM_IDS["appetizers"]))
         else:
-            items.append(random.choice(MENU_ITEM_IDS[item_type]))
+            items.append(MENU_ITEM_IDS[item_type])
 
-    return items
+    return items, item_quantity
 
 
 def generate_transaction_history():
@@ -184,10 +188,13 @@ def generate_transaction_history():
         # generate transaction items (currently only 1-3 items per transaction)
         for n in range(num_items):
             item_type = weighted_random_choice(MENU_ITEM_WEIGHTS)
-            item_ids = generate_transaction_items(item_type)
+            generated_items = generate_transaction_items(item_type)
+            item_ids = generated_items[0]
 
             all_item_ids.extend(item_ids)
-            all_item_types.append(item_type)
+
+            for m in range(generated_items[1]):
+                all_item_types.append(item_type)
 
         total_cost = round(sum([MENU_ITEMS[item]
                            for item in all_item_types]), 2)
@@ -210,16 +217,17 @@ def generate_transaction_history():
 
 
 if __name__ == "__main__":
+    transaction_history = generate_transaction_history()
     # write to transaction.csv
     with open("csv_scripts/transaction.csv", "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(TRANSACTION_HEADER)
-        transactions = generate_transaction_history()[0]
+        transactions = transaction_history[0]
         writer.writerows(transactions)
 
     # write to menu_item_transaction.csv
     with open("csv_scripts/menu_item_transaction.csv", "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(MENU_TRANSACTION_JOIN_HEADER)
-        menu_item_transactions = generate_transaction_history()[1]
+        menu_item_transactions = transaction_history[1]
         writer.writerows(menu_item_transactions)
