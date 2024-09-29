@@ -11,29 +11,32 @@ MENU_ITEMS = {
     "bowl": 8.30,
     "plate": 9.80,
     "bigger_plate": 11.30,
-    "entree": 5.20,
-    "side": 4.40,
+    "alc_entree": 5.20,
+    "alc_side": 4.40,
     "appetizer": 2.00,
     "drink": 2.10
 }
 
 # NOTE: subject to change based on actual menu_item table
 MENU_ITEM_IDS = {
-    "bowl": 1,
-    "plate": 2,
-    "bigger_plate": 3,
-    "entree": list(range(4, 10)),
-    "side": list(range(10, 14)),
-    "appetizer": list(range(14, 18)),
-    "drink": 18
+    "bowl": 17,
+    "plate": 18,
+    "bigger_plate": 19,
+    "appetizer": 20,
+    "alc_side": 21,
+    "alc_entree": 22,
+    "entree": [5, 6, 7, 8, 9, 10],
+    "side": [1, 2, 3, 4],
+    "appetizers": [11, 12, 13, 14],
+    "drink": [15, 16]
 }
 
 MENU_ITEM_WEIGHTS = {
     "bowl": 5,
     "plate": 5,
     "bigger_plate": 3,
-    "entree": 1,
-    "side": 1,
+    "alc_entree": 1,
+    "alc_side": 1,
     "appetizer": 2,
     "drink": 3
 }
@@ -42,8 +45,8 @@ ITEM_QUANTITY_WEIGHTS = {
     "bowl": {1: 16, 2: 3, 3: 1},
     "plate": {1: 20, 2: 4, 3: 1},
     "bigger_plate": {1: 14, 2: 1, 3: 1},
-    "entree": {1: 3, 2: 2, 3: 1},
-    "side": {1: 2, 2: 1},
+    "alc_entree": {1: 3, 2: 2, 3: 1},
+    "alc_side": {1: 2, 2: 1},
     "appetizer": {1: 5, 2: 3, 3: 2},
     "drink": {1: 13, 2: 1}
 }
@@ -123,9 +126,9 @@ def generate_transaction_type(total_cost):
 def generate_transaction_items(item_type):
     """generates a list of menu items based on the meal type"""
     items = []
-    
+
     item_quantity = weighted_random_choice(ITEM_QUANTITY_WEIGHTS[item_type])
-    
+
     for i in range(item_quantity):
         if item_type == "bowl":
             items.append(MENU_ITEM_IDS["bowl"])
@@ -142,10 +145,17 @@ def generate_transaction_items(item_type):
             items.append(random.choice(MENU_ITEM_IDS["entree"]))
             items.append(random.choice(MENU_ITEM_IDS["entree"]))
             items.append(random.choice(MENU_ITEM_IDS["side"]))
-        elif item_type == "entree" or item_type == "side" or item_type == "appetizer":
-            items.append(random.choice(MENU_ITEM_IDS[item_type]))
+        elif item_type == "alc_entree":
+            items.append(MENU_ITEM_IDS["alc_entree"])
+            items.append(random.choice(MENU_ITEM_IDS["entree"]))
+        elif item_type == "alc_side":
+            items.append(MENU_ITEM_IDS["alc_side"])
+            items.append(random.choice(MENU_ITEM_IDS["side"]))
+        elif item_type == "appetizer":
+            items.append(MENU_ITEM_IDS["appetizer"])
+            items.append(random.choice(MENU_ITEM_IDS["appetizers"]))
         else:
-            items.append(MENU_ITEM_IDS[item_type])
+            items.append(random.choice(MENU_ITEM_IDS[item_type]))
 
     return items
 
