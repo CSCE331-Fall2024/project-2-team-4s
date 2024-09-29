@@ -178,7 +178,7 @@ def generate_transaction_history():
         time = generate_random_time(START_TIME, END_TIME)
         customer_choice = weighted_random_choice(CUSTOMER_ID_WEIGHTS)
         customer_id = random.choice(
-            CUSTOMER_ID_RANGE) if customer_choice == "customer_id" else "NULL"
+            CUSTOMER_ID_RANGE) if customer_choice == "customer_id" else ""
         employee_id = random.choice(EMPLOYEE_ID_RANGE)
 
         num_items = random.randint(1, 3)
