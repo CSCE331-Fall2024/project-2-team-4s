@@ -66,7 +66,7 @@ TRANSACTION_TYPES = ["Maroon Meal",
                      "Dining Dollars", "Credit/Debit", "Gift Card"]
 
 TRANSACTION_COUNT = 65000
-TOTAL_REVENUE = 750000
+TOTAL_REVENUE = 755432
 CUSTOMER_ID_RANGE = list(range(1, 1001))
 EMPLOYEE_ID_RANGE = list(range(1, 14))  # FIXME: update to exclude chefs
 START_DATE = dt.datetime(2024, 1, 1)
