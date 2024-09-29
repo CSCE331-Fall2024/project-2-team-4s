@@ -201,14 +201,14 @@ def generate_transaction_history():
 
 if __name__ == "__main__":
     # write to transaction.csv
-    with open("csv_scripts/transaction.csv", "w") as f:
+    with open("csv_scripts/transaction.csv", "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(TRANSACTION_HEADER)
         transactions = generate_transaction_history()[0]
         writer.writerows(transactions)
 
     # write to menu_item_transaction.csv
-    with open("csv_scripts/menu_item_transaction.csv", "w") as f:
+    with open("csv_scripts/menu_item_transaction.csv", "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(MENU_TRANSACTION_JOIN_HEADER)
         menu_item_transactions = generate_transaction_history()[1]
