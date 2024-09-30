@@ -38,61 +38,51 @@ FROM (
 
 -- Eshwar Reddy Gadi
 -- amount of money each customer has spent
-SELECT c.Customer_ID, c.First_Name, c.Last_Name, SUM(t.Total_Cost) AS TotalSpent
-FROM Customer c
-JOIN Transaction t ON c.Customer_ID = t.Customer_ID
-GROUP BY c.Customer_ID, c.First_Name, c.Last_Name ORDER BY c.Customer_ID;
+SELECT c.customer_id, c.first_name, c.last_name, SUM(t.total_cost) AS total_spent
+FROM customer c
+JOIN transaction t ON c.customer_id = t.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name 
+ORDER BY c.customer_id;
 
--- number of Transactions each employee has done
-SELECT e.Employee_ID, e.First_Name, e.Last_Name, COUNT(t.Transaction_ID) AS Number_Of_Transactions
-FROM Employee e
-JOIN Transaction t ON e.Employee_ID = t.Employee_ID
-GROUP BY e.Employee_ID, e.First_Name, e.Last_Name ORDER BY e.Employee_ID;
+-- number of transactions each employee has done
+SELECT e.employee_id, e.first_name, e.last_name, COUNT(t.transaction_id) AS number_of_transactions
+FROM employee e
+JOIN transaction t ON e.employee_id = t.employee_id
+GROUP BY e.employee_id, e.first_name, e.last_name 
+ORDER BY e.employee_id;
 
--- amount of Revenue Each Item has generated
-SELECT mi.Menu_Item_ID, mi.Item_Name, SUM(mt.Item_Quantity * mi.Item_Price) AS Total_Revenue
-FROM Menu_Item mi
-JOIN Menu_Item_Transaction mt ON mi.Menu_Item_ID = mt.Menu_Item_ID
-JOIN Transaction t ON mt.Transaction_ID = t.Transaction_ID WHERE mi.Menu_Item_ID BETWEEN 15 AND 22
-GROUP BY mi.Menu_Item_ID, mi.Item_Name;
+-- amount of revenue each item has generated
+SELECT mi.menu_item_id, mi.item_name, SUM(mt.item_quantity * mi.item_price) AS total_revenue
+FROM menu_item mi
+JOIN menu_item_transaction mt ON mi.menu_item_id = mt.menu_item_id
+JOIN transaction t ON mt.transaction_id = t.transaction_id 
+WHERE mi.menu_item_id BETWEEN 15 AND 22
+GROUP BY mi.menu_item_id, mi.item_name;
 
 
 --Landon Uelsmann
---shows the number of transactions that were paid with each payment method, and the total revenue for each method 
-SELECT 
-    transaction.transaction_type, 
-    COUNT(transaction.transaction_id) AS transaction_count, 
-    SUM(transaction.total_cost) AS total_revenue
-FROM 
-    transaction
-GROUP BY 
-    transaction.transaction_type
-ORDER BY 
-    transaction_count DESC;
+-- number of transactions associated with each payment method and the total revenue for each method 
+SELECT transaction.transaction_type, COUNT(transaction.transaction_id) AS transaction_count, SUM(transaction.total_cost) AS total_revenue
+FROM transaction
+GROUP BY transaction.transaction_type
+ORDER BY transaction_count DESC;
 
---shows the top 8 used ingredients in all transactions
-SELECT 
-    CONCAT('The ingredient ', inventory.ingredient_name, ' was used a total of ', 
-           SUM(inventory_menu_item.ingredient_amount * menu_item_transaction.item_quantity), ' times.') AS sentence
-FROM 
-    inventory_menu_item
-JOIN 
-    inventory ON inventory_menu_item.ingredient_id = inventory.ingredient_id
-JOIN 
-    menu_item_transaction ON inventory_menu_item.menu_item_id = menu_item_transaction.menu_item_id
-GROUP BY 
-    inventory.ingredient_name
-ORDER BY 
-    SUM(inventory_menu_item.ingredient_amount * menu_item_transaction.item_quantity) DESC
+-- top 8 used ingredients in all transactions
+SELECT CONCAT('The ingredient ', inventory.ingredient_name, ' was used a total of ', SUM(inventory_menu_item.ingredient_amount * menu_item_transaction.item_quantity), ' times.') AS result
+FROM inventory_menu_item
+JOIN inventory ON inventory_menu_item.ingredient_id = inventory.ingredient_id
+JOIN  menu_item_transaction ON inventory_menu_item.menu_item_id = menu_item_transaction.menu_item_id
+GROUP BY inventory.ingredient_name
+ORDER BY SUM(inventory_menu_item.ingredient_amount * menu_item_transaction.item_quantity) DESC
 LIMIT 8;
 
 --Ryan Tran
--- inventory items sorted by closest to running out
+-- inventory items sorted by closest to being understocked
 SELECT i.ingredient_name, i.current_stock, i.min_stock, i.current_stock - i.min_stock AS difference 
 FROM inventory AS i 
-ORDER BY difference DESC;
+ORDER BY difference ASC;
 
--- employee with the most transactions
+-- employee with the most transactions done
 SELECT e.employee_id, e.first_name, e.last_name, COUNT(t.transaction_id) AS transaction_count 
 FROM employee AS e 
 INNER JOIN transaction AS t ON e.employee_id = t.employee_id 
