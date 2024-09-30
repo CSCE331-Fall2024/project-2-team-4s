@@ -32,3 +32,24 @@ FROM (
     ORDER BY total_cost DESC
     LIMIT 10
 ) AS top_orders;
+
+
+-- Eshwar Reddy Gadi
+-- Amount of money each customer has spent:
+SELECT c.Customer_ID, c.First_Name, c.Last_Name, SUM(t.Total_Cost) AS TotalSpent
+FROM Customer c
+JOIN Transaction t ON c.Customer_ID = t.Customer_ID
+GROUP BY c.Customer_ID, c.First_Name, c.Last_Name ORDER BY c.Customer_ID;
+
+-- Number of Transactions each employee has done:
+SELECT e.Employee_ID, e.First_Name, e.Last_Name, COUNT(t.Transaction_ID) AS Number_Of_Transactions
+FROM Employee e
+JOIN Transaction t ON e.Employee_ID = t.Employee_ID
+GROUP BY e.Employee_ID, e.First_Name, e.Last_Name ORDER BY e.Employee_ID;
+
+-- Amount of Revenue Each Item has generated:
+SELECT mi.Menu_Item_ID, mi.Item_Name, SUM(mt.Item_Quantity * mi.Item_Price) AS Total_Revenue
+FROM Menu_Item mi
+JOIN Menu_Item_Transaction mt ON mi.Menu_Item_ID = mt.Menu_Item_ID
+JOIN Transaction t ON mt.Transaction_ID = t.Transaction_ID WHERE mi.Menu_Item_ID BETWEEN 15 AND 22
+GROUP BY mi.Menu_Item_ID, mi.Item_Name;
