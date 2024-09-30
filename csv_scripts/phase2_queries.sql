@@ -14,6 +14,7 @@ AND EXTRACT(HOUR FROM transaction_time) = 11
 GROUP BY EXTRACT(HOUR FROM transaction_time), EXTRACT(MONTH FROM transaction_date);
 
 -- SPECIAL QUERY 1
+-- USED IN DEMO
 SELECT 'Week ' || week_number || ' had ' || COUNT(transaction_id) || ' transactions' AS result
 FROM transaction
 WHERE week_number = 5
@@ -45,6 +46,7 @@ GROUP BY c.customer_id, c.first_name, c.last_name
 ORDER BY c.customer_id;
 
 -- number of transactions each employee has done
+-- USED IN DEMO
 SELECT e.employee_id, e.first_name, e.last_name, COUNT(t.transaction_id) AS number_of_transactions
 FROM employee e
 JOIN transaction t ON e.employee_id = t.employee_id
@@ -62,6 +64,7 @@ GROUP BY mi.menu_item_id, mi.item_name;
 
 --Landon Uelsmann
 -- number of transactions associated with each payment method and the total revenue for each method 
+-- USED IN DEMO
 SELECT transaction.transaction_type, COUNT(transaction.transaction_id) AS transaction_count, SUM(transaction.total_cost) AS total_revenue
 FROM transaction
 GROUP BY transaction.transaction_type
@@ -83,6 +86,7 @@ FROM inventory AS i
 ORDER BY difference ASC;
 
 -- employee with the most transactions done
+-- USED IN DEMO
 SELECT e.employee_id, e.first_name, e.last_name, COUNT(t.transaction_id) AS transaction_count 
 FROM employee AS e 
 INNER JOIN transaction AS t ON e.employee_id = t.employee_id 
