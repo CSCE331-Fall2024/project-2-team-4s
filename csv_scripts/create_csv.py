@@ -61,7 +61,7 @@ CUSTOMER_ID_WEIGHTS = {
 }
 
 TRANSACTION_HEADER = ["transaction_id", "total_cost", "transaction_time",
-                      "transaction_date","week_number", "transaction_type", "customer_id", "employee_id"]
+                      "transaction_date", "transaction_type", "customer_id", "employee_id", "week_number"]
 
 MENU_ITEM_HEADER = ["menu_item_id", "current_servings",
                     "item_name", "item_price", "item_category"]
@@ -213,7 +213,7 @@ def generate_transaction_history():
 
         # format of row: [transaction_id, total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id]
         transactions.append([i, total_cost, time,
-                             date, week_number, transaction_type, customer_id, employee_id])
+                             date, transaction_type, customer_id, employee_id, week_number])
 
         # generate junction table data
         for item_id in set(all_item_ids):
