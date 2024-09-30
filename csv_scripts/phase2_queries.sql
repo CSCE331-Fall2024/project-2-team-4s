@@ -26,7 +26,7 @@ WHERE EXTRACT(HOUR FROM transaction_time) = 11
 GROUP BY EXTRACT(HOUR FROM transaction_time);
 
 -- SPECIAL QUERY 3
-SELECT '2024-01-27 has $' || SUM(total_cost) || " in top sales" AS result
+SELECT '2024-01-27 has $' || SUM(total_cost) || ' in top sales' AS result
 FROM (
     SELECT total_cost
     FROM transaction
