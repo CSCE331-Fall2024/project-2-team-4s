@@ -61,7 +61,7 @@ CUSTOMER_ID_WEIGHTS = {
 }
 
 TRANSACTION_HEADER = ["transaction_id", "total_cost", "transaction_time",
-                      "transaction_date", "transaction_type", "customer_id", "employee_id"]
+                      "transaction_date","week_number", "transaction_type", "customer_id", "employee_id"]
 
 MENU_ITEM_HEADER = ["menu_item_id", "current_servings",
                     "item_name", "item_price", "item_category"]
@@ -80,7 +80,6 @@ START_DATE = dt.datetime(2024, 1, 1)
 END_DATE = dt.datetime(2024, 9, 27)
 START_TIME = dt.timedelta(hours=10)
 END_TIME = dt.timedelta(hours=22)
-
 
 # helper functions
 def weighted_random_choice(weights_dict):
@@ -116,6 +115,12 @@ def generate_random_date(start_date, end_date):
 
     # format: YYYY-MM-DD
     return str(random_date)[:10]
+
+def calculate_week_number(transaction_date, start_date):
+    """Calculate the week number based on the start date."""
+    delta = (transaction_date - start_date).days
+    week_number = (delta // 7) + 1 
+    return week_number
 
 
 def generate_transaction_type(total_cost):
@@ -181,6 +186,9 @@ def generate_transaction_history():
             CUSTOMER_ID_RANGE) if customer_choice == "customer_id" else ""
         employee_id = random.choice(EMPLOYEE_ID_RANGE)
 
+        date_obj = dt.datetime.strptime(date, '%Y-%m-%d').date()
+        week_number = calculate_week_number(date_obj, START_DATE.date())
+        
         num_items = random.randint(1, 3)
         all_item_ids = []  # item ids for junction table
         all_item_types = []  # types for transaction cost
@@ -205,7 +213,7 @@ def generate_transaction_history():
 
         # format of row: [transaction_id, total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id]
         transactions.append([i, total_cost, time,
-                             date, transaction_type, customer_id, employee_id])
+                             date, week_number, transaction_type, customer_id, employee_id])
 
         # generate junction table data
         for item_id in set(all_item_ids):
