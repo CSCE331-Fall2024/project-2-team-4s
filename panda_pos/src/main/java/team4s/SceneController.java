@@ -20,7 +20,9 @@ public class SceneController {
     public void initialize() {
         try {
             conn = Database.connect();
-            System.out.println("Connected to database successfully");
+            System.out.println("Database connection opened");
+            conn.close();
+            System.out.println("Database connection closed");
         } catch (SQLException e) {
             System.err.println("Database connection error");
         }
