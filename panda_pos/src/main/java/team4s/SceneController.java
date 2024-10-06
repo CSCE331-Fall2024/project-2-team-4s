@@ -7,10 +7,24 @@ import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 public class SceneController {
     private Stage stage;
     private Scene scene;
     private Parent root;
+    private Connection conn;
+
+    // test database connection
+    public void initialize() {
+        try {
+            conn = Database.connect();
+            System.out.println("Connected to database successfully");
+        } catch (SQLException e) {
+            System.err.println("Database connection error");
+        }
+    }
 
     // switch to specified scene
     public void switchToScene(ActionEvent event, String fxmlFile) {
