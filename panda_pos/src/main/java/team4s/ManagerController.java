@@ -68,6 +68,7 @@ public class ManagerController {
 
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
+                // add a new employee object to the list for each row in the result set
                 employees.add(new Employee(
                         rs.getInt("employee_id"),
                         rs.getString("first_name"),
