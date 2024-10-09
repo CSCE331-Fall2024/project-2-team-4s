@@ -109,12 +109,32 @@
                 </Tab>
 
                 <Tab text="Employees" closable="false">
-                    <VBox alignment="CENTER">
-                        <children>
-                            <Label text="Content for Tab 3" />
-                        </children>
-                    </VBox>
+                    <TableView fx:id="employeeTable" prefWidth="600" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="employeeIDColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="employeeID"/>
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="employeeFirstNameColumn" text="First name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="firstName"/>
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="employeeLastNameColumn" text="Last Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="lastName"/>
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="employeeRoleColumn" text="Role">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="role"/>
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
                 </Tab>
+
                 <Tab text="Reports" closable="false">
                     <VBox alignment="CENTER">
                         <children>

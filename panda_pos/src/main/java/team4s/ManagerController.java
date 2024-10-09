@@ -28,13 +28,17 @@ public class ManagerController {
     private Parent root;
     private Connection conn;
 
-    // FXML injected UI element for the menu table (used only in Manager.fxml)
+    // FXML injected UI element for the menu table
     @FXML
     private TableView<MenuItem> menuTable;
 
-    // FXML injected UI elements for the inventory table (used only in Manager.fxml)
+    // FXML injected UI elements for the inventory table
     @FXML
     private TableView<InventoryItem> inventoryTable;
+
+    // FXML injected UI elements for the employee table
+    @FXML
+    private TableView<Employee> employeeTable;
 
     // Method to initialize only when Manager.fxml is loaded
     public void initializeManager() {
@@ -46,6 +50,9 @@ public class ManagerController {
             loadMenuItems();
             loadInventoryItems();
 
+            // load the employees
+            loadEmployees();
+
             conn.close();
             System.out.println("Database connection closed");
         } catch (SQLException e) {
@@ -53,7 +60,29 @@ public class ManagerController {
         }
     }
 
-    // Method to load menu items into the TableView
+    // load employees into the table view
+    private void loadEmployees() {
+        ObservableList<Employee> employees = FXCollections.observableArrayList();
+
+        String query = "SELECT * FROM employee ORDER BY employee_id";
+
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                employees.add(new Employee(
+                        rs.getInt("employee_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("role")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // set the employees in the table view
+        employeeTable.setItems(employees);
+    }
+
+    // load menu items into the TableView
     private void loadMenuItems() {
         ObservableList<MenuItem> menu_items = FXCollections.observableArrayList();
 
