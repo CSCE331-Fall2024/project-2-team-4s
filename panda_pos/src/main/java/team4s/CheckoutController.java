@@ -14,10 +14,23 @@ import java.math.RoundingMode;
 
 import javafx.event.ActionEvent;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class CheckoutController {
-    @FXML 
+    private Connection conn;
+
+    @FXML
     private Label total;
     @FXML
     private Label tax;
@@ -35,10 +48,11 @@ public class CheckoutController {
 
     // Setter method to accept the variable
     public void setOrderNames(List<List<String>> orderNames) {
-        this.orderNames = orderNames; //order names taken from ordercontroller and stored neatly to display
+        this.orderNames = orderNames; // order names taken from ordercontroller and stored neatly to display
         // Add each sublist as a single item in the ListView
         for (List<String> sublist : orderNames) {
-            checkout_listing.getItems().add(sublist.toString() + "\n" + "$" +String.valueOf(NamesToCost(sublist.get(0))));
+            checkout_listing.getItems()
+                    .add(sublist.toString() + "\n" + "$" + String.valueOf(NamesToCost(sublist.get(0))));
             total_cost += NamesToCost(sublist.get(0));
         }
         total_cost = roundToTwoDecimalPlaces(total_cost);
@@ -50,49 +64,125 @@ public class CheckoutController {
         total.setText("Total - $" + String.valueOf(total_cost));
 
     }
-    public void setOrder(List<List<Integer>> orders){ //order names taken from ordercontroller and stored neatly for transaction table
+
+    public void setOrder(List<List<Integer>> orders) { // order names taken from ordercontroller and stored neatly for
+                                                       // transaction table
         this.orders = orders;
     }
+
     public double roundToTwoDecimalPlaces(double value) {
-    BigDecimal bd = new BigDecimal(Double.toString(value));
-    bd = bd.setScale(2, RoundingMode.HALF_UP);
-    return bd.doubleValue();
-}
-    public double NamesToCost(String orderNames){
-        if (orderNames == "Bowl"){
-                return 8.3;
-            }
-        else if (orderNames == "Plate"){
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public double NamesToCost(String orderNames) {
+        if (orderNames == "Bowl") {
+            return 8.3;
+        } else if (orderNames == "Plate") {
             return 9.3;
-        }
-        else if (orderNames == "Bigger Plate"){
+        } else if (orderNames == "Bigger Plate") {
             return 11.3;
-        }
-        else if (orderNames == "Appetizer"){
+        } else if (orderNames == "Appetizer") {
             return 2;
-        }
-        else if (orderNames == "Side"){
+        } else if (orderNames == "Side") {
             return 4.4;
-        }
-        else if (orderNames == "Entree"){
+        } else if (orderNames == "Entree") {
             return 5.2;
-        }
-        else if (orderNames == "Fountain Drink"){
+        } else if (orderNames == "Fountain Drink") {
             return 2.1;
-        }
-        else if (orderNames == "Bottled Drink"){
+        } else if (orderNames == "Bottled Drink") {
             return 3;
-        }
-        else{
+        } else {
             return 9999;
         }
+    }
+
+    private List<Integer> flattenOrderList(List<List<Integer>> orders) {
+        List<Integer> flattened = new ArrayList<>();
+
+        for (List<Integer> sublist : orders) {
+            for (Integer item : sublist) {
+                flattened.add(item);
+            }
         }
-    
+
+        return flattened;
+    }
 
     @FXML
     private void confirm_checkout(ActionEvent event) {
-        // Your logic for confirming checkout
         System.out.println(orderNames);
+
+        try {
+            conn = Database.connect();
+            System.out.println("Database connection opened");
+            String insertQuery = "INSERT INTO transaction (total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id, week_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            // get current time
+            LocalTime time = LocalTime.now();
+            java.sql.Time sqlTime = java.sql.Time.valueOf(time);
+
+            // get current date
+            LocalDate date = LocalDate.now();
+            java.sql.Date sqlDate = java.sql.Date.valueOf(date);
+
+            PreparedStatement stmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
+            stmt.setDouble(1, total_cost);
+            stmt.setTime(2, sqlTime);
+            stmt.setDate(3, sqlDate);
+            stmt.setString(4, "Credit/Debit");
+            stmt.setNull(5, java.sql.Types.INTEGER); // set customer_id to null
+            stmt.setInt(6, 1);
+            stmt.setInt(7, 40);
+
+            stmt.executeUpdate(); // execute the insert statement
+
+            // get the transaction_id of the newly inserted transaction
+            int transactionID;
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    transactionID = generatedKeys.getInt(1);
+                    System.out.println("transaction_id: " + transactionID);
+                } else {
+                    throw new SQLException("Creating transaction failed");
+                }
+            }
+
+            // flatten the orders list and create a set of unique items
+            List<Integer> flattenedOrders = flattenOrderList(orders);
+            Set<Integer> ordersSet = new HashSet<>(flattenedOrders);
+
+            // set join table entries
+            for (Integer order : ordersSet) {
+                String insertJoinTableQuery = "INSERT INTO menu_item_transaction (menu_item_id, transaction_id, item_quantity) VALUES (?, ?, ?)";
+                PreparedStatement joinTableStmt = conn.prepareStatement(insertJoinTableQuery);
+
+                int quantity = 0;
+                for (Integer item : flattenedOrders) {
+                    if (item == order) {
+                        quantity++;
+                    }
+                }
+
+                joinTableStmt.setInt(1, order);
+                joinTableStmt.setInt(2, transactionID);
+                joinTableStmt.setInt(3, quantity);
+
+                joinTableStmt.executeUpdate();
+
+                System.out.println(
+                        "Inserted into menu_item_transaction: " + order + ", " + transactionID + ", " + quantity);
+            }
+
+            conn.close();
+            System.out.println("Database connection closed");
+
+            // navigate back to the cashier screen
+            go_back(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -103,7 +193,7 @@ public class CheckoutController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cashier.fxml"));
             Parent root = loader.load();
 
-        // Get the controller and set the variable
+            // Get the controller and set the variable
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
