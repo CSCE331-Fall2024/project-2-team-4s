@@ -737,4 +737,50 @@ public class ManagerController {
         modal.setScene(modalScene);
         modal.showAndWait();
     };
+
+    public void showDeleteEmployeeModal() {
+        // get the selected employee
+        Employee selectedEmployee = employeeTable.getSelectionModel().getSelectedItem();
+
+        if (selectedEmployee != null) {
+            Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
+            confirmationAlert.setTitle("Delete Confirmation");
+            confirmationAlert.setHeaderText("Are you sure you want to delete this employee?");
+            confirmationAlert.setContentText(
+                    "Employee: " + selectedEmployee.getFirstName() + " " + selectedEmployee.getLastName());
+
+            // wait for user confirmation
+            Optional<ButtonType> response = confirmationAlert.showAndWait();
+
+            if (response.isPresent() && response.get() == ButtonType.OK) {
+                try {
+                    conn = Database.connect();
+                    System.out.println("Database connection opened");
+                    String deleteQuery = "DELETE FROM employee WHERE employee_id = ?";
+
+                    PreparedStatement stmt = conn.prepareStatement(deleteQuery);
+                    // set the employee id for the statement
+                    stmt.setInt(1, selectedEmployee.getEmployeeID());
+
+                    stmt.executeUpdate(); // execute the delete statement
+
+                    loadEmployees(); // refresh the table view
+
+                    conn.close();
+                    System.out.println("Database connection closed");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } else {
+            // show an alert if no employee is selected
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("No Employee Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an employee to delete");
+            alert.showAndWait();
+            return;
+        }
+    };
 }
