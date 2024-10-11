@@ -39,11 +39,18 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
 
 
 <ScrollPane fx:controller="team4s.OrderController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" pannable="true" prefHeight="431.0" prefWidth="671.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-     <content>
-      <SplitPane dividerPositions="0.1477832512315271, 0.31773399014778325, 0.5862068965517241, 0.7857142857142857" orientation="VERTICAL" prefHeight="420.0" prefWidth="654.0">
+    <content>
+      <SplitPane dividerPositions="0.14620535714285715, 0.28180803571428575, 0.4559151785714286, 0.5530133928571429" orientation="VERTICAL" prefHeight="610.0" prefWidth="665.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="66.0" prefWidth="645.0">
                <children>
@@ -78,7 +85,7 @@
                   </HBox>
                </children>
             </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="94.0" prefWidth="658.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="663.0">
                <children>
                   <HBox id="entree_hbox" fx:id="entree_hbox" layoutX="54.0" layoutY="-3.0" prefHeight="95.0" prefWidth="595.0" spacing="25.0">
                      <padding>
@@ -107,9 +114,9 @@
                   </HBox>
                </children>
             </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="239.0" prefWidth="622.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="79.0" prefWidth="663.0">
                <children>
-                  <HBox id="appetizer_hbox" fx:id="appetizers_hbox" layoutX="58.0" layoutY="-2.0" prefHeight="100.0" prefWidth="593.0" spacing="25.0">
+                  <HBox id="appetizer_hbox" fx:id="appetizers_hbox" layoutX="34.0" layoutY="-13.0" prefHeight="78.0" prefWidth="593.0" spacing="25.0">
                      <children>
                         <Button fx:id="chicken_eggrolls" mnemonicParsing="false" onAction="#chicken_eggrolls" prefHeight="25.0" prefWidth="130.0" text="Chicken Eggrolls" />
                         <Button fx:id="rangoons" mnemonicParsing="false" onAction="#rangoons" prefHeight="25.0" prefWidth="110.0" text="Rangoons" />
@@ -122,22 +129,43 @@
                   </HBox>
                </children>
             </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="147.0" prefWidth="652.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="179.0" prefWidth="663.0">
                <children>
-                  <HBox layoutX="57.0" layoutY="-3.0" prefHeight="71.0" prefWidth="596.0" spacing="25.0">
+                  <HBox layoutY="-3.0" prefHeight="71.0" prefWidth="653.0" spacing="25.0">
                      <children>
                         <HBox fx:id="drink_hbox" prefHeight="46.0" prefWidth="253.0" spacing="10.0">
                            <children>
-                              <Button fx:id="fountain_drink" mnemonicParsing="false" onAction="#fountain_drink" prefHeight="25.0" prefWidth="125.0" text="Fountain Drink" />
-                              <Button fx:id="bottled_drink" mnemonicParsing="false" onAction="#bottled_drink" prefHeight="25.0" prefWidth="116.0" text="Bottled Drink" />
+                              <Button fx:id="fountain_drink" mnemonicParsing="false" onAction="#fountain_drink" prefHeight="57.0" prefWidth="221.0" text="Fountain Drink" />
+                              <Button fx:id="bottled_drink" mnemonicParsing="false" onAction="#bottled_drink" prefHeight="49.0" prefWidth="206.0" text="Bottled Drink" />
                            </children>
                         </HBox>
-                        <HBox fx:id="control_hbox" prefHeight="46.0" prefWidth="390.0" spacing="10.0">
+                        <HBox fx:id="control_hbox" prefHeight="46.0" prefWidth="473.0" spacing="10.0">
                            <children>
-                              <Button id="redo" fx:id="redo" mnemonicParsing="false" onAction="#redo" prefHeight="47.0" prefWidth="107.0" text="REDO" />
-                              <Button id="redo_last_order" fx:id="redo_last_order" mnemonicParsing="false" onAction="#redo_last_order" prefHeight="46.0" prefWidth="175.0" text="REDO LAST ORDER" />
-                              <Button id="confirm" fx:id="confirm" mnemonicParsing="false" onAction="#confirm" prefHeight="46.0" prefWidth="123.0" text="CONFIRM" />
-                              <Button id="checkout" fx:id="checkout" mnemonicParsing="false" onAction="#checkout" prefHeight="56.0" prefWidth="136.0" text="CHECKOUT" />
+                              <Button id="redo" fx:id="redo" mnemonicParsing="false" onAction="#redo" prefHeight="47.0" prefWidth="107.0" text="REDO">
+                                 <font>
+                                    <Font size="7.0" />
+                                 </font>
+                              </Button>
+                              <Button id="redo_last_order" fx:id="redo_last_order" mnemonicParsing="false" onAction="#redo_last_order" prefHeight="46.0" prefWidth="175.0" text="REDO LAST ORDER">
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Button>
+                              <Button id="confirm" fx:id="confirm" mnemonicParsing="false" onAction="#confirm" prefHeight="46.0" prefWidth="123.0" text="CONFIRM">
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Button>
+                              <Button id="checkout" fx:id="checkout" mnemonicParsing="false" onAction="#checkout" prefHeight="56.0" prefWidth="136.0" text="CHECKOUT">
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="previous_screen" mnemonicParsing="false" onAction="#previous_screen" prefHeight="46.0" prefWidth="193.0" text="PREVIOUS SCREEN">
+                                 <font>
+                                    <Font size="9.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                      </children>
