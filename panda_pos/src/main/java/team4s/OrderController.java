@@ -53,6 +53,7 @@ public class OrderController {
     List<String> order_names = new ArrayList<String>();
     List<List<String>> orders_names = new ArrayList<List<String>>();
 
+
     @FXML
     private Button appetizer;
 
@@ -137,6 +138,8 @@ public class OrderController {
     private HBox drink_hbox;
     @FXML
     private Button redo;
+    @FXML
+    private Button previous_screen;
 
 
     @FXML
@@ -416,8 +419,6 @@ public class OrderController {
         if (type_of_order == 0) {
             type_of_order = 1;
             drink_num = 1;
-            order.add(23);
-            order_names.add("Drink");
             bowl.setDisable(true);
             plate.setDisable(true);
             bigger_plate.setDisable(true);
@@ -430,8 +431,6 @@ public class OrderController {
         else{
             cancel();
             drink.setStyle(null);
-            order.remove(order.size()-1);
-            order_names.remove(order_names.size()-1);
         }
         System.out.println("Drink button clicked");
     }
@@ -688,6 +687,23 @@ public class OrderController {
         }
 
 
+    }
+    @FXML
+    private void previous_screen(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Menu.fxml"));
+            Parent root = loader.load();
+
+            // Get the controller and cast to the correct type
+            MenuController menuController = loader.getController();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
         private void showPopupMessage(String message) { //popup message for bad orders
         // Create a new Stage (window)
