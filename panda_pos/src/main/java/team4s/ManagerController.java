@@ -66,7 +66,10 @@ public class ManagerController {
 
         String query = "SELECT * FROM employee ORDER BY employee_id";
 
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
             while (rs.next()) {
                 // add a new employee object to the list for each row in the result set
                 employees.add(new Employee(
@@ -298,6 +301,73 @@ public class ManagerController {
         Scene dialogScene = new Scene(vbox, 400, 320);
         dialog.setScene(dialogScene);
         dialog.showAndWait();
+    }
+
+    public void showAddEmployeeModal(ActionEvent e) {
+        // create a stage for the modal
+        Stage modal = new Stage();
+        modal.initModality(Modality.APPLICATION_MODAL);
+        modal.setTitle("Add New Employee");
+
+        // create vbox for modal layout
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+
+        // input fields for the new employee
+        Label firstNameLabel = new Label("First Name:");
+        TextField firstNameField = new TextField();
+        firstNameField.setPromptText("First Name");
+
+        Label lastNameLabel = new Label("Last Name:");
+        TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Last Name");
+
+        Label roleLabel = new Label("Role:");
+        ComboBox<String> roleComboBox = new ComboBox<>();
+        roleComboBox.getItems().addAll("Manager", "Cashier", "Chef");
+        roleComboBox.setPromptText("Select Role");
+
+        // button to submit the new employee
+        Button addButton = new Button("Add Employee");
+
+        addButton.setOnAction(event -> {
+            // get input data
+            String firstName = firstNameField.getText();
+            String lastName = lastNameField.getText();
+            String role = roleComboBox.getValue();
+
+            // insert the new employee into the database
+            try {
+                conn = Database.connect();
+                System.out.println("Database connection opened");
+                String insertQuery = "INSERT INTO employee (first_name, last_name, role) VALUES (?, ?, ?)";
+
+                PreparedStatement stmt = conn.prepareStatement(insertQuery);
+                // set the values for the statement
+                stmt.setString(1, firstName);
+                stmt.setString(2, lastName);
+                stmt.setString(3, role);
+
+                stmt.executeUpdate(); // execute the insert statement
+
+                loadEmployees(); // refresh the table view
+
+                conn.close();
+                System.out.println("Database connection closed");
+                modal.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        // add elements to the vbox
+        vbox.getChildren().addAll(firstNameLabel, firstNameField, lastNameLabel, lastNameField, roleLabel,
+                roleComboBox, addButton);
+
+        // create a scene with the vbox and display the modal
+        Scene modalScene = new Scene(vbox, 300, 250);
+        modal.setScene(modalScene);
+        modal.showAndWait();
     }
 
     public void handleDeleteItem(ActionEvent event) {
