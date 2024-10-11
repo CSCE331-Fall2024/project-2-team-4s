@@ -140,7 +140,7 @@
                         <!-- buttons for editing employee data -->
                         <HBox alignment="CENTER" spacing="10">
                             <Button text="Add Employee" onAction="#showAddEmployeeModal" />
-                            <Button text="Edit Employee" />
+                            <Button text="Edit Employee" onAction="#showEditEmployeeModal" />
                             <Button text="Delete Employee" />
                         </HBox>
                     </VBox>
