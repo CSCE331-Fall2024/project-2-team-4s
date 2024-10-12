@@ -47,6 +47,11 @@
                                     <PropertyValueFactory property="item_category"/>
                                  </cellValueFactory>
                               </TableColumn>
+                              <TableColumn fx:id="ingredientsColumn" text="Ingredients">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredients"/>
+                                    </cellValueFactory>
+                                </TableColumn>
                         </columns>
                      </TableView>
 
