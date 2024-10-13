@@ -1,181 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
-  All rights reserved. Use is subject to license terms.
-
-  This file is available and licensed under the following license:
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-  - Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  - Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the distribution.
-  - Neither the name of Oracle Corporation nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
-
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+    prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ManagerController">
+    <children>
+        <!-- TabPane with 4 tabs, automatically positioned at the top -->
+        <TabPane>
+            <tabs>
 
-<ScrollPane fx:controller="team4s.OrderController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" pannable="true" prefHeight="431.0" prefWidth="671.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-    <content>
-      <SplitPane dividerPositions="0.14620535714285715, 0.28180803571428575, 0.4559151785714286, 0.5530133928571429" orientation="VERTICAL" prefHeight="610.0" prefWidth="665.0">
-        <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="66.0" prefWidth="645.0">
-               <children>
-                  <HBox layoutX="21.0" layoutY="-1.0" prefHeight="62.0" prefWidth="626.0" spacing="30.0">
-                     <children>
-                        <Button id="bowl" fx:id="bowl" mnemonicParsing="false" onAction="#bowl" text="Bowl" />
-                        <Button id="plate" fx:id="plate" mnemonicParsing="false" onAction="#plate" text="Plate" />
-                        <Button fx:id="bigger_plate" mnemonicParsing="false" onAction="#bigger_plate" prefHeight="25.0" prefWidth="96.0" text="Bigger Plate" />
-                        <Button id="appetizer" fx:id="appetizer" mnemonicParsing="false" onAction="#appetizer" text="Appetizer" />
-                        <Button id="side" fx:id="side" mnemonicParsing="false" onAction="#side" text="Side" />
-                        <Button id="entree" fx:id="entree" mnemonicParsing="false" onAction="#entree" text="Entree" />
-                        <Button id="drink" fx:id="drink" mnemonicParsing="false" onAction="#drink" text="Drink" />
-                     </children>
-                     <padding>
-                        <Insets top="25.0" />
-                     </padding>
-                  </HBox>
-               </children>
-            </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="164.0" prefWidth="601.0">
-               <children>
-                  <HBox id="sides_hbox" fx:id="sides_hbox" layoutX="57.0" layoutY="-5.0" prefHeight="82.0" prefWidth="529.0" spacing="25.0" styleClass="sides_hbox">
-                     <children>
-                        <Button id="white_rice" fx:id="white_rice" mnemonicParsing="false" onAction="#white_rice" prefHeight="25.0" prefWidth="109.0" text="White Rice" />
-                        <Button id="super_greens" fx:id="super_greens" mnemonicParsing="false" onAction="#super_greens" text="Super Greens" />
-                        <Button id="fried_rice" fx:id="fried_rice" mnemonicParsing="false" onAction="#fried_rice" text="Fried Rice" />
-                        <Button id="chow_mein" fx:id="chow_mein" mnemonicParsing="false" onAction="#chow_mein" text="Chow Mein" />
-                     </children>
-                     <padding>
-                        <Insets top="25.0" />
-                     </padding>
-                  </HBox>
-               </children>
-            </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="663.0">
-               <children>
-                  <HBox id="entree_hbox" fx:id="entree_hbox" layoutX="54.0" layoutY="-3.0" prefHeight="95.0" prefWidth="595.0" spacing="25.0">
-                     <padding>
-                        <Insets top="25.0" />
-                     </padding>
-                     <children>
-                        <VBox prefHeight="70.0" prefWidth="185.0" spacing="20.0">
-                           <children>
-                              <Button id="black_pepper_chicken" fx:id="black_pepper_chicken" mnemonicParsing="false" onAction="#black_pepper_chicken" prefHeight="25.0" prefWidth="147.0" text="Black Pepper Chicken" />
-                              <Button id="broccoli_beef" fx:id="broccoli_beef" mnemonicParsing="false" onAction="#broccoli_beef" prefHeight="25.0" prefWidth="111.0" text="Broccoli Beef" />
-                           </children>
-                        </VBox>
-                        <VBox prefHeight="121.0" prefWidth="165.0" spacing="20.0">
-                           <children>
-                              <Button id="teriyaki_chicken" fx:id="teriyaki_chicken" mnemonicParsing="false" onAction="#teriyaki_chicken" prefHeight="25.0" prefWidth="138.0" text="Teriyaki Chicken" />
-                              <Button id="mushroom_chicken" fx:id="mushroom_chicken" mnemonicParsing="false" onAction="#mushroom_chicken" prefHeight="25.0" prefWidth="142.0" text="Mushroom Chicken" />
-                           </children>
-                        </VBox>
-                        <VBox prefHeight="74.0" prefWidth="165.0" spacing="20.0">
-                           <children>
-                              <Button id="beijing_beef" fx:id="beijing_beef" mnemonicParsing="false" onAction="#beijing_beef" prefWidth="116.0" text="Beijing Beef" />
-                              <Button id="orange_chicken" fx:id="orange_chicken" mnemonicParsing="false" onAction="#orange_chicken" prefHeight="25.0" prefWidth="167.0" text="Orange Chicken" />
-                           </children>
-                        </VBox>
-                     </children>
-                  </HBox>
-               </children>
-            </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="79.0" prefWidth="663.0">
-               <children>
-                  <HBox id="appetizer_hbox" fx:id="appetizers_hbox" layoutX="34.0" layoutY="-13.0" prefHeight="78.0" prefWidth="593.0" spacing="25.0">
-                     <children>
-                        <Button fx:id="chicken_eggrolls" mnemonicParsing="false" onAction="#chicken_eggrolls" prefHeight="25.0" prefWidth="130.0" text="Chicken Eggrolls" />
-                        <Button fx:id="rangoons" mnemonicParsing="false" onAction="#rangoons" prefHeight="25.0" prefWidth="110.0" text="Rangoons" />
-                        <Button fx:id="apple_pie_roll" mnemonicParsing="false" onAction="#apple_pie_roll" prefHeight="25.0" prefWidth="119.0" text="Apple Pie Roll" />
-                        <Button fx:id="vegetable_eggrolls" mnemonicParsing="false" onAction="#vegetable_eggrolls" prefHeight="25.0" prefWidth="152.0" text="Vegetable Eggrolls" />
-                     </children>
-                     <padding>
-                        <Insets top="25.0" />
-                     </padding>
-                  </HBox>
-               </children>
-            </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="179.0" prefWidth="663.0">
-               <children>
-                  <HBox layoutY="-3.0" prefHeight="71.0" prefWidth="653.0" spacing="25.0">
-                     <children>
-                        <HBox fx:id="drink_hbox" prefHeight="46.0" prefWidth="253.0" spacing="10.0">
-                           <children>
-                              <Button fx:id="fountain_drink" mnemonicParsing="false" onAction="#fountain_drink" prefHeight="57.0" prefWidth="221.0" text="Fountain Drink" />
-                              <Button fx:id="bottled_drink" mnemonicParsing="false" onAction="#bottled_drink" prefHeight="49.0" prefWidth="206.0" text="Bottled Drink" />
-                           </children>
+                <Tab text="Menu" closable="false">
+                    <VBox alignment="CENTER" spacing="10">
+                        <!-- Table for displaying menu items -->
+                        <TableView fx:id="menuTable" prefWidth="600" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="itemIdColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="menu_item_id" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="currentServingsColumn" text="Servings">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="current_servings" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemNameColumn" text="Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="item_name" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemPriceColumn" text="Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="item_price" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemCategoryColumn" text="Category">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="item_category" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <!-- Button to open the Add Item dialog -->
+                        <HBox alignment="CENTER" spacing="10">
+                            <children>
+                                <Button text="Add Item" onAction="#showAddItemDialog" />
+                                <Button text="Edit Item" onAction="#showEditItemDialog" />
+                                <Button mnemonicParsing="false" text="Delete Item"
+                                    onAction="#handleDeleteItem" />
+                            </children>
                         </HBox>
-                        <HBox fx:id="control_hbox" prefHeight="46.0" prefWidth="473.0" spacing="10.0">
-                           <children>
-                              <Button id="redo" fx:id="redo" mnemonicParsing="false" onAction="#redo" prefHeight="47.0" prefWidth="107.0" text="REDO">
-                                 <font>
-                                    <Font size="7.0" />
-                                 </font>
-                              </Button>
-                              <Button id="redo_last_order" fx:id="redo_last_order" mnemonicParsing="false" onAction="#redo_last_order" prefHeight="46.0" prefWidth="175.0" text="REDO LAST ORDER">
-                                 <font>
-                                    <Font size="9.0" />
-                                 </font>
-                              </Button>
-                              <Button id="confirm" fx:id="confirm" mnemonicParsing="false" onAction="#confirm" prefHeight="46.0" prefWidth="123.0" text="CONFIRM">
-                                 <font>
-                                    <Font size="9.0" />
-                                 </font>
-                              </Button>
-                              <Button id="checkout" fx:id="checkout" mnemonicParsing="false" onAction="#checkout" prefHeight="56.0" prefWidth="136.0" text="CHECKOUT">
-                                 <font>
-                                    <Font size="9.0" />
-                                 </font>
-                              </Button>
-                              <Button fx:id="previous_screen" mnemonicParsing="false" onAction="#previous_screen" prefHeight="46.0" prefWidth="193.0" text="PREVIOUS SCREEN">
-                                 <font>
-                                    <Font size="9.0" />
-                                 </font>
-                              </Button>
-                           </children>
+
+                    </VBox>
+                </Tab>
+
+                <Tab text="Inventory" closable="false">
+                    <VBox alignment="CENTER" spacing="10">
+                        <TableView fx:id="inventoryTable" prefWidth="600" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="ingredientIdColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientId" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="ingredientNameColumn" text="Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="currentStockColumn" text="Current Stock">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="currentStock" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="priceColumn" text="Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="price" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="unitColumn" text="Unit">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="unit" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="minStockColumn" text="Min Stock">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="minStock" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <HBox alignment="CENTER" spacing="10">
+                            <Button text="Add Item" onAction="#showAddInventoryItemDialog" />
+                            <Button text="Edit Item" onAction="#showEditInventoryItemDialog" />
+                            <Button text="Delete Item" onAction="#showDeleteInventoryItemDialog" />
                         </HBox>
-                     </children>
-                     <padding>
-                        <Insets top="25.0" />
-                     </padding>
-                  </HBox>
-               </children>
-            </AnchorPane>
-        </items>
-      </SplitPane>
-   </content>
-</ScrollPane>
+                    </VBox>
+                </Tab>
+
+                <Tab text="Employees" closable="false">
+                    <VBox alignment="CENTER" spacing="10">
+                        <TableView fx:id="employeeTable" prefWidth="600" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="employeeIDColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="employeeID" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="employeeFirstNameColumn" text="First name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="firstName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="employeeLastNameColumn" text="Last Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="lastName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="employeeRoleColumn" text="Role">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="role" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <!-- buttons for editing employee data -->
+                        <HBox alignment="CENTER" spacing="10">
+                            <Button text="Add Employee" />
+                            <Button text="Edit Employee" />
+                            <Button text="Delete Employee" />
+                        </HBox>
+                    </VBox>
+                </Tab>
+
+                <Tab text="Reports" closable="false">
+                    <VBox alignment="CENTER">
+                        <children>
+                            <Label text="Content for Tab 4" />
+                        </children>
+                    </VBox>
+                </Tab>
+            </tabs>
+        </TabPane>
+
+        <!-- Button to switch back to the menu -->
+        <HBox spacing="50">
+            <Button mnemonicParsing="false" text="Go Back To Menu" onAction="#switchToMenu" />
+        </HBox>
+    </children>
+</VBox>
