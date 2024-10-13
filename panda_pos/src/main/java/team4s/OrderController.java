@@ -87,55 +87,53 @@ import javafx.scene.input.InputMethodRequests;
 public class OrderController {
     // Initialization-----------------------------------------------------------
 
-
-
     List<Integer> order = new ArrayList<Integer>();
     List<List<Integer>> orders = new ArrayList<List<Integer>>();
     List<String> order_names = new ArrayList<String>();
     List<List<String>> orders_names = new ArrayList<List<String>>();
-    @FXML 
+    @FXML
     private Button bowl;
-    @FXML 
+    @FXML
     private Button plate;
-    @FXML 
+    @FXML
     private Button bigger_plate;
-    @FXML 
+    @FXML
     private Button appetizer;
     @FXML
     private Button side;
-    @FXML 
+    @FXML
     private Button entree;
-    @FXML 
+    @FXML
     private Button drink;
-    @FXML 
+    @FXML
     private Button sides;
-    @FXML 
+    @FXML
     private Button entrees;
-    @FXML 
+    @FXML
     private Button appetizers;
-    @FXML 
+    @FXML
     private Button drinks;
-    @FXML 
+    @FXML
     private Button up;
-    @FXML 
+    @FXML
     private Button down;
-    @FXML 
+    @FXML
     private Button add_1;
-    @FXML 
+    @FXML
     private Button add_2;
-    @FXML 
+    @FXML
     private Button add_3;
-    @FXML 
+    @FXML
     private Button add_4;
-    @FXML 
+    @FXML
     private Button redo;
-    @FXML 
+    @FXML
     private Button redo_last_order;
-    @FXML 
+    @FXML
     private Button confirm;
-    @FXML 
+    @FXML
     private Button checkout;
-    @FXML 
+    @FXML
     private Button previous_screen;
     @FXML
     private ListView menu_items_display;
@@ -151,37 +149,34 @@ public class OrderController {
     private int offsetter = 0;
     private String tagger;
     private int type_of_order = 0;
-//update appetizer_num and stuff, use tagger in add()
-    private void updateNums(String name){
-        if (name == "Appetizer"){
+
+    // update appetizer_num and stuff, use tagger in add()
+    private void updateNums(String name) {
+        if (name == "Appetizer") {
             System.out.println("appetizer num: " + appetizers_num);
             appetizers_num -= 1;
-        }
-        else if (name == "Side"){
+        } else if (name == "Side") {
             sides_num -= 1;
-        }
-        else if (name == "Entree"){
+        } else if (name == "Entree") {
             entrees_num -= 1;
-        }
-        else if (name == "Drink"){
+        } else if (name == "Drink") {
             drinks_num -= 1;
         }
 
     }
-    private Integer getNums(String name){
-        if (name == "Appetizer"){
+
+    private Integer getNums(String name) {
+        if (name == "Appetizer") {
             return appetizers_num;
-        }
-        else if (name == "Side"){
+        } else if (name == "Side") {
             return sides_num;
-        }
-        else if (name == "Entree"){
+        } else if (name == "Entree") {
             return entrees_num;
-        }
-        else {
+        } else {
             return drinks_num;
         }
     }
+
     public void loadItems(String item_category, int offset) {
         current_display.clear();
         ids.clear();
@@ -189,40 +184,39 @@ public class OrderController {
         String selectQuery = "SELECT item_name, menu_item_id FROM menu_item WHERE item_category = ? LIMIT 4 OFFSET ?";
         ObservableList<String> items = FXCollections.observableArrayList();
         ObservableList<Integer> ids1 = FXCollections.observableArrayList(); // Initialize the ids list
-        
+
         try (Connection conn = Database.connect();
-             PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
-        
-            stmt.setString(1, item_category);  // Set the item_category parameter
-            stmt.setInt(2, offset);  // Set the offset parameter
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+
+            stmt.setString(1, item_category); // Set the item_category parameter
+            stmt.setInt(2, offset); // Set the offset parameter
             ResultSet rs = stmt.executeQuery();
-        
+
             while (rs.next()) {
                 String itemName = rs.getString("item_name");
                 Integer id = rs.getInt("menu_item_id");
                 System.out.println("Retrieved item: " + itemName + " with ID: " + id); // Debug print statement
                 items.add(itemName);
-                ids1.add(id);  // Add the ID to the ids list
-        
+                ids1.add(id); // Add the ID to the ids list
+
                 current_display.add(itemName);
                 ids.add(id);
             }
-        
+
             System.out.println("IDs: " + ids); // Print the ids list to verify
             menu_items_display.setItems(items);
             System.out.println("Items: " + items); // Print the items list to verify
-        
+
         } catch (SQLException e) {
             System.err.println("Failed to load items from the database.");
             e.printStackTrace();
         }
-    
-}
 
+    }
 
-        public void bowl(ActionEvent event){
+    public void bowl(ActionEvent event) {
         cancel();
-        if (type_of_order == 0){
+        if (type_of_order == 0) {
             order.add(17);
             order_names.add("Bowl");
             current_order.setText("Current Order: " + order_names);
@@ -236,8 +230,7 @@ public class OrderController {
             entrees.setDisable(false);
             appetizers.setDisable(true);
             drinks.setDisable(true);
-        }
-        else{
+        } else {
             order.remove(0);
             order_names.remove(0);
             current_order.setText("Current Order: " + order_names);
@@ -253,225 +246,230 @@ public class OrderController {
             drinks.setDisable(false);
         }
     }
-    public void plate(ActionEvent event){
+
+    public void plate(ActionEvent event) {
         cancel();
-    if (type_of_order == 0){
-        order.add(18);
-        order_names.add("Plate");
-        current_order.setText("Current Order: " + order_names);
-        plate.setStyle("-fx-background-color: #ff0000");
-        sides_num = 1;
-        entrees_num = 2;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 1;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(true);
-        drinks.setDisable(true);
+        if (type_of_order == 0) {
+            order.add(18);
+            order_names.add("Plate");
+            current_order.setText("Current Order: " + order_names);
+            plate.setStyle("-fx-background-color: #ff0000");
+            sides_num = 1;
+            entrees_num = 2;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 1;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(true);
+            drinks.setDisable(true);
+        } else {
+            order.remove(0);
+            order_names.remove(0);
+            current_order.setText("Current Order: " + order_names);
+            plate.setStyle(null);
+            sides_num = 0;
+            entrees_num = 0;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 0;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(false);
+            drinks.setDisable(false);
+        }
     }
-    else{
-        order.remove(0);
-        order_names.remove(0);
-        current_order.setText("Current Order: " + order_names);
-        plate.setStyle(null);
-        sides_num = 0;
-        entrees_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 0;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(false);
-        drinks.setDisable(false);
+
+    public void bigger_plate(ActionEvent event) {
+        cancel();
+        if (type_of_order == 0) {
+            order.add(19);
+            order_names.add("Bigger Plate");
+            current_order.setText("Current Order: " + order_names);
+            bigger_plate.setStyle("-fx-background-color: #ff0000");
+            sides_num = 1;
+            entrees_num = 3;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 1;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(true);
+            drinks.setDisable(true);
+        } else {
+            order.remove(0);
+            order_names.remove(0);
+            current_order.setText("Current Order: " + order_names);
+            bigger_plate.setStyle(null);
+            sides_num = 0;
+            entrees_num = 0;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 0;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(false);
+            drinks.setDisable(false);
+        }
     }
-}
-    public void bigger_plate(ActionEvent event){
-            cancel();
-    if (type_of_order == 0){
-        order.add(19);
-        order_names.add("Bigger Plate");
-        current_order.setText("Current Order: " + order_names);
-        bigger_plate.setStyle("-fx-background-color: #ff0000");
-        sides_num = 1;
-        entrees_num = 3;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 1;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(true);
-        drinks.setDisable(true);
+
+    public void appetizer(ActionEvent event) {
+        cancel();
+        if (type_of_order == 0) {
+            System.out.println("appetizer button clicked");
+            order.add(20);
+            order_names.add("Appetizer");
+            current_order.setText("Current Order: " + order_names);
+            appetizer.setStyle("-fx-background-color: #ff0000");
+            appetizers_num = 1;
+            sides.setDisable(true);
+            entrees.setDisable(true);
+            appetizers.setDisable(false);
+            drinks.setDisable(true);
+            drinks_num = 0;
+            type_of_order = 1;
+        } else {
+            order.remove(1);
+            order_names.remove(1);
+            current_order.setText("Current Order: " + order_names);
+            appetizer.setStyle(null);
+            appetizers_num = 0;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(false);
+            drinks.setDisable(false);
+            drinks_num = 0;
+            type_of_order = 0;
+        }
     }
-    else{
-        order.remove(0);
-        order_names.remove(0);
-        current_order.setText("Current Order: " + order_names);
-        bigger_plate.setStyle(null);
-        sides_num = 0;
-        entrees_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 0;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(false);
-        drinks.setDisable(false);
+
+    public void side(ActionEvent event) {
+        cancel();
+        if (type_of_order == 0) {
+            order.add(21);
+            order_names.add("Side");
+            current_order.setText("Current Order: " + order_names);
+            side.setStyle("-fx-background-color: #ff0000");
+            sides_num = 1;
+            sides.setDisable(false);
+            entrees.setDisable(true);
+            appetizers.setDisable(true);
+            drinks.setDisable(true);
+            entrees_num = 0;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 1;
+        } else {
+            order.remove(1);
+            order_names.remove(1);
+            current_order.setText("Current Order: " + order_names);
+            side.setStyle(null);
+            sides_num = 0;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(false);
+            drinks.setDisable(false);
+            entrees_num = 0;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 0;
+        }
     }
-}
-    public void appetizer(ActionEvent event){
-    cancel();
-    if (type_of_order == 0){
-        System.out.println("appetizer button clicked");
-        order.add(20);
-        order_names.add("Appetizer");
-        current_order.setText("Current Order: " + order_names);
-        appetizer.setStyle("-fx-background-color: #ff0000");
-        appetizers_num = 1;
-        sides.setDisable(true);
-        entrees.setDisable(true);
-        appetizers.setDisable(false);
-        drinks.setDisable(true);
-        drinks_num = 0;
-        type_of_order = 1;
+
+    public void entree(ActionEvent event) {
+        cancel();
+        if (type_of_order == 0) {
+            order.add(22);
+            order_names.add("Entree");
+            current_order.setText("Current Order: " + order_names);
+            entree.setStyle("-fx-background-color: #ff0000");
+            entrees_num = 1;
+            sides.setDisable(true);
+            entrees.setDisable(false);
+            appetizers.setDisable(true);
+            drinks.setDisable(true);
+            sides_num = 0;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 1;
+        } else {
+            order.remove(1);
+            order_names.remove(1);
+            current_order.setText("Current Order: " + order_names);
+            entree.setStyle(null);
+            entrees_num = 0;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(false);
+            drinks.setDisable(false);
+            sides_num = 0;
+            appetizers_num = 0;
+            drinks_num = 0;
+            type_of_order = 0;
+        }
     }
-    else{
-        order.remove(1);
-        order_names.remove(1);
-        current_order.setText("Current Order: " + order_names);
-        appetizer.setStyle(null);
-        appetizers_num = 0;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(false);
-        drinks.setDisable(false);
-        drinks_num = 0;
-        type_of_order = 0;
+
+    public void drink(ActionEvent event) {
+        cancel();
+        if (type_of_order == 0) {
+            order_names.add("Drink");
+            order.add(23);
+            current_order.setText("Current Order: " + order_names);
+            drink.setStyle("-fx-background-color: #ff0000");
+            drinks_num = 1;
+            sides.setDisable(true);
+            entrees.setDisable(true);
+            appetizers.setDisable(true);
+            drinks.setDisable(false);
+            sides_num = 0;
+            entrees_num = 0;
+            appetizers_num = 0;
+            type_of_order = 1;
+        } else {
+            order.remove(1);
+            order_names.remove(1);
+            current_order.setText("Current Order: " + order_names);
+            drink.setStyle(null);
+            drinks_num = 0;
+            sides.setDisable(false);
+            entrees.setDisable(false);
+            appetizers.setDisable(false);
+            drinks.setDisable(false);
+            sides_num = 0;
+            entrees_num = 0;
+            appetizers_num = 0;
+            type_of_order = 0;
+        }
     }
-}
-    public void side(ActionEvent event){
-            cancel();
-    if (type_of_order == 0){
-        order.add(21);
-        order_names.add("Side");
-        current_order.setText("Current Order: " + order_names);
-        side.setStyle("-fx-background-color: #ff0000");
-        sides_num = 1;
-        sides.setDisable(false);
-        entrees.setDisable(true);
-        appetizers.setDisable(true);
-        drinks.setDisable(true);
-        entrees_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 1;
-    }
-    else{
-        order.remove(1);
-        order_names.remove(1);
-        current_order.setText("Current Order: " + order_names);
-        side.setStyle(null);
-        sides_num = 0;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(false);
-        drinks.setDisable(false);
-        entrees_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 0;
-    }
-}
-    public void entree(ActionEvent event){
-            cancel();
-    if (type_of_order == 0){
-        order.add(22);
-        order_names.add("Entree");
-        current_order.setText("Current Order: " + order_names);
-        entree.setStyle("-fx-background-color: #ff0000");
-        entrees_num = 1;
-        sides.setDisable(true);
-        entrees.setDisable(false);
-        appetizers.setDisable(true);
-        drinks.setDisable(true);
-        sides_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 1;
-    }
-    else{
-        order.remove(1);
-        order_names.remove(1);
-        current_order.setText("Current Order: " + order_names);
-        entree.setStyle(null);
-        entrees_num = 0;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(false);
-        drinks.setDisable(false);
-        sides_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 0;
-    }
-}
-    public void drink(ActionEvent event){
-            cancel();
-    if (type_of_order == 0){
-        order_names.add("Drink");   
-        order.add(23);
-        current_order.setText("Current Order: " + order_names);
-        drink.setStyle("-fx-background-color: #ff0000");
-        drinks_num = 1;
-        sides.setDisable(true);
-        entrees.setDisable(true);
-        appetizers.setDisable(true);
-        drinks.setDisable(false);
-        sides_num = 0;
-        entrees_num = 0;
-        appetizers_num = 0;
-        type_of_order = 1;
-    }
-    else{
-        order.remove(1);
-        order_names.remove(1);
-        current_order.setText("Current Order: " + order_names);
-        drink.setStyle(null);
-        drinks_num = 0;
-        sides.setDisable(false);
-        entrees.setDisable(false);
-        appetizers.setDisable(false);
-        drinks.setDisable(false);
-        sides_num = 0;
-        entrees_num = 0;
-        appetizers_num = 0;
-        type_of_order = 0;
-    }
-}
-//--------------------------------------------------------
-    public void sides(ActionEvent event){
+
+    // --------------------------------------------------------
+    public void sides(ActionEvent event) {
         tagger = "Side";
         offsetter = 0;
         loadItems(tagger, offsetter);
     }
-    public void entrees(ActionEvent event){
+
+    public void entrees(ActionEvent event) {
         tagger = "Entree";
         offsetter = 0;
         loadItems(tagger, offsetter);
     }
-    public void appetizers(ActionEvent event){
+
+    public void appetizers(ActionEvent event) {
         tagger = "Appetizer";
         offsetter = 0;
         loadItems(tagger, offsetter);
     }
-    public void drinks(ActionEvent event){
+
+    public void drinks(ActionEvent event) {
         tagger = "Drink";
         offsetter = 0;
         loadItems(tagger, offsetter);
     }
-    public void up(ActionEvent event){
+
+    public void up(ActionEvent event) {
         System.out.println("up button clicked");
-        if (offsetter > 0){
+        if (offsetter > 0) {
             offsetter -= 4;
             loadItems(tagger, offsetter);
             current_display.clear();
@@ -479,16 +477,17 @@ public class OrderController {
         }
 
     }
-    public void down(ActionEvent event){
+
+    public void down(ActionEvent event) {
         System.out.println("down button clicked");
         offsetter += 4;
         current_display.clear();
         ids.clear();
         loadItems(tagger, offsetter);
     }
-    //--------------------------------------------------------------------------------
-    
-    private void cancel(){
+    // --------------------------------------------------------------------------------
+
+    private void cancel() {
         System.out.println("cancel button clicked");
         bowl.setStyle(null);
         plate.setStyle(null);
@@ -510,39 +509,42 @@ public class OrderController {
         order_names.clear();
 
     }
+
     @FXML
-    private void redo(ActionEvent event){
+    private void redo(ActionEvent event) {
         cancel();
         order.clear();
         order_names.clear();
 
     }
-    @FXML
-    private void redo_last_order(ActionEvent event){
-        System.out.println("Redo Last Order button clicked");
-        if (orders.size() > 0){
-            cancel();
-        orders.remove(orders.size()-1);
-        orders_names.remove(orders_names.size()-1);
 
-        
+    @FXML
+    private void redo_last_order(ActionEvent event) {
+        System.out.println("Redo Last Order button clicked");
+        if (orders.size() > 0) {
+            cancel();
+            orders.remove(orders.size() - 1);
+            orders_names.remove(orders_names.size() - 1);
+
         }
 
     }
 
     @FXML
-    private void confirm(ActionEvent event){ //checks if order is valid and add it to the grand list of things i will be sending over to the checkout screen, if it is not valid, show what is missing
+    private void confirm(ActionEvent event) { // checks if order is valid and add it to the grand list of things i will
+                                              // be sending over to the checkout screen, if it is not valid, show what
+                                              // is missing
         System.out.println(appetizers_num);
         System.out.println(sides_num);
         System.out.println(entrees_num);
         System.out.println(drinks_num);
         System.out.println(type_of_order);
         menu_items_display.setItems(null);
-        if (appetizers_num == 0 && sides_num == 0 && entrees_num == 0 && drinks_num == 0  && type_of_order == 1){
+        if (appetizers_num == 0 && sides_num == 0 && entrees_num == 0 && drinks_num == 0 && type_of_order == 1) {
             System.out.println(order_names);
-            
+
             System.out.println("confirm button clicked1");
-            orders.add(new ArrayList<>(order)); //list are mutable so add a copy
+            orders.add(new ArrayList<>(order)); // list are mutable so add a copy
             orders_names.add(new ArrayList<>(order_names));
             for (List<Integer> order : orders) {
                 System.out.println(order);
@@ -552,16 +554,17 @@ public class OrderController {
             order.clear();
             order_names.clear();
             cancel();
-        }
-        else if (appetizers_num > 0 || sides_num > 0 || entrees_num > 0 || drinks_num > 0){
-            showPopupMessage("Please select the correct amount of items: \n"+appetizers_num+" appetizers,\n"+sides_num+" sides,\n"+entrees_num+" entrees, \n"+drinks_num+" drinks");
-            System.out.println("Please select the correct amount of items: "+appetizers_num+" appetizers, "+sides_num+" sides, "+entrees_num+" entrees, "+drinks_num+" drinks");
-        }
-        else{
+        } else if (appetizers_num > 0 || sides_num > 0 || entrees_num > 0 || drinks_num > 0) {
+            showPopupMessage("Please select the correct amount of items: \n" + appetizers_num + " appetizers,\n"
+                    + sides_num + " sides,\n" + entrees_num + " entrees, \n" + drinks_num + " drinks");
+            System.out.println("Please select the correct amount of items: " + appetizers_num + " appetizers, "
+                    + sides_num + " sides, " + entrees_num + " entrees, " + drinks_num + " drinks");
+        } else {
             System.out.println("confirm button clicked");
-}
+        }
 
     }
+
     @FXML
     private void previous_screen(ActionEvent event) {
         try {
@@ -579,7 +582,8 @@ public class OrderController {
             e.printStackTrace();
         }
     }
-        private void showPopupMessage(String message) { //popup message for bad orders
+
+    private void showPopupMessage(String message) { // popup message for bad orders
         // Create a new Stage (window)
         Stage popupStage = new Stage();
         popupStage.setAlwaysOnTop(true);
@@ -605,7 +609,8 @@ public class OrderController {
     public List<List<String>> getOrderNames() {
         return orders_names;
     }
-    public void checkout(ActionEvent event) { //switches scene to checkout
+
+    public void checkout(ActionEvent event) { // switches scene to checkout
         cancel();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Checkout.fxml"));
@@ -624,6 +629,7 @@ public class OrderController {
             e.printStackTrace();
         }
     }
+
     public void initialize() {
         // Your logic for initializing the controller
         drinks.setDisable(true);
@@ -632,12 +638,12 @@ public class OrderController {
         appetizers.setDisable(true);
         current_order.setText("Current Order: ");
     }
-    @FXML 
-    private void add_1(ActionEvent event){
-        System.out.println("works add 1");
-        
 
-        if (getNums(tagger) > 0){
+    @FXML
+    private void add_1(ActionEvent event) {
+        System.out.println("works add 1");
+
+        if (getNums(tagger) > 0) {
             updateNums(tagger);
             order_names.add(current_display.get(0));
             order.add(ids.get(0));
@@ -645,11 +651,11 @@ public class OrderController {
             current_order.setText("Current Order:\n" + order_names);
             System.out.println(order);
         }
-        }
-    
+    }
+
     @FXML
-    private void add_2(ActionEvent event){
-        if (getNums(tagger) > 0){
+    private void add_2(ActionEvent event) {
+        if (getNums(tagger) > 0) {
             updateNums(tagger);
             order_names.add(current_display.get(1));
             order.add(ids.get(1));
@@ -658,9 +664,10 @@ public class OrderController {
             System.out.println(order);
         }
     }
+
     @FXML
-    private void add_3(ActionEvent event){
-        if (getNums(tagger) > 0){
+    private void add_3(ActionEvent event) {
+        if (getNums(tagger) > 0) {
             updateNums(tagger);
             order_names.add(current_display.get(2));
             order.add(ids.get(2));
@@ -669,9 +676,10 @@ public class OrderController {
             System.out.println(order);
         }
     }
+
     @FXML
-    private void add_4(ActionEvent event){
-        if (getNums(tagger) > 0){
+    private void add_4(ActionEvent event) {
+        if (getNums(tagger) > 0) {
             updateNums(tagger);
             order_names.add(current_display.get(3));
             order.add(ids.get(3));
@@ -679,8 +687,6 @@ public class OrderController {
             current_order.setText("Current Order:\n" + order_names);
             System.out.println(order);
         }
-}
-
-
+    }
 
 }

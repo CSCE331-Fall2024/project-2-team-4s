@@ -50,7 +50,7 @@ public class ManagerController {
     @FXML
     private TableView<Employee> employeeTable;
 
-     // Show the customizer for generating charts
+    // Show the customizer for generating charts
     @FXML
     public void showReportCustomizer() {
         // Create a new dialog
@@ -75,7 +75,7 @@ public class ManagerController {
 
         Scene scene = new Scene(layout, 300, 200);
         customizerStage.setScene(scene);
-        customizerStage.initModality(Modality.APPLICATION_MODAL);  // Block input to other windows
+        customizerStage.initModality(Modality.APPLICATION_MODAL); // Block input to other windows
         customizerStage.show();
 
         // Handle confirm button action
@@ -85,50 +85,54 @@ public class ManagerController {
             handleReportTypeChange(selectedGraphType);
         });
     }
+
     // Handle report type change and generate appropriate chart
     private void handleReportTypeChange(String selectedType) {
-        chartArea.getChildren().clear();  // Clear the chart area before adding a new chart
+        chartArea.getChildren().clear(); // Clear the chart area before adding a new chart
 
         switch (selectedType) {
             case "Pie Chart":
-                loadForPieChart();  // Load PieChart data
+                loadForPieChart(); // Load PieChart data
                 break;
             case "Line Graph":
-                loadForLineChart();  // Load LineChart data
+                loadForLineChart(); // Load LineChart data
                 break;
             case "Bar Chart":
-                loadForBarChart();  // Load BarChart data
+                loadForBarChart(); // Load BarChart data
                 break;
         }
     }
-        // Load PieChart data (popularity of entrees)
+
+    // Load PieChart data (popularity of entrees)
     private void loadForPieChart() {
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
 
-        // Query to count number of transactions by payment type (can be adapted to entrees)
-        String query = "SELECT transaction.transaction_type, COUNT(transaction.transaction_id) AS transaction_count, SUM(transaction.total_cost) AS total_revenue " +
-                       "FROM transaction " +
-                       "GROUP BY transaction.transaction_type " +
-                       "ORDER BY transaction_count DESC";
-    
+        // Query to count number of transactions by payment type (can be adapted to
+        // entrees)
+        String query = "SELECT transaction.transaction_type, COUNT(transaction.transaction_id) AS transaction_count, SUM(transaction.total_cost) AS total_revenue "
+                +
+                "FROM transaction " +
+                "GROUP BY transaction.transaction_type " +
+                "ORDER BY transaction_count DESC";
+
         try (Connection conn = Database.connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-    
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query)) {
+
             while (rs.next()) {
                 String paymentType = rs.getString("transaction_type");
                 int count = rs.getInt("transaction_count");
-    
+
                 // Add data for PieChart: payment type and count
                 pieChartData.add(new PieChart.Data(paymentType, count));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         // Create and display the PieChart
         PieChart pieChart = new PieChart(pieChartData);
-        chartArea.getChildren().clear();  // Clear the chart area before adding the new chart
+        chartArea.getChildren().clear(); // Clear the chart area before adding the new chart
         chartArea.getChildren().add(pieChart);
     }
 
@@ -138,30 +142,30 @@ public class ManagerController {
 
         // Query for total sales per week
         String query = "SELECT week_number, SUM(total_cost) AS total_revenue " +
-                       "FROM transaction " +
-                       "GROUP BY week_number " +
-                       "ORDER BY week_number";
-    
+                "FROM transaction " +
+                "GROUP BY week_number " +
+                "ORDER BY week_number";
+
         try (Connection conn = Database.connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-    
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query)) {
+
             while (rs.next()) {
                 String week = "Week " + rs.getInt("week_number");
                 double totalSales = rs.getDouble("total_revenue");
-    
+
                 // Add data for LineChart: week number and total sales
                 series.getData().add(new XYChart.Data<>(week, totalSales));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         // Create and display the LineChart
         LineChart<String, Number> lineChart = new LineChart<>(new CategoryAxis(), new NumberAxis());
         lineChart.getData().add(series);
         lineChart.setLegendVisible(false);
-        chartArea.getChildren().clear();  // Clear the chart area before adding the new chart
+        chartArea.getChildren().clear(); // Clear the chart area before adding the new chart
         chartArea.getChildren().add(lineChart);
     }
 
@@ -170,30 +174,31 @@ public class ManagerController {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
 
         // Query to get inventory items sorted by current stock minus minimum stock
-        String query = "SELECT i.ingredient_name, i.current_stock, i.min_stock, i.current_stock - i.min_stock AS difference " +
-                       "FROM inventory AS i " +
-                       "ORDER BY difference ASC";
-    
+        String query = "SELECT i.ingredient_name, i.current_stock, i.min_stock, i.current_stock - i.min_stock AS difference "
+                +
+                "FROM inventory AS i " +
+                "ORDER BY difference ASC";
+
         try (Connection conn = Database.connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-    
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query)) {
+
             while (rs.next()) {
                 String ingredientName = rs.getString("ingredient_name");
                 int currentStock = rs.getInt("current_stock");
-    
+
                 // Add data for BarChart: ingredient name and current stock
                 series.getData().add(new XYChart.Data<>(ingredientName, currentStock));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         // Create and display the BarChart
         BarChart<String, Number> barChart = new BarChart<>(new CategoryAxis(), new NumberAxis());
         barChart.getData().add(series);
         barChart.setLegendVisible(false);
-        chartArea.getChildren().clear();  // Clear the chart area before adding the new chart
+        chartArea.getChildren().clear(); // Clear the chart area before adding the new chart
         chartArea.getChildren().add(barChart);
     }
 
@@ -202,7 +207,7 @@ public class ManagerController {
         // Logic to export the current chart as a file (e.g., PDF, CSV)
         System.out.println("Exporting report...");
     }
-  
+
     // Method to initialize only when Manager.fxml is loaded
     public void initializeManager() {
         try {
@@ -252,15 +257,15 @@ public class ManagerController {
     // load menu items into the TableView
     private void loadMenuItems() {
         ObservableList<MenuItem> menu_items = FXCollections.observableArrayList();
-    
+
         String query = "SELECT mi.menu_item_id, mi.current_servings, mi.item_name, mi.item_price, mi.item_category, "
-                 + "COALESCE(STRING_AGG(i.ingredient_name || ' (' || im.ingredient_amount || ')', ', '), '') AS ingredients "
-                 + "FROM menu_item mi "
-                 + "LEFT JOIN inventory_menu_item im ON mi.menu_item_id = im.menu_item_id "
-                 + "LEFT JOIN inventory i ON im.ingredient_id = i.ingredient_id "
-                 + "GROUP BY mi.menu_item_id "
-                 + "ORDER BY mi.menu_item_id";
-        
+                + "COALESCE(STRING_AGG(i.ingredient_name || ' (' || im.ingredient_amount || ')', ', '), '') AS ingredients "
+                + "FROM menu_item mi "
+                + "LEFT JOIN inventory_menu_item im ON mi.menu_item_id = im.menu_item_id "
+                + "LEFT JOIN inventory i ON im.ingredient_id = i.ingredient_id "
+                + "GROUP BY mi.menu_item_id "
+                + "ORDER BY mi.menu_item_id";
+
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 menu_items.add(new MenuItem(
@@ -269,16 +274,16 @@ public class ManagerController {
                         rs.getString("item_name"),
                         rs.getFloat("item_price"),
                         rs.getString("item_category"),
-                        rs.getString("ingredients")));  // Added ingredients column
+                        rs.getString("ingredients"))); // Added ingredients column
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         // Set the items in the TableView
         menuTable.setItems(menu_items);
     }
-    
+
     // Load Inventory Items
     private void loadInventoryItems() {
         ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
@@ -305,7 +310,7 @@ public class ManagerController {
     // Load Ingredients
     private void loadIngredients(ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
-    
+
         // Fetch ingredients from the database
         try {
             conn = Database.connect();
@@ -318,52 +323,56 @@ public class ManagerController {
                     double price = rs.getDouble("price");
                     String unit = rs.getString("unit");
                     int minStock = rs.getInt("min_stock");
-    
+
                     // Create the InventoryItem object
-                    InventoryItem item = new InventoryItem(ingredientId, ingredientName, currentStock, price, unit, minStock);
+                    InventoryItem item = new InventoryItem(ingredientId, ingredientName, currentStock, price, unit,
+                            minStock);
                     ingredients.add(item);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         // Set the ingredients in ListView
         ingredientListView.setItems(ingredients);
-    
-        // Set a custom cell factory to add checkboxes and amount spinners to the ListView
+
+        // Set a custom cell factory to add checkboxes and amount spinners to the
+        // ListView
         ingredientListView.setCellFactory(param -> new ListCell<>() {
             private final CheckBox checkBox = new CheckBox();
-            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1);  // Spinner for amount, range 1-100, default 1
-            private final HBox hbox = new HBox(10);  // HBox to arrange CheckBox and Spinner
-    
+            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Spinner for amount, range 1-100,
+                                                                                     // default 1
+            private final HBox hbox = new HBox(10); // HBox to arrange CheckBox and Spinner
+
             {
                 amountSpinner.setPrefWidth(70);
             }
-    
+
             @Override
             protected void updateItem(InventoryItem item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
                 } else {
-                    checkBox.setText(item.getIngredientName() + " (" + item.getCurrentStock() + " " + item.getUnit() + ")");
-                    checkBox.setSelected(item.isSelected());  // Bind the checkbox to the item’s selected state
-                    amountSpinner.getValueFactory().setValue(item.getAmount());  // Bind the spinner to the item’s amount
-    
+                    checkBox.setText(
+                            item.getIngredientName() + " (" + item.getCurrentStock() + " " + item.getUnit() + ")");
+                    checkBox.setSelected(item.isSelected()); // Bind the checkbox to the item’s selected state
+                    amountSpinner.getValueFactory().setValue(item.getAmount()); // Bind the spinner to the item’s amount
+
                     // Update item state when checkbox is clicked
                     checkBox.setOnAction(event -> item.setSelected(checkBox.isSelected()));
-    
+
                     // Update item state when spinner value changes
                     amountSpinner.valueProperty().addListener((obs, oldValue, newValue) -> item.setAmount(newValue));
-    
-                    hbox.getChildren().setAll(checkBox, amountSpinner);  // Add CheckBox and Spinner to HBox
+
+                    hbox.getChildren().setAll(checkBox, amountSpinner); // Add CheckBox and Spinner to HBox
                     setGraphic(hbox);
                 }
             }
         });
     }
-    
+
     // Method to handle the Add Ingredients button
     public void showAddItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
@@ -406,14 +415,15 @@ public class ManagerController {
             String currentServingsText = currentServingsField.getText();
 
             // Input validation
-            if (itemName.isEmpty() || itemPriceText.isEmpty() || itemCategory == null || currentServingsText.isEmpty()) {
+            if (itemName.isEmpty() || itemPriceText.isEmpty() || itemCategory == null
+                    || currentServingsText.isEmpty()) {
                 // Show error alert if any field is empty
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Missing Information");
                 errorAlert.setContentText("Please fill out all fields.");
                 errorAlert.showAndWait();
-                return;  // Exit the method early
+                return; // Exit the method early
             }
 
             // Parse the price and current servings, assuming inputs are valid
@@ -450,7 +460,7 @@ public class ManagerController {
                             PreparedStatement ingredientStmt = conn.prepareStatement(insertIngredientQuery);
                             ingredientStmt.setInt(1, newMenuItemId);
                             ingredientStmt.setInt(2, ingredient.getIngredientId());
-                            ingredientStmt.setInt(3, ingredient.getAmount());  // Use the selected amount
+                            ingredientStmt.setInt(3, ingredient.getAmount()); // Use the selected amount
 
                             ingredientStmt.executeUpdate();
                         }
@@ -460,11 +470,12 @@ public class ManagerController {
                     loadMenuItems(); // Refresh the table view
                 }
 
-                conn.close();  // Close the connection only after all operations are complete
+                conn.close(); // Close the connection only after all operations are complete
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
-                // Show an error alert if the input is not valid (e.g., non-numeric price or servings)
+                // Show an error alert if the input is not valid (e.g., non-numeric price or
+                // servings)
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Invalid Number Format");
@@ -527,7 +538,8 @@ public class ManagerController {
         itemCategoryBox.getItems().addAll("Drink", "Meal", "Appetizer", "Side", "Entree");
         itemCategoryBox.setValue(itemToUpdate.getItem_category());
 
-        // Create ListView for InventoryItems (to include current and potential new ingredients)
+        // Create ListView for InventoryItems (to include current and potential new
+        // ingredients)
         ListView<InventoryItem> ingredientListView = new ListView<>();
         ingredientListView.setPrefHeight(150);
 
@@ -545,14 +557,15 @@ public class ManagerController {
             String currentServingsText = currentServingsField.getText();
 
             // Input validation
-            if (itemName.isEmpty() || itemPriceText.isEmpty() || itemCategory == null || currentServingsText.isEmpty()) {
+            if (itemName.isEmpty() || itemPriceText.isEmpty() || itemCategory == null
+                    || currentServingsText.isEmpty()) {
                 // Show error alert if any field is empty
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Missing Information");
                 errorAlert.setContentText("Please fill out all fields.");
                 errorAlert.showAndWait();
-                return;  // Exit the method early
+                return; // Exit the method early
             }
 
             // Parse the price and current servings, assuming inputs are valid
@@ -587,7 +600,7 @@ public class ManagerController {
                         PreparedStatement ingredientStmt = conn.prepareStatement(insertIngredientQuery);
                         ingredientStmt.setInt(1, itemToUpdate.getMenu_item_id());
                         ingredientStmt.setInt(2, ingredient.getIngredientId());
-                        ingredientStmt.setInt(3, ingredient.getAmount());  // Use the selected amount
+                        ingredientStmt.setInt(3, ingredient.getAmount()); // Use the selected amount
 
                         ingredientStmt.executeUpdate();
                     }
@@ -602,7 +615,8 @@ public class ManagerController {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
-                // Show an error alert if the input is not valid (e.g., non-numeric price or servings)
+                // Show an error alert if the input is not valid (e.g., non-numeric price or
+                // servings)
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Invalid Number Format");
@@ -625,21 +639,23 @@ public class ManagerController {
         dialog.showAndWait();
     }
 
-    // Load all ingredients, marking those that are currently selected for the given menu item
+    // Load all ingredients, marking those that are currently selected for the given
+    // menu item
     private void loadAllIngredientsWithCurrentSelection(int menuItemId, ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
-        
+
         try {
             conn = Database.connect();
             String fetchIngredientsQuery = "SELECT i.ingredient_id, i.ingredient_name, i.current_stock, i.price, i.unit, i.min_stock, "
-                    + "COALESCE(im.ingredient_amount, 1) AS ingredient_amount, "  // Default amount set to 1 if no amount exists
+                    + "COALESCE(im.ingredient_amount, 1) AS ingredient_amount, " // Default amount set to 1 if no amount
+                                                                                 // exists
                     + "CASE WHEN im.menu_item_id IS NOT NULL THEN TRUE ELSE FALSE END AS selected "
                     + "FROM inventory i "
                     + "LEFT JOIN inventory_menu_item im ON i.ingredient_id = im.ingredient_id AND im.menu_item_id = ? "
                     + "ORDER BY i.ingredient_name";
             PreparedStatement stmt = conn.prepareStatement(fetchIngredientsQuery);
             stmt.setInt(1, menuItemId);
-    
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int ingredientId = rs.getInt("ingredient_id");
@@ -648,56 +664,58 @@ public class ManagerController {
                     double price = rs.getDouble("price");
                     String unit = rs.getString("unit");
                     int minStock = rs.getInt("min_stock");
-                    int ingredientAmount = rs.getInt("ingredient_amount");  // Get the actual amount
+                    int ingredientAmount = rs.getInt("ingredient_amount"); // Get the actual amount
                     boolean selected = rs.getBoolean("selected");
-    
+
                     // Create the InventoryItem object
-                    InventoryItem item = new InventoryItem(ingredientId, ingredientName, currentStock, price, unit, minStock);
-                    item.setAmount(ingredientAmount);  // Set the actual amount to the item
-                    item.setSelected(selected);  // Mark as selected if it's currently used by the menu item
+                    InventoryItem item = new InventoryItem(ingredientId, ingredientName, currentStock, price, unit,
+                            minStock);
+                    item.setAmount(ingredientAmount); // Set the actual amount to the item
+                    item.setSelected(selected); // Mark as selected if it's currently used by the menu item
                     ingredients.add(item);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         // Set the ingredients in ListView with checkboxes and spinners for amounts
         ingredientListView.setItems(ingredients);
         ingredientListView.setCellFactory(param -> new ListCell<>() {
             private final CheckBox checkBox = new CheckBox();
-            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1);  // Default range 1-100
-            private final HBox hbox = new HBox(10);  // Layout
-    
+            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Default range 1-100
+            private final HBox hbox = new HBox(10); // Layout
+
             {
                 amountSpinner.setPrefWidth(70);
             }
-    
+
             @Override
             protected void updateItem(InventoryItem item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
                 } else {
-                    checkBox.setText(item.getIngredientName() + " (" + item.getCurrentStock() + " " + item.getUnit() + ")");
+                    checkBox.setText(
+                            item.getIngredientName() + " (" + item.getCurrentStock() + " " + item.getUnit() + ")");
                     checkBox.setSelected(item.isSelected());
-    
+
                     // Initialize the spinner with the current ingredient amount
-                    amountSpinner.getValueFactory().setValue(item.getAmount());  
-    
+                    amountSpinner.getValueFactory().setValue(item.getAmount());
+
                     // Update item state when checkbox is clicked
                     checkBox.setOnAction(event -> item.setSelected(checkBox.isSelected()));
-    
+
                     // Update item state when spinner value changes
                     amountSpinner.valueProperty().addListener((obs, oldValue, newValue) -> item.setAmount(newValue));
-    
+
                     hbox.getChildren().setAll(checkBox, amountSpinner);
                     setGraphic(hbox);
                 }
             }
         });
     }
-    
+
     // Method to handle the Delete Item button
     public void handleDeleteItem(ActionEvent event) {
         // Get the selected item
@@ -727,14 +745,15 @@ public class ManagerController {
         }
     }
 
-    // Method to delete the selected item from the database, including its ingredients
+    // Method to delete the selected item from the database, including its
+    // ingredients
     private void deleteItemFromDatabase(MenuItem item) {
         String deleteIngredientsQuery = "DELETE FROM inventory_menu_item WHERE menu_item_id = ?";
         String deleteMenuItemQuery = "DELETE FROM menu_item WHERE menu_item_id = ?";
 
         try {
             conn = Database.connect();
-            
+
             // Start a transaction
             conn.setAutoCommit(false);
 
@@ -752,11 +771,12 @@ public class ManagerController {
 
             // Commit the transaction
             conn.commit();
-            System.out.println("Menu item and associated ingredients deleted from the database: " + item.getItem_name());
+            System.out
+                    .println("Menu item and associated ingredients deleted from the database: " + item.getItem_name());
         } catch (SQLException e) {
             try {
                 if (conn != null) {
-                    conn.rollback();  // Rollback transaction if an error occurs
+                    conn.rollback(); // Rollback transaction if an error occurs
                 }
             } catch (SQLException rollbackEx) {
                 rollbackEx.printStackTrace();
@@ -765,7 +785,7 @@ public class ManagerController {
         } finally {
             try {
                 if (conn != null) {
-                    conn.setAutoCommit(true);  // Reset auto-commit
+                    conn.setAutoCommit(true); // Reset auto-commit
                     conn.close();
                 }
             } catch (SQLException ex) {
@@ -780,28 +800,28 @@ public class ManagerController {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Add New Inventory Item");
-    
+
         // Create VBox layout for the dialog
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
-    
+
         // Input fields for the new inventory item
         TextField ingredientNameField = new TextField();
         ingredientNameField.setPromptText("Ingredient Name");
-    
+
         TextField currentStockField = new TextField();
         currentStockField.setPromptText("Current Stock");
-    
+
         TextField priceField = new TextField();
         priceField.setPromptText("Price");
-    
+
         ComboBox<String> unitComboBox = new ComboBox<>();
         unitComboBox.getItems().addAll("cups", "tsp", "lbs", "g", "kgs", "Oz", "ml", "L", "Pcs");
         unitComboBox.setPromptText("Select Unit");
-    
+
         TextField minStockField = new TextField();
         minStockField.setPromptText("Minimum Stock");
-    
+
         // Add button to submit the new inventory item
         Button addButton = new Button("Add Item");
         addButton.setOnAction(e -> {
@@ -811,59 +831,61 @@ public class ManagerController {
             String priceText = priceField.getText();
             String unit = unitComboBox.getValue();
             String minStockText = minStockField.getText();
-    
+
             // Input validation
-            if (ingredientName.isEmpty() || currentStockText.isEmpty() || priceText.isEmpty() || unit == null || minStockText.isEmpty()) {
+            if (ingredientName.isEmpty() || currentStockText.isEmpty() || priceText.isEmpty() || unit == null
+                    || minStockText.isEmpty()) {
                 // Show error alert if any field is empty
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Missing Information");
                 errorAlert.setContentText("Please fill out all fields.");
                 errorAlert.showAndWait();
-                return;  // Exit the method early
+                return; // Exit the method early
             }
-    
+
             // Parse the current stock, price, and min stock, assuming inputs are valid
             try {
                 int currentStock = Integer.parseInt(currentStockText);
                 double price = Double.parseDouble(priceText);
                 int minStock = Integer.parseInt(minStockText);
-    
+
                 // Insert the new item into the database
                 conn = Database.connect();
                 String insertQuery = "INSERT INTO inventory (ingredient_name, current_stock, price, unit, min_stock) VALUES (?, ?, ?, ?, ?)";
-    
+
                 PreparedStatement stmt = conn.prepareStatement(insertQuery);
                 stmt.setString(1, ingredientName);
                 stmt.setInt(2, currentStock);
                 stmt.setDouble(3, price);
                 stmt.setString(4, unit);
                 stmt.setInt(5, minStock);
-    
+
                 int rowsInserted = stmt.executeUpdate(); // Execute the INSERT
                 if (rowsInserted > 0) {
                     System.out.println("A new inventory item was inserted successfully!");
-    
+
                     // Reload the inventory items to reflect the changes
                     loadInventoryItems();
                 }
-    
+
                 conn.close();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
-                // Show an error alert if the input is not valid (e.g., non-numeric price or stock)
+                // Show an error alert if the input is not valid (e.g., non-numeric price or
+                // stock)
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Invalid Number Format");
                 errorAlert.setContentText("Please enter valid numbers for stock, price, and minimum stock.");
                 errorAlert.showAndWait();
             }
-    
+
             // Close the dialog
             dialog.close();
         });
-    
+
         // Add fields and buttons to the VBox
         vbox.getChildren().addAll(
                 new Label("Ingredient Name:"), ingredientNameField,
@@ -872,17 +894,17 @@ public class ManagerController {
                 new Label("Unit:"), unitComboBox,
                 new Label("Minimum Stock:"), minStockField,
                 addButton);
-    
+
         // Create the scene and show the dialog
         Scene dialogScene = new Scene(vbox, 350, 370);
         dialog.setScene(dialogScene);
         dialog.showAndWait();
     }
-    
+
     // Method to handle the Edit Inventory Item button
     public void showEditInventoryItemDialog() {
         InventoryItem selectedItem = inventoryTable.getSelectionModel().getSelectedItem();
-    
+
         if (selectedItem == null) {
             // Show a pop-up if no item is selected
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -892,39 +914,39 @@ public class ManagerController {
             alert.showAndWait();
             return;
         }
-    
+
         final InventoryItem itemToUpdate = selectedItem;
-    
+
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle("Edit Inventory Item");
-    
+
         // Create VBox layout for the dialog
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
-    
+
         // Labels and text fields for each property
         Label ingredientNameLabel = new Label("Ingredient Name:");
         TextField ingredientNameField = new TextField(itemToUpdate.getIngredientName());
-    
+
         Label currentStockLabel = new Label("Current Stock:");
         TextField currentStockField = new TextField(String.valueOf(itemToUpdate.getCurrentStock()));
-    
+
         Label priceLabel = new Label("Price:");
         TextField priceField = new TextField(String.valueOf(itemToUpdate.getPrice()));
-    
+
         Label unitLabel = new Label("Unit:");
         ComboBox<String> unitComboBox = new ComboBox<>();
         unitComboBox.getItems().addAll("cups", "tsp", "lbs", "g", "kgs", "Oz", "ml", "L", "Pcs");
         unitComboBox.setValue(itemToUpdate.getUnit());
-    
+
         Label minStockLabel = new Label("Minimum Stock:");
         TextField minStockField = new TextField(String.valueOf(itemToUpdate.getMinStock()));
-    
+
         // Submit button
         Button submitButton = new Button("Update Item");
-    
+
         submitButton.setOnAction(e -> {
             // Collect input data
             String ingredientName = ingredientNameField.getText();
@@ -932,28 +954,29 @@ public class ManagerController {
             String priceText = priceField.getText();
             String unit = unitComboBox.getValue();
             String minStockText = minStockField.getText();
-    
+
             // Input validation
-            if (ingredientName.isEmpty() || currentStockText.isEmpty() || priceText.isEmpty() || unit == null || minStockText.isEmpty()) {
+            if (ingredientName.isEmpty() || currentStockText.isEmpty() || priceText.isEmpty() || unit == null
+                    || minStockText.isEmpty()) {
                 // Show error alert if any field is empty
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Missing Information");
                 errorAlert.setContentText("Please fill out all fields.");
                 errorAlert.showAndWait();
-                return;  // Exit the method early
+                return; // Exit the method early
             }
-    
+
             // Parse the current stock, price, and min stock, assuming inputs are valid
             try {
                 int currentStock = Integer.parseInt(currentStockText);
                 double price = Double.parseDouble(priceText);
                 int minStock = Integer.parseInt(minStockText);
-    
+
                 // Open a new connection before updating the item
                 conn = Database.connect();
                 System.out.println("Database connection opened for updating");
-    
+
                 String updateQuery = "UPDATE inventory SET ingredient_name = ?, current_stock = ?, price = ?, unit = ?, min_stock = ? WHERE ingredient_id = ?";
                 PreparedStatement stmt = conn.prepareStatement(updateQuery);
                 stmt.setString(1, ingredientName);
@@ -962,17 +985,18 @@ public class ManagerController {
                 stmt.setString(4, unit);
                 stmt.setInt(5, minStock);
                 stmt.setInt(6, itemToUpdate.getIngredientId());
-    
+
                 stmt.executeUpdate();
                 loadInventoryItems(); // Refresh the table
                 dialog.close(); // Close the dialog
-    
+
                 conn.close(); // Ensure the connection is closed after use
                 System.out.println("Database connection closed after updating");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
-                // Show an error alert if the input is not valid (e.g., non-numeric price or stock)
+                // Show an error alert if the input is not valid (e.g., non-numeric price or
+                // stock)
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setTitle("Input Error");
                 errorAlert.setHeaderText("Invalid Number Format");
@@ -980,7 +1004,7 @@ public class ManagerController {
                 errorAlert.showAndWait();
             }
         });
-    
+
         // Add fields and button to the VBox
         vbox.getChildren().addAll(
                 ingredientNameLabel, ingredientNameField,
@@ -989,13 +1013,13 @@ public class ManagerController {
                 unitLabel, unitComboBox,
                 minStockLabel, minStockField,
                 submitButton);
-    
+
         vbox.setPadding(new Insets(20));
         Scene dialogScene = new Scene(vbox, 400, 380);
         dialog.setScene(dialogScene);
         dialog.showAndWait();
     }
-    
+
     // Method to handle the Delete Inventory Item button
     public void showDeleteInventoryItemDialog(ActionEvent event) {
         // Get the selected inventory item
