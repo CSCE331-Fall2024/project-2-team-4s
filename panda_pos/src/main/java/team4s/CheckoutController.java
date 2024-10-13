@@ -49,13 +49,16 @@ public class CheckoutController {
     // Setter method to accept the variable
     public void setOrderNames(List<List<String>> orderNames) {
         this.orderNames = orderNames; // order names taken from ordercontroller and stored neatly to display
-        // Add each sublist as a single item in the ListView
+
+        // Add sublist as a single item in the ListView and calculate the total cost
         for (List<String> sublist : orderNames) {
             checkout_listing.getItems()
-                    .add(sublist.toString() + "\n" + "$" + String.valueOf(NamesToCost(sublist.get(0))));
-            total_cost += NamesToCost(sublist.get(0));
+                    .add(sublist.toString() + "\n" + "$"
+                            + String.valueOf(roundToTwoDecimalPlaces(totalCostSub(sublist))));
         }
-        total_cost = roundToTwoDecimalPlaces(total_cost);
+
+        // Calculate the total cost
+        total_cost = roundToTwoDecimalPlaces(totalCostList(orderNames));
         sum_cost = total_cost;
         sum.setText("Sum - $" + String.valueOf(total_cost));
         tax_cost = roundToTwoDecimalPlaces(total_cost * 0.0825);
@@ -76,26 +79,68 @@ public class CheckoutController {
         return bd.doubleValue();
     }
 
-    public double NamesToCost(String orderNames) {
-        if (orderNames == "Bowl") {
-            return 8.3;
-        } else if (orderNames == "Plate") {
-            return 9.3;
-        } else if (orderNames == "Bigger Plate") {
-            return 11.3;
-        } else if (orderNames == "Appetizer") {
-            return 2;
-        } else if (orderNames == "Side") {
-            return 4.4;
-        } else if (orderNames == "Entree") {
-            return 5.2;
-        } else if (orderNames == "Fountain Drink") {
-            return 2.1;
-        } else if (orderNames == "Bottled Drink") {
-            return 3;
-        } else {
-            return 9999;
+    public double totalCostSub(List<String> items) {
+        String selectQuery = "SELECT * FROM menu_item WHERE item_name = ?";
+        double func_total = 0;
+
+        try {
+            conn = Database.connect();
+            System.out.println("Database connection opened");
+
+            for (String item : items) {
+                PreparedStatement stmt = conn.prepareStatement(selectQuery);
+
+                stmt.setString(1, item);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    double cost = rs.getDouble("item_price");
+                    System.out.println("Cost: " + cost);
+
+                    func_total += cost;
+                }
+            }
+
+            conn.close();
+            System.out.println("Database connection closed");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        return func_total;
+    }
+
+    public double totalCostList(List<List<String>> items) {
+        String selectQuery = "SELECT * FROM menu_item WHERE item_name = ?";
+        double func_total = 0;
+
+        try {
+            conn = Database.connect();
+            System.out.println("Database connection opened");
+
+            for (List<String> sublist : items) {
+                for (String item : sublist) {
+                    PreparedStatement stmt = conn.prepareStatement(selectQuery);
+
+                    stmt.setString(1, item);
+                    ResultSet rs = stmt.executeQuery();
+
+                    if (rs.next()) {
+                        double cost = rs.getDouble("item_price");
+                        System.out.println("Cost: " + cost);
+
+                        func_total += cost;
+                    }
+                }
+            }
+
+            conn.close();
+            System.out.println("Database connection closed");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return func_total;
     }
 
     private List<Integer> flattenOrderList(List<List<Integer>> orders) {
@@ -107,6 +152,7 @@ public class CheckoutController {
             }
         }
 
+        System.out.println("Flattened order list: " + flattened);
         return flattened;
     }
 
@@ -189,6 +235,7 @@ public class CheckoutController {
     private void go_back(ActionEvent event) {
         // Your logic for going back
         System.out.println(orders);
+        System.out.println(orderNames);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cashier.fxml"));
             Parent root = loader.load();
