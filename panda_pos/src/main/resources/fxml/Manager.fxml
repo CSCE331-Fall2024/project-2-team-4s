@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
@@ -20,37 +21,42 @@
             <tabs>
 
                 <Tab text="Menu" closable="false">
-                    <VBox alignment="CENTER" spacing="10">
-                        <!-- Table for displaying menu items -->
-                        <TableView fx:id="menuTable" prefWidth="600" prefHeight="400">
-                            <columns>
-                                <TableColumn fx:id="itemIdColumn" text="ID">
+                  <VBox alignment="CENTER" spacing="10">
+                     <!-- Table for displaying menu items -->
+                     <TableView fx:id="menuTable" prefWidth="600" prefHeight="400">
+                        <columns>
+                              <TableColumn fx:id="itemIdColumn" text="ID">
+                                 <cellValueFactory>
+                                    <PropertyValueFactory property="menu_item_id"/>
+                                 </cellValueFactory>
+                              </TableColumn>
+                              <TableColumn fx:id="currentServingsColumn" text="Servings">
+                                 <cellValueFactory>
+                                    <PropertyValueFactory property="current_servings"/>
+                                 </cellValueFactory>
+                              </TableColumn>
+                              <TableColumn fx:id="itemNameColumn" text="Name">
+                                 <cellValueFactory>
+                                    <PropertyValueFactory property="item_name"/>
+                                 </cellValueFactory>
+                              </TableColumn>
+                              <TableColumn fx:id="itemPriceColumn" text="Price">
+                                 <cellValueFactory>
+                                    <PropertyValueFactory property="item_price"/>
+                                 </cellValueFactory>
+                              </TableColumn>
+                              <TableColumn fx:id="itemCategoryColumn" text="Category">
+                                 <cellValueFactory>
+                                    <PropertyValueFactory property="item_category"/>
+                                 </cellValueFactory>
+                              </TableColumn>
+                              <TableColumn fx:id="ingredientsColumn" text="Ingredients">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="menu_item_id" />
+                                        <PropertyValueFactory property="ingredients"/>
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn fx:id="currentServingsColumn" text="Servings">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="current_servings" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn fx:id="itemNameColumn" text="Name">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="item_name" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn fx:id="itemPriceColumn" text="Price">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="item_price" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                                <TableColumn fx:id="itemCategoryColumn" text="Category">
-                                    <cellValueFactory>
-                                        <PropertyValueFactory property="item_category" />
-                                    </cellValueFactory>
-                                </TableColumn>
-                            </columns>
-                        </TableView>
+                        </columns>
+                     </TableView>
 
                         <!-- Button to open the Add Item dialog -->
                         <HBox alignment="CENTER" spacing="10">
@@ -148,9 +154,16 @@
 
                 <Tab text="Reports" closable="false">
                     <VBox alignment="CENTER">
-                        <children>
-                            <Label text="Content for Tab 4" />
-                        </children>
+                        <!-- Area to display the generated chart -->
+                        <VBox fx:id="chartArea" alignment="CENTER">
+                            <!-- The chart will be dynamically added here -->
+                        </VBox>
+
+                        <!-- Buttons for customizing the report and exporting -->
+                        <HBox alignment="CENTER" spacing="10">
+                            <Button text="Customize Report" onAction="#showReportCustomizer"/>
+                            <Button text="Export Report" onAction="#exportReport"/>
+                        </HBox>                        
                     </VBox>
                 </Tab>
             </tabs>
