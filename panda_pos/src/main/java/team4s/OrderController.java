@@ -153,7 +153,7 @@ public class OrderController {
     // update appetizer_num and stuff, use tagger in add()
     private void updateNums(String name) {
         if (name == "Appetizer") {
-            System.out.println("appetizer num: " + appetizers_num);
+            //System.out.println("appetizer num: " + appetizers_num);
             appetizers_num -= 1;
         } else if (name == "Side") {
             sides_num -= 1;
@@ -180,7 +180,7 @@ public class OrderController {
     public void loadItems(String item_category, int offset) {
         current_display.clear();
         ids.clear();
-        System.out.println("Loading items from the database.");
+        //System.out.println("Loading items from the database.");
         String selectQuery = "SELECT item_name, menu_item_id FROM menu_item WHERE item_category = ? LIMIT 4 OFFSET ?";
         ObservableList<String> items = FXCollections.observableArrayList();
         ObservableList<Integer> ids1 = FXCollections.observableArrayList(); // Initialize the ids list
@@ -195,7 +195,7 @@ public class OrderController {
             while (rs.next()) {
                 String itemName = rs.getString("item_name");
                 Integer id = rs.getInt("menu_item_id");
-                System.out.println("Retrieved item: " + itemName + " with ID: " + id); // Debug print statement
+                //System.out.println("Retrieved item: " + itemName + " with ID: " + id); // Debug print statement
                 items.add(itemName);
                 ids1.add(id); // Add the ID to the ids list
 
@@ -203,9 +203,9 @@ public class OrderController {
                 ids.add(id);
             }
 
-            System.out.println("IDs: " + ids); // Print the ids list to verify
+            //ystem.out.println("IDs: " + ids); // Print the ids list to verify
             menu_items_display.setItems(items);
-            System.out.println("Items: " + items); // Print the items list to verify
+            //System.out.println("Items: " + items); // Print the items list to verify
 
         } catch (SQLException e) {
             System.err.println("Failed to load items from the database.");
@@ -316,7 +316,7 @@ public class OrderController {
     public void appetizer(ActionEvent event) {
         cancel();
         if (type_of_order == 0) {
-            System.out.println("appetizer button clicked");
+            //System.out.println("appetizer button clicked");
             order.add(20);
             order_names.add("Appetizer");
             current_order.setText("Current Order: " + order_names);
@@ -468,7 +468,7 @@ public class OrderController {
     }
 
     public void up(ActionEvent event) {
-        System.out.println("up button clicked");
+        //System.out.println("up button clicked");
         if (offsetter > 0) {
             offsetter -= 4;
             loadItems(tagger, offsetter);
@@ -479,7 +479,7 @@ public class OrderController {
     }
 
     public void down(ActionEvent event) {
-        System.out.println("down button clicked");
+        //System.out.println("down button clicked");
         offsetter += 4;
         current_display.clear();
         ids.clear();
@@ -488,7 +488,7 @@ public class OrderController {
     // --------------------------------------------------------------------------------
 
     private void cancel() {
-        System.out.println("cancel button clicked");
+        //System.out.println("cancel button clicked");
         bowl.setStyle(null);
         plate.setStyle(null);
         bigger_plate.setStyle(null);
@@ -520,7 +520,7 @@ public class OrderController {
 
     @FXML
     private void redo_last_order(ActionEvent event) {
-        System.out.println("Redo Last Order button clicked");
+        //System.out.println("Redo Last Order button clicked");
         if (orders.size() > 0) {
             cancel();
             orders.remove(orders.size() - 1);
@@ -534,33 +534,33 @@ public class OrderController {
     private void confirm(ActionEvent event) { // checks if order is valid and add it to the grand list of things i will
                                               // be sending over to the checkout screen, if it is not valid, show what
                                               // is missing
-        System.out.println(appetizers_num);
-        System.out.println(sides_num);
-        System.out.println(entrees_num);
-        System.out.println(drinks_num);
-        System.out.println(type_of_order);
+        //System.out.println(appetizers_num);
+        //System.out.println(sides_num);
+        //System.out.println(entrees_num);
+        //System.out.println(drinks_num);
+        //System.out.println(type_of_order);
         menu_items_display.setItems(null);
         if (appetizers_num == 0 && sides_num == 0 && entrees_num == 0 && drinks_num == 0 && type_of_order == 1) {
-            System.out.println(order_names);
+            //System.out.println(order_names);
 
-            System.out.println("confirm button clicked1");
+            //System.out.println("confirm button clicked1");
             orders.add(new ArrayList<>(order)); // list are mutable so add a copy
             orders_names.add(new ArrayList<>(order_names));
             for (List<Integer> order : orders) {
-                System.out.println(order);
+                //System.out.println(order);
             }
-            System.out.println(orders);
-            System.out.println(orders_names);
+            //System.out.println(orders);
+            //System.out.println(orders_names);
             order.clear();
             order_names.clear();
             cancel();
         } else if (appetizers_num > 0 || sides_num > 0 || entrees_num > 0 || drinks_num > 0) {
             showPopupMessage("Please select the correct amount of items: \n" + appetizers_num + " appetizers,\n"
                     + sides_num + " sides,\n" + entrees_num + " entrees, \n" + drinks_num + " drinks");
-            System.out.println("Please select the correct amount of items: " + appetizers_num + " appetizers, "
-                    + sides_num + " sides, " + entrees_num + " entrees, " + drinks_num + " drinks");
+           // System.out.println("Please select the correct amount of items: " + appetizers_num + " appetizers, "
+            //        + sides_num + " sides, " + entrees_num + " entrees, " + drinks_num + " drinks");
         } else {
-            System.out.println("confirm button clicked");
+            //System.out.println("confirm button clicked");
         }
 
     }
@@ -641,15 +641,15 @@ public class OrderController {
 
     @FXML
     private void add_1(ActionEvent event) {
-        System.out.println("works add 1");
+        //System.out.println("works add 1");
 
         if (getNums(tagger) > 0) {
             updateNums(tagger);
             order_names.add(current_display.get(0));
             order.add(ids.get(0));
-            System.out.println(order_names);
+            //System.out.println(order_names);
             current_order.setText("Current Order:\n" + order_names);
-            System.out.println(order);
+            //System.out.println(order);
         }
     }
 
@@ -659,9 +659,9 @@ public class OrderController {
             updateNums(tagger);
             order_names.add(current_display.get(1));
             order.add(ids.get(1));
-            System.out.println(order_names);
+           // System.out.println(order_names);
             current_order.setText("Current Order:\n" + order_names);
-            System.out.println(order);
+            //System.out.println(order);
         }
     }
 
@@ -671,9 +671,9 @@ public class OrderController {
             updateNums(tagger);
             order_names.add(current_display.get(2));
             order.add(ids.get(2));
-            System.out.println(order_names);
+            //System.out.println(order_names);
             current_order.setText("Current Order:\n" + order_names);
-            System.out.println(order);
+            //System.out.println(order);
         }
     }
 
@@ -683,9 +683,9 @@ public class OrderController {
             updateNums(tagger);
             order_names.add(current_display.get(3));
             order.add(ids.get(3));
-            System.out.println(order_names);
+            //System.out.println(order_names);
             current_order.setText("Current Order:\n" + order_names);
-            System.out.println(order);
+            //System.out.println(order);
         }
     }
 

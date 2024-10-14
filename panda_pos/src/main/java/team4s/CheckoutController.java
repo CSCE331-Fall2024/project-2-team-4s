@@ -85,7 +85,7 @@ public class CheckoutController {
 
         try {
             conn = Database.connect();
-            System.out.println("Database connection opened");
+            //System.out.println("Database connection opened");
 
             for (String item : items) {
                 PreparedStatement stmt = conn.prepareStatement(selectQuery);
@@ -95,14 +95,14 @@ public class CheckoutController {
 
                 if (rs.next()) {
                     double cost = rs.getDouble("item_price");
-                    System.out.println("Cost: " + cost);
+                    //System.out.println("Cost: " + cost);
 
                     func_total += cost;
                 }
             }
 
             conn.close();
-            System.out.println("Database connection closed");
+            //System.out.println("Database connection closed");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,7 +116,7 @@ public class CheckoutController {
 
         try {
             conn = Database.connect();
-            System.out.println("Database connection opened");
+            //System.out.println("Database connection opened");
 
             for (List<String> sublist : items) {
                 for (String item : sublist) {
@@ -127,7 +127,7 @@ public class CheckoutController {
 
                     if (rs.next()) {
                         double cost = rs.getDouble("item_price");
-                        System.out.println("Cost: " + cost);
+                        //System.out.println("Cost: " + cost);
 
                         func_total += cost;
                     }
@@ -135,7 +135,7 @@ public class CheckoutController {
             }
 
             conn.close();
-            System.out.println("Database connection closed");
+            //System.out.println("Database connection closed");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,17 +152,17 @@ public class CheckoutController {
             }
         }
 
-        System.out.println("Flattened order list: " + flattened);
+        //System.out.println("Flattened order list: " + flattened);
         return flattened;
     }
 
     @FXML
     private void confirm_checkout(ActionEvent event) {
-        System.out.println(orderNames);
+        //System.out.println(orderNames);
 
         try {
             conn = Database.connect();
-            System.out.println("Database connection opened");
+            //System.out.println("Database connection opened");
             String insertQuery = "INSERT INTO transaction (total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id, week_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             // get current time
@@ -189,7 +189,7 @@ public class CheckoutController {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     transactionID = generatedKeys.getInt(1);
-                    System.out.println("transaction_id: " + transactionID);
+                    //System.out.println("transaction_id: " + transactionID);
                 } else {
                     throw new SQLException("Creating transaction failed");
                 }
@@ -217,12 +217,12 @@ public class CheckoutController {
 
                 joinTableStmt.executeUpdate();
 
-                System.out.println(
-                        "Inserted into menu_item_transaction: " + order + ", " + transactionID + ", " + quantity);
+               // System.out.println(
+                //        "Inserted into menu_item_transaction: " + order + ", " + transactionID + ", " + quantity);
             }
 
             conn.close();
-            System.out.println("Database connection closed");
+            //System.out.println("Database connection closed");
 
             // navigate back to the cashier screen
             go_back(event);
@@ -234,8 +234,8 @@ public class CheckoutController {
     @FXML
     private void go_back(ActionEvent event) {
         // Your logic for going back
-        System.out.println(orders);
-        System.out.println(orderNames);
+        //System.out.println(orders);
+        //System.out.println(orderNames);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cashier.fxml"));
             Parent root = loader.load();
