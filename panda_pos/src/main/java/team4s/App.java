@@ -5,14 +5,27 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 
 public class App extends Application {
     static Stage mainStage;
 
+    /**
+     * Serves as the entry point for the application.
+     * It launches the application by calling the launch method.
+     *
+     * @param args the command line arguments used for execution
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Starts the application by setting up the primary stage.
+     * This method is called after the application is initialized.
+     *
+     * @param stage the primary stage, used to set the application scene
+     */
     @Override
     public void start(Stage stage) {
         try {
@@ -28,7 +41,7 @@ public class App extends Application {
 
             // show stage
             stage.show();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

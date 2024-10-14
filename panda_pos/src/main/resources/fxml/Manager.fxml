@@ -27,27 +27,27 @@
                             <columns>
                                 <TableColumn fx:id="itemIdColumn" text="ID">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="menu_item_id" />
+                                        <PropertyValueFactory property="menuItemID" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn fx:id="currentServingsColumn" text="Servings">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="current_servings" />
+                                        <PropertyValueFactory property="currentServings" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn fx:id="itemNameColumn" text="Name">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="item_name" />
+                                        <PropertyValueFactory property="itemName" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn fx:id="itemPriceColumn" text="Price">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="item_price" />
+                                        <PropertyValueFactory property="itemPrice" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn fx:id="itemCategoryColumn" text="Category">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="item_category" />
+                                        <PropertyValueFactory property="itemCategory" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn fx:id="ingredientsColumn" text="Ingredients">
@@ -77,7 +77,7 @@
                             <columns>
                                 <TableColumn fx:id="ingredientIdColumn" text="ID">
                                     <cellValueFactory>
-                                        <PropertyValueFactory property="ingredientId" />
+                                        <PropertyValueFactory property="ingredientID" />
                                     </cellValueFactory>
                                 </TableColumn>
                                 <TableColumn fx:id="ingredientNameColumn" text="Name">

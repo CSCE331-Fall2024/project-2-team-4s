@@ -46,6 +46,13 @@ public class CheckoutController {
     private List<List<String>> orderNames;
     private List<List<Integer>> orders;
 
+    /**
+     * Setter method to get item names, add them to the ListView, and calculate the
+     * costs for the order like tax and total
+     * 
+     * @param orderNames a list of items in the order to be displayed
+     * @return void
+     */
     // Setter method to accept the variable
     public void setOrderNames(List<List<String>> orderNames) {
         this.orderNames = orderNames; // order names taken from ordercontroller and stored neatly to display
@@ -68,16 +75,36 @@ public class CheckoutController {
 
     }
 
+    /**
+     * setter method for the list of items in the order
+     * 
+     * @param orders a list of items in the order
+     * @return void
+     */
     public void setOrder(List<List<Integer>> orders) { // order names taken from ordercontroller and stored neatly for
                                                        // transaction table
         this.orders = orders;
     }
 
+    /**
+     * Rounds the cost to two decimal places for tax and floating point error
+     * 
+     * @param value the value to be rounded
+     * @return double the rounded value
+     */
     public double roundToTwoDecimalPlaces(double value) {
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
+    /**
+     * calculates cost one item in the order
+     * 
+     * @param items list of items associated with a bowl, plate, etc.
+     * @return double the cost of the item
+     * @throws SQLException if the item is not found in the database
+     */
 
     public double totalCostSub(List<String> items) {
         String selectQuery = "SELECT * FROM menu_item WHERE item_name = ?";
@@ -85,7 +112,7 @@ public class CheckoutController {
 
         try {
             conn = Database.connect();
-            //System.out.println("Database connection opened");
+            // System.out.println("Database connection opened");
 
             for (String item : items) {
                 PreparedStatement stmt = conn.prepareStatement(selectQuery);
@@ -95,14 +122,14 @@ public class CheckoutController {
 
                 if (rs.next()) {
                     double cost = rs.getDouble("item_price");
-                    //System.out.println("Cost: " + cost);
+                    // System.out.println("Cost: " + cost);
 
                     func_total += cost;
                 }
             }
 
             conn.close();
-            //System.out.println("Database connection closed");
+            // System.out.println("Database connection closed");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,13 +137,21 @@ public class CheckoutController {
         return func_total;
     }
 
+    /**
+     * Finds the cost of the overall transaction
+     * 
+     * @param items list of list storing the item names for the overall transaction
+     * @return double total cost of the transaction (without tax)
+     * @throws SQLException connection not established or query did not find the
+     *                      item in the database
+     */
     public double totalCostList(List<List<String>> items) {
         String selectQuery = "SELECT * FROM menu_item WHERE item_name = ?";
         double func_total = 0;
 
         try {
             conn = Database.connect();
-            //System.out.println("Database connection opened");
+            // System.out.println("Database connection opened");
 
             for (List<String> sublist : items) {
                 for (String item : sublist) {
@@ -127,7 +162,7 @@ public class CheckoutController {
 
                     if (rs.next()) {
                         double cost = rs.getDouble("item_price");
-                        //System.out.println("Cost: " + cost);
+                        // System.out.println("Cost: " + cost);
 
                         func_total += cost;
                     }
@@ -135,7 +170,7 @@ public class CheckoutController {
             }
 
             conn.close();
-            //System.out.println("Database connection closed");
+            // System.out.println("Database connection closed");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -143,6 +178,13 @@ public class CheckoutController {
         return func_total;
     }
 
+    /**
+     * Assists in creating the menu_item_transaction join table
+     * 
+     * @params orders which is the list of lists containing all of te ordered items
+     *         with its respective components
+     * @returns flattened which is a single list of integers
+     */
     private List<Integer> flattenOrderList(List<List<Integer>> orders) {
         List<Integer> flattened = new ArrayList<>();
 
@@ -152,17 +194,25 @@ public class CheckoutController {
             }
         }
 
-        //System.out.println("Flattened order list: " + flattened);
+        // System.out.println("Flattened order list: " + flattened);
         return flattened;
     }
 
+    /**
+     * confirms the checkout of an order
+     * 
+     * @params event that emulates when the checkout button is pressed
+     * @returns void
+     * @throws SQLException if the transaction is not entered into the transaction
+     *                      table
+     */
     @FXML
     private void confirm_checkout(ActionEvent event) {
-        //System.out.println(orderNames);
+        // System.out.println(orderNames);
 
         try {
             conn = Database.connect();
-            //System.out.println("Database connection opened");
+            // System.out.println("Database connection opened");
             String insertQuery = "INSERT INTO transaction (total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id, week_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             // get current time
@@ -189,7 +239,7 @@ public class CheckoutController {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     transactionID = generatedKeys.getInt(1);
-                    //System.out.println("transaction_id: " + transactionID);
+                    // System.out.println("transaction_id: " + transactionID);
                 } else {
                     throw new SQLException("Creating transaction failed");
                 }
@@ -217,25 +267,33 @@ public class CheckoutController {
 
                 joinTableStmt.executeUpdate();
 
-               // System.out.println(
-                //        "Inserted into menu_item_transaction: " + order + ", " + transactionID + ", " + quantity);
+                // System.out.println(
+                // "Inserted into menu_item_transaction: " + order + ", " + transactionID + ", "
+                // + quantity);
             }
 
             conn.close();
-            //System.out.println("Database connection closed");
+            // System.out.println("Database connection closed");
 
             // navigate back to the cashier screen
-            go_back(event);
+            goBack(event);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * go back method for going back to the previous order
+     * 
+     * @params event that emulates when the button is pressed.
+     * @returns void
+     * @throws IOExeception if no order to go back to
+     */
     @FXML
-    private void go_back(ActionEvent event) {
+    private void goBack(ActionEvent event) {
         // Your logic for going back
-        //System.out.println(orders);
-        //System.out.println(orderNames);
+        // System.out.println(orders);
+        // System.out.println(orderNames);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cashier.fxml"));
             Parent root = loader.load();
@@ -249,10 +307,5 @@ public class CheckoutController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @FXML
-    public void initialize() {
-        // Your logic for initializing the controller
     }
 }

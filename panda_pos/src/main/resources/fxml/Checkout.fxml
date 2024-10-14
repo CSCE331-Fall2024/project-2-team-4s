@@ -17,7 +17,7 @@
         <Button id="confirm_checkout" fx:id="confirm_checkout" layoutX="486.0" layoutY="334.0"
           mnemonicParsing="false" onAction="#confirm_checkout" text="Confirm" />
         <Button id="go_back" fx:id="go_back" layoutX="410.0" layoutY="334.0" mnemonicParsing="false"
-          onAction="#go_back" text="Go Back" />
+          onAction="#goBack" text="Go Back" />
         <Label fx:id="tax" layoutX="475.0" layoutY="279.0" prefHeight="17.0" prefWidth="105.0"
           text="Tax: " />
         <Label layoutX="410.0" layoutY="295.0" text="-------------------------------------" />

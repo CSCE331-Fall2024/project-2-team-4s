@@ -10,13 +10,15 @@ public class Database {
     private static String PASSWORD = "quietheat74";
     private static Connection conn;
 
-    // connect to database
+    /**
+     * Connects to a PostgreSQL database using the provided URL, user, and
+     * password.
+     *
+     * @return conn a Connection object
+     * @throws SQLException if a database access error occurs
+     */
     public static Connection connect() throws SQLException {
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        conn = DriverManager.getConnection(URL, USER, PASSWORD);
 
         return conn;
     }
