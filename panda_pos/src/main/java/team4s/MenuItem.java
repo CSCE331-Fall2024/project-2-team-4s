@@ -8,7 +8,16 @@ public class MenuItem {
     private String item_category;
     private String ingredients;
 
-    // Constructor
+    /**
+     * Constructs a MenuItem with the specified details.
+     * 
+     * @param menu_item_id     the unique ID of the menu item
+     * @param current_servings the current servings of the menu item
+     * @param item_name        the name of the menu item
+     * @param item_price       the price of the menu item
+     * @param item_category    the category of the menu item
+     * @param ingredients      the ingredients of the menu item
+     */
     public MenuItem(int menu_item_id, int current_servings, String item_name, float item_price, String item_category,
             String ingredients) {
         this.menu_item_id = menu_item_id;
@@ -19,49 +28,102 @@ public class MenuItem {
         this.ingredients = ingredients;
     }
 
-    // Getters (method names follow property names)
-    public int getMenu_item_id() {
+    /**
+     * Gets the ID of the menu item.
+     * 
+     * @return menu_item_id the ID of the menu item
+     */
+    public int getMenuItemID() {
         return menu_item_id;
     }
 
-    public int getCurrent_servings() {
+    /**
+     * Gets the current servings of the menu item.
+     * 
+     * @return current_servings the current number of servings for the menu item
+     */
+    public int getCurrentServings() {
         return current_servings;
     }
 
-    public String getItem_name() {
+    /**
+     * Gets the name of the menu item.
+     * 
+     * @return item_name the name of the menu item
+     */
+    public String getItemName() {
         return item_name;
     }
 
-    public float getItem_price() {
+    /**
+     * Gets the price of the menu item.
+     * 
+     * @return item_price the price of the menu item
+     */
+    public float getItemPrice() {
         return item_price;
     }
 
-    public String getItem_category() {
+    /**
+     * Gets the category of the menu item.
+     * 
+     * @return item_category the category of the menu item
+     */
+    public String getItemCategory() {
         return item_category;
     }
 
+    /**
+     * Gets the ingredients of the menu item.
+     * 
+     * @return ingredients the ingredients of the menu item
+     */
     public String getIngredients() {
         return ingredients;
     }
 
-    // Setters
-    public void setMenu_item_id(int menu_item_id) {
+    /**
+     * Sets the ID of the menu item.
+     * 
+     * @param menu_item_id the new ID of the menu item
+     */
+    public void setMenuItemID(int menu_item_id) {
         this.menu_item_id = menu_item_id;
     }
 
-    public void setCurrent_servings(int current_servings) {
+    /**
+     * Sets the current servings of the menu item.
+     * 
+     * @param current_servings the new current number of servings for the menu item
+     */
+    public void setCurrentServings(int current_servings) {
         this.current_servings = current_servings;
     }
 
-    public void setItem_name(String item_name) {
+    /**
+     * Sets the name of the menu item.
+     * 
+     * @param item_name the new name of the menu item
+     */
+    public void setItemName(String item_name) {
         this.item_name = item_name;
     }
 
-    public void setItem_price(float item_price) {
+    /**
+     * Sets the price of the menu item.
+     * 
+     * @param item_price the new price of the menu item
+     */
+    public void setItemPrice(float item_price) {
         this.item_price = item_price;
     }
 
-    public void setItem_category(String item_category) {
+    /**
+     * Sets the category of the menu item.
+     * 
+     * @param item_category the new category of the menu item
+     */
+    public void setItemCategory(String item_category) {
         this.item_category = item_category;
     }
 }

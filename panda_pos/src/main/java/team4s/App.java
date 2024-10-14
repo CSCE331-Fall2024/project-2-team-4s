@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 
 public class App extends Application {
     static Stage mainStage;
@@ -24,8 +25,6 @@ public class App extends Application {
      * This method is called after the application is initialized.
      *
      * @param stage the primary stage, used to set the application scene
-     * @throws Exception if an error occurs while loading the Menu.fxml file or
-     *                   showing the stage
      */
     @Override
     public void start(Stage stage) {
@@ -42,7 +41,7 @@ public class App extends Application {
 
             // show stage
             stage.show();
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -459,7 +459,7 @@ public class ManagerController {
 
                             PreparedStatement ingredientStmt = conn.prepareStatement(insertIngredientQuery);
                             ingredientStmt.setInt(1, newMenuItemId);
-                            ingredientStmt.setInt(2, ingredient.getIngredientId());
+                            ingredientStmt.setInt(2, ingredient.getIngredientID());
                             ingredientStmt.setInt(3, ingredient.getAmount()); // Use the selected amount
 
                             ingredientStmt.executeUpdate();
@@ -525,18 +525,18 @@ public class ManagerController {
 
         // Labels and text fields for each property
         Label itemNameLabel = new Label("Item Name:");
-        TextField itemNameField = new TextField(itemToUpdate.getItem_name());
+        TextField itemNameField = new TextField(itemToUpdate.getItemName());
 
         Label itemPriceLabel = new Label("Item Price:");
-        TextField itemPriceField = new TextField(String.valueOf(itemToUpdate.getItem_price()));
+        TextField itemPriceField = new TextField(String.valueOf(itemToUpdate.getItemPrice()));
 
         Label currentServingsLabel = new Label("Current Servings:");
-        TextField currentServingsField = new TextField(String.valueOf(itemToUpdate.getCurrent_servings()));
+        TextField currentServingsField = new TextField(String.valueOf(itemToUpdate.getCurrentServings()));
 
         Label itemCategoryLabel = new Label("Item Category:");
         ComboBox<String> itemCategoryBox = new ComboBox<>();
         itemCategoryBox.getItems().addAll("Drink", "Meal", "Appetizer", "Side", "Entree");
-        itemCategoryBox.setValue(itemToUpdate.getItem_category());
+        itemCategoryBox.setValue(itemToUpdate.getItemCategory());
 
         // Create ListView for InventoryItems (to include current and potential new
         // ingredients)
@@ -544,7 +544,7 @@ public class ManagerController {
         ingredientListView.setPrefHeight(150);
 
         // Load all available ingredients, marking the ones that are already selected
-        loadAllIngredientsWithCurrentSelection(itemToUpdate.getMenu_item_id(), ingredientListView);
+        loadAllIngredientsWithCurrentSelection(itemToUpdate.getMenuItemID(), ingredientListView);
 
         // Submit button to update the item
         Button submitButton = new Button("Update Item");
@@ -583,14 +583,14 @@ public class ManagerController {
                 stmt.setString(2, itemName);
                 stmt.setFloat(3, itemPrice);
                 stmt.setString(4, itemCategory);
-                stmt.setInt(5, itemToUpdate.getMenu_item_id());
+                stmt.setInt(5, itemToUpdate.getMenuItemID());
 
                 stmt.executeUpdate();
 
                 // Delete existing ingredient records for this menu item
                 String deleteIngredientsQuery = "DELETE FROM inventory_menu_item WHERE menu_item_id = ?";
                 PreparedStatement deleteStmt = conn.prepareStatement(deleteIngredientsQuery);
-                deleteStmt.setInt(1, itemToUpdate.getMenu_item_id());
+                deleteStmt.setInt(1, itemToUpdate.getMenuItemID());
                 deleteStmt.executeUpdate();
 
                 // Insert the selected ingredients with amounts
@@ -598,8 +598,8 @@ public class ManagerController {
                     if (ingredient.isSelected()) {
                         String insertIngredientQuery = "INSERT INTO inventory_menu_item (menu_item_id, ingredient_id, ingredient_amount) VALUES (?, ?, ?)";
                         PreparedStatement ingredientStmt = conn.prepareStatement(insertIngredientQuery);
-                        ingredientStmt.setInt(1, itemToUpdate.getMenu_item_id());
-                        ingredientStmt.setInt(2, ingredient.getIngredientId());
+                        ingredientStmt.setInt(1, itemToUpdate.getMenuItemID());
+                        ingredientStmt.setInt(2, ingredient.getIngredientID());
                         ingredientStmt.setInt(3, ingredient.getAmount()); // Use the selected amount
 
                         ingredientStmt.executeUpdate();
@@ -726,7 +726,7 @@ public class ManagerController {
             Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
             confirmationAlert.setTitle("Delete Confirmation");
             confirmationAlert.setHeaderText("Are you sure you want to delete this item?");
-            confirmationAlert.setContentText("Item Name: " + selectedItem.getItem_name());
+            confirmationAlert.setContentText("Item Name: " + selectedItem.getItemName());
 
             // Wait for user confirmation
             if (confirmationAlert.showAndWait().get() == ButtonType.OK) {
@@ -759,20 +759,20 @@ public class ManagerController {
 
             // Delete ingredients associated with the menu item
             try (PreparedStatement stmt = conn.prepareStatement(deleteIngredientsQuery)) {
-                stmt.setInt(1, item.getMenu_item_id());
+                stmt.setInt(1, item.getMenuItemID());
                 stmt.executeUpdate();
             }
 
             // Delete the menu item itself
             try (PreparedStatement stmt = conn.prepareStatement(deleteMenuItemQuery)) {
-                stmt.setInt(1, item.getMenu_item_id());
+                stmt.setInt(1, item.getMenuItemID());
                 stmt.executeUpdate();
             }
 
             // Commit the transaction
             conn.commit();
             System.out
-                    .println("Menu item and associated ingredients deleted from the database: " + item.getItem_name());
+                    .println("Menu item and associated ingredients deleted from the database: " + item.getItemName());
         } catch (SQLException e) {
             try {
                 if (conn != null) {
@@ -984,7 +984,7 @@ public class ManagerController {
                 stmt.setDouble(3, price);
                 stmt.setString(4, unit);
                 stmt.setInt(5, minStock);
-                stmt.setInt(6, itemToUpdate.getIngredientId());
+                stmt.setInt(6, itemToUpdate.getIngredientID());
 
                 stmt.executeUpdate();
                 loadInventoryItems(); // Refresh the table
@@ -1057,7 +1057,7 @@ public class ManagerController {
         try {
             conn = Database.connect(); // Open a new connection
             PreparedStatement stmt = conn.prepareStatement(deleteQuery);
-            stmt.setInt(1, item.getIngredientId());
+            stmt.setInt(1, item.getIngredientID());
             stmt.executeUpdate();
             conn.close(); // Close the connection
             System.out.println("Inventory item deleted from database: " + item.getIngredientName());
