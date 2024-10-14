@@ -13,6 +13,15 @@ public class MenuController {
     private Parent root;
 
     // Switch to manager GUI (Manager.fxml)
+
+     /**
+     * This function switches the scene to the Manager.fxml file
+     * @param event - the event that triggers the switch
+     * @throws Exception - if the file is not found
+     * 
+     * 
+     * 
+     */
     public void switchToManager(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Manager.fxml"));
@@ -32,6 +41,15 @@ public class MenuController {
     }
 
     // Switch to cashier GUI (Cashier.fxml)
+
+        /**
+     * This function switches the scene to the Manager.fxml file
+     * @param event - the event that triggers the switch
+     * @throws Exception - if the file is not found
+     * 
+     * 
+     * 
+     */
     public void switchToCashier(ActionEvent event) {
         try {
             root = FXMLLoader.load(getClass().getResource("/fxml/Cashier.fxml"));

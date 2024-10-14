@@ -49,6 +49,8 @@ public class ManagerController {
 
     // ------------------------------- Initializers -------------------------------
     // Method to initialize only when Manager.fxml is loaded
+
+
     public void initializeManager() {
         try {
             conn = Database.connect();
