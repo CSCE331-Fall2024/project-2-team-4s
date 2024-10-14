@@ -1,1 +1,8 @@
+# scripts
 *.csv
+
+# maven
+target/
+
+# vscode
+.vscode/
