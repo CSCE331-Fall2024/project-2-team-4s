@@ -15,12 +15,12 @@ public class MenuController {
     // Switch to manager GUI (Manager.fxml)
     public void switchToManager(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Manager.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
             root = loader.load();
 
             // Get the controller for Manager.fxml and initialize the table view
-            ManagerController controller = loader.getController();
-            controller.initializeManager(); // Initialize the Manager-specific logic
+            // ManagerController controller = loader.getController();
+            // controller.initializeManager(); // Initialize the Manager-specific logic
 
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
