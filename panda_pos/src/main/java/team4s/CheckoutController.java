@@ -276,7 +276,7 @@ public class CheckoutController {
             // System.out.println("Database connection closed");
 
             // navigate back to the cashier screen
-            go_back(event);
+            goBack(event);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -290,7 +290,7 @@ public class CheckoutController {
      * @throws IOExeception if no order to go back to
      */
     @FXML
-    private void go_back(ActionEvent event) {
+    private void goBack(ActionEvent event) {
         // Your logic for going back
         // System.out.println(orders);
         // System.out.println(orderNames);
