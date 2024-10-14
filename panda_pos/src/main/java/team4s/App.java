@@ -9,16 +9,23 @@ import javafx.stage.Stage;
 public class App extends Application {
     static Stage mainStage;
 
+    /**
+     * Serves as the entry point for the application.
+     * It launches the application by calling the launch method.
+     *
+     * @param args the command line arguments used for execution
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
     /**
-     * start method to show the stage
-     * 
-     * @params stage the stage to be shown
-     * @returns void
-     * @throws Exception if an error occurs
+     * Starts the application by setting up the primary stage.
+     * This method is called after the application is initialized.
+     *
+     * @param stage the primary stage, used to set the application scene
+     * @throws Exception if an error occurs while loading the Menu.fxml file or
+     *                   showing the stage
      */
     @Override
     public void start(Stage stage) {
