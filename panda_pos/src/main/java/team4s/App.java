@@ -13,6 +13,13 @@ public class App extends Application {
         launch(args);
     }
 
+    /**
+     * start method to show the stage
+     * 
+     * @params stage the stage to be shown
+     * @returns void
+     * @throws Exception if an error occurs
+     */
     @Override
     public void start(Stage stage) {
         try {
