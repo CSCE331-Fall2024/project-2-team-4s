@@ -1,692 +1,1195 @@
 package team4s;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-import javafx.scene.Parent;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.scene.control.ListView;
-import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.VBox;
 
-import java.sql.PreparedStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import team4s.Database; // Add this line to import the Database class
-
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Label;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
-import javafx.event.ActionEvent;
-
-import java.util.List;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import javafx.scene.input.InputMethodRequests;
-
-/*
- *  This code has three main parts:
- * 1. A list storing the type of order (bowl, plate, bigger plate, appetizer, side, entree, drink), 
- *  which will be appended to a list of list in ID and name form for the checkout screen and a list of ID for the transaction table
- * 2. Buttons for each type of order, which will be disabled when the order is selected and enabled when the order is cancelled
- * several variables to keep track of the quantity of each item and for protection against invalid orders, should all be some variation of _num
- * 3. Buttons to update the lists and change the scene to the checkout screen
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OrderController {
-    // Initialization-----------------------------------------------------------
 
-    List<Integer> order = new ArrayList<Integer>();
-    List<List<Integer>> orders = new ArrayList<List<Integer>>();
-    List<String> order_names = new ArrayList<String>();
-    List<List<String>> orders_names = new ArrayList<List<String>>();
     @FXML
-    private Button bowl;
+    private Button bowlButton, plateButton, biggerPlateButton, appetizerButton, drinksButton, sideButton, entreeButton;
     @FXML
-    private Button plate;
+    private Button confirmButton, cancelButton;
     @FXML
-    private Button bigger_plate;
+    private Button editItemButton, deleteItemButton; // New buttons
     @FXML
-    private Button appetizer;
+    private ListView<String> currentOrderList;
     @FXML
-    private Button side;
+    private VBox dynamicButtons;
     @FXML
-    private Button entree;
+    private Label orderTotalLabel, selectedEmployeeLabel, customerLabel; // Add this to bind with the label in FXML
     @FXML
-    private Button drink;
+    private Button selectEmployeeButton;
     @FXML
-    private Button sides;
-    @FXML
-    private Button entrees;
-    @FXML
-    private Button appetizers;
-    @FXML
-    private Button drinks;
-    @FXML
-    private Button up;
-    @FXML
-    private Button down;
-    @FXML
-    private Button add_1;
-    @FXML
-    private Button add_2;
-    @FXML
-    private Button add_3;
-    @FXML
-    private Button add_4;
-    @FXML
-    private Button redo;
-    @FXML
-    private Button redo_last_order;
-    @FXML
-    private Button confirm;
-    @FXML
-    private Button checkout;
-    @FXML
-    private Button previous_screen;
-    @FXML
-    private ListView menu_items_display;
-    @FXML
-    private List<String> current_display = new ArrayList<String>();
-    private List<Integer> ids = new ArrayList<Integer>();
-    @FXML
-    private Label current_order;
-    private int sides_num = 0;
-    private int entrees_num = 0;
-    private int appetizers_num = 0;
-    private int drinks_num = 0;
-    private int offsetter = 0;
-    private String tagger;
-    private int type_of_order = 0;
+    private Button addCustomerButton; // New button
 
-    // update appetizer_num and stuff, use tagger in add()
-    private void updateNums(String name) {
-        if (name == "Appetizer") {
-            //System.out.println("appetizer num: " + appetizers_num);
-            appetizers_num -= 1;
-        } else if (name == "Side") {
-            sides_num -= 1;
-        } else if (name == "Entree") {
-            entrees_num -= 1;
-        } else if (name == "Drink") {
-            drinks_num -= 1;
-        }
 
+    private List<String> currentOrder = new ArrayList<>();
+    private String selectedPlateType = "";
+    private Map<String, Integer> selectedEntrees = new HashMap<>(); // Track selected entrees and counts
+    private String selectedSide = ""; // To track the selected side
+    private List<Button> entreeButtons = new ArrayList<>(); // To track the dynamically created entree buttons
+
+    private int editingIndex = -1; // To track which item in the order is being edited
+
+    private double orderTotal = 0.0;
+
+    private int selectedEmployeeId; // To store the selected employee's ID
+    private int selectedCustomerId;
+    private String customerFullName;
+
+    // Method to display the employee selection pop-up
+    public void showEmployeeSelectionDialog() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Select Employee");
+        dialog.setHeaderText("Please select an employee to continue.");
+
+        // Create a VBox to hold the ComboBox
+        VBox dialogPaneContent = new VBox();
+        Label employeeLabel = new Label("Employee:");
+        ComboBox<String> employeeComboBox = new ComboBox<>();
+
+        // Load employee names into the ComboBox
+        Map<String, Integer> employeeMap = loadEmployeesFromDatabase();
+        employeeComboBox.getItems().addAll(employeeMap.keySet());
+
+        dialogPaneContent.getChildren().addAll(employeeLabel, employeeComboBox);
+        dialog.getDialogPane().setContent(dialogPaneContent);
+
+        // Add OK and Cancel buttons
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // When OK is clicked, store the selected employee ID
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String selectedEmployeeName = employeeComboBox.getSelectionModel().getSelectedItem();
+                if (selectedEmployeeName != null) {
+                    selectedEmployeeId = employeeMap.get(selectedEmployeeName); // Store the employee ID
+                    selectedEmployeeLabel.setText("Selected Employee: " + selectedEmployeeName);
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
     }
 
-    private Integer getNums(String name) {
-        if (name == "Appetizer") {
-            return appetizers_num;
-        } else if (name == "Side") {
-            return sides_num;
-        } else if (name == "Entree") {
-            return entrees_num;
-        } else {
-            return drinks_num;
-        }
-    }
+    // Method to load employee data from the database
+    private Map<String, Integer> loadEmployeesFromDatabase() {
+        Map<String, Integer> employeeMap = new HashMap<>();
 
-    public void loadItems(String item_category, int offset) {
-        current_display.clear();
-        ids.clear();
-        //System.out.println("Loading items from the database.");
-        String selectQuery = "SELECT item_name, menu_item_id FROM menu_item WHERE item_category = ? LIMIT 4 OFFSET ?";
-        ObservableList<String> items = FXCollections.observableArrayList();
-        ObservableList<Integer> ids1 = FXCollections.observableArrayList(); // Initialize the ids list
+        String query = "SELECT employee_id, first_name, last_name FROM employee"; // Adjust column names as needed
 
-        try (Connection conn = Database.connect();
-                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
-
-            stmt.setString(1, item_category); // Set the item_category parameter
-            stmt.setInt(2, offset); // Set the offset parameter
-            ResultSet rs = stmt.executeQuery();
+        try (Connection conn = Database.connect(); // Replace with your DB connection method
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                String itemName = rs.getString("item_name");
-                Integer id = rs.getInt("menu_item_id");
-                //System.out.println("Retrieved item: " + itemName + " with ID: " + id); // Debug print statement
-                items.add(itemName);
-                ids1.add(id); // Add the ID to the ids list
-
-                current_display.add(itemName);
-                ids.add(id);
+                int employeeId = rs.getInt("employee_id");
+                String employeeFName = rs.getString("first_name");
+                String employeeLName = rs.getString("last_name");
+                String employeeName = employeeFName + " " + employeeLName;
+                employeeMap.put(employeeName, employeeId); // Add employee name and ID to the map
             }
-
-            //ystem.out.println("IDs: " + ids); // Print the ids list to verify
-            menu_items_display.setItems(items);
-            //System.out.println("Items: " + items); // Print the items list to verify
 
         } catch (SQLException e) {
-            System.err.println("Failed to load items from the database.");
             e.printStackTrace();
         }
 
+        return employeeMap;
     }
 
-    public void bowl(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            order.add(17);
-            order_names.add("Bowl");
-            current_order.setText("Current Order: " + order_names);
-            bowl.setStyle("-fx-background-color: #ff0000");
-            sides_num = 1;
-            entrees_num = 1;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 1;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(true);
-            drinks.setDisable(true);
-        } else {
-            order.remove(0);
-            order_names.remove(0);
-            current_order.setText("Current Order: " + order_names);
-            bowl.setStyle(null);
-            sides_num = 0;
-            entrees_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-        }
-    }
-
-    public void plate(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            order.add(18);
-            order_names.add("Plate");
-            current_order.setText("Current Order: " + order_names);
-            plate.setStyle("-fx-background-color: #ff0000");
-            sides_num = 1;
-            entrees_num = 2;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 1;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(true);
-            drinks.setDisable(true);
-        } else {
-            order.remove(0);
-            order_names.remove(0);
-            current_order.setText("Current Order: " + order_names);
-            plate.setStyle(null);
-            sides_num = 0;
-            entrees_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-        }
-    }
-
-    public void bigger_plate(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            order.add(19);
-            order_names.add("Bigger Plate");
-            current_order.setText("Current Order: " + order_names);
-            bigger_plate.setStyle("-fx-background-color: #ff0000");
-            sides_num = 1;
-            entrees_num = 3;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 1;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(true);
-            drinks.setDisable(true);
-        } else {
-            order.remove(0);
-            order_names.remove(0);
-            current_order.setText("Current Order: " + order_names);
-            bigger_plate.setStyle(null);
-            sides_num = 0;
-            entrees_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-        }
-    }
-
-    public void appetizer(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            //System.out.println("appetizer button clicked");
-            order.add(20);
-            order_names.add("Appetizer");
-            current_order.setText("Current Order: " + order_names);
-            appetizer.setStyle("-fx-background-color: #ff0000");
-            appetizers_num = 1;
-            sides.setDisable(true);
-            entrees.setDisable(true);
-            appetizers.setDisable(false);
-            drinks.setDisable(true);
-            drinks_num = 0;
-            type_of_order = 1;
-        } else {
-            order.remove(1);
-            order_names.remove(1);
-            current_order.setText("Current Order: " + order_names);
-            appetizer.setStyle(null);
-            appetizers_num = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-            drinks_num = 0;
-            type_of_order = 0;
-        }
-    }
-
-    public void side(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            order.add(21);
-            order_names.add("Side");
-            current_order.setText("Current Order: " + order_names);
-            side.setStyle("-fx-background-color: #ff0000");
-            sides_num = 1;
-            sides.setDisable(false);
-            entrees.setDisable(true);
-            appetizers.setDisable(true);
-            drinks.setDisable(true);
-            entrees_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 1;
-        } else {
-            order.remove(1);
-            order_names.remove(1);
-            current_order.setText("Current Order: " + order_names);
-            side.setStyle(null);
-            sides_num = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-            entrees_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 0;
-        }
-    }
-
-    public void entree(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            order.add(22);
-            order_names.add("Entree");
-            current_order.setText("Current Order: " + order_names);
-            entree.setStyle("-fx-background-color: #ff0000");
-            entrees_num = 1;
-            sides.setDisable(true);
-            entrees.setDisable(false);
-            appetizers.setDisable(true);
-            drinks.setDisable(true);
-            sides_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 1;
-        } else {
-            order.remove(1);
-            order_names.remove(1);
-            current_order.setText("Current Order: " + order_names);
-            entree.setStyle(null);
-            entrees_num = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-            sides_num = 0;
-            appetizers_num = 0;
-            drinks_num = 0;
-            type_of_order = 0;
-        }
-    }
-
-    public void drink(ActionEvent event) {
-        cancel();
-        if (type_of_order == 0) {
-            order_names.add("Drink");
-            order.add(23);
-            current_order.setText("Current Order: " + order_names);
-            drink.setStyle("-fx-background-color: #ff0000");
-            drinks_num = 1;
-            sides.setDisable(true);
-            entrees.setDisable(true);
-            appetizers.setDisable(true);
-            drinks.setDisable(false);
-            sides_num = 0;
-            entrees_num = 0;
-            appetizers_num = 0;
-            type_of_order = 1;
-        } else {
-            order.remove(1);
-            order_names.remove(1);
-            current_order.setText("Current Order: " + order_names);
-            drink.setStyle(null);
-            drinks_num = 0;
-            sides.setDisable(false);
-            entrees.setDisable(false);
-            appetizers.setDisable(false);
-            drinks.setDisable(false);
-            sides_num = 0;
-            entrees_num = 0;
-            appetizers_num = 0;
-            type_of_order = 0;
-        }
-    }
-
-    // --------------------------------------------------------
-    public void sides(ActionEvent event) {
-        tagger = "Side";
-        offsetter = 0;
-        loadItems(tagger, offsetter);
-    }
-
-    public void entrees(ActionEvent event) {
-        tagger = "Entree";
-        offsetter = 0;
-        loadItems(tagger, offsetter);
-    }
-
-    public void appetizers(ActionEvent event) {
-        tagger = "Appetizer";
-        offsetter = 0;
-        loadItems(tagger, offsetter);
-    }
-
-    public void drinks(ActionEvent event) {
-        tagger = "Drink";
-        offsetter = 0;
-        loadItems(tagger, offsetter);
-    }
-
-    public void up(ActionEvent event) {
-        //System.out.println("up button clicked");
-        if (offsetter > 0) {
-            offsetter -= 4;
-            loadItems(tagger, offsetter);
-            current_display.clear();
-            ids.clear();
-        }
-
-    }
-
-    public void down(ActionEvent event) {
-        //System.out.println("down button clicked");
-        offsetter += 4;
-        current_display.clear();
-        ids.clear();
-        loadItems(tagger, offsetter);
-    }
-    // --------------------------------------------------------------------------------
-
-    private void cancel() {
-        //System.out.println("cancel button clicked");
-        bowl.setStyle(null);
-        plate.setStyle(null);
-        bigger_plate.setStyle(null);
-        appetizer.setStyle(null);
-        side.setStyle(null);
-        entree.setStyle(null);
-        drink.setStyle(null);
-        sides_num = 0;
-        entrees_num = 0;
-        appetizers_num = 0;
-        drinks_num = 0;
-        type_of_order = 0;
-        sides.setDisable(true);
-        entrees.setDisable(true);
-        appetizers.setDisable(true);
-        drinks.setDisable(true);
-        current_order.setText("Current Order: ");
-        order_names.clear();
-
-    }
-
+    // Method to handle Bowl button click
     @FXML
-    private void redo(ActionEvent event) {
-        cancel();
-        order.clear();
-        order_names.clear();
-
+    public void selectBowl() {
+        selectPlate("Bowl");
     }
 
+    // Method to handle Plate button click
     @FXML
-    private void redo_last_order(ActionEvent event) {
-        //System.out.println("Redo Last Order button clicked");
-        if (orders.size() > 0) {
-            cancel();
-            orders.remove(orders.size() - 1);
-            orders_names.remove(orders_names.size() - 1);
+    public void selectPlate() {
+        selectPlate("Plate");
+    }
 
+    // Method to handle Bigger Plate button click
+    @FXML
+    public void selectBiggerPlate() {
+        selectPlate("Bigger Plate");
+    }
+
+    // Method to handle Appetizer button click
+    @FXML
+    public void selectAppetizer() {
+        resetButtonStyles();
+        appetizerButton.setStyle("-fx-background-color: #ffcccc"); // Change background color
+        selectedPlateType = ""; // Reset plate type
+        loadItems("Appetizer");
+    }
+
+    // Method to handle Drinks button click
+    @FXML
+    public void selectDrinks() {
+        resetButtonStyles();
+        drinksButton.setStyle("-fx-background-color: #ffcccc"); // Change background color
+        selectedPlateType = ""; // Reset plate type
+        loadItems("Drink");
+    }
+
+    // Method to handle Side button click
+    @FXML
+    public void selectSide() {
+        resetButtonStyles();
+        sideButton.setStyle("-fx-background-color: #ffcccc"); // Change background color
+        selectedPlateType = ""; // Reset plate type
+        loadItems("Side");
+    }
+
+    // Method to handle Entree button click
+    @FXML
+    public void selectEntree() {
+        resetButtonStyles();
+        entreeButton.setStyle("-fx-background-color: #ffcccc"); // Change background color
+        selectedPlateType = ""; // Reset plate type
+        loadItems("Entree");
+    }
+
+    private void selectPlate(String plateType) {
+        // Reset button styles
+        resetButtonStyles();
+
+        // Set the selected plate type
+        selectedPlateType = plateType;
+
+        // Change the background color of the selected button
+        switch (plateType) {
+            case "Bowl":
+                bowlButton.setStyle("-fx-background-color: #ffcccc");
+                break;
+            case "Plate":
+                plateButton.setStyle("-fx-background-color: #ffcccc");
+                break;
+            case "Bigger Plate":
+                biggerPlateButton.setStyle("-fx-background-color: #ffcccc");
+                break;
         }
 
+        // Show side buttons
+        showSideButtons();
     }
 
-    @FXML
-    private void confirm(ActionEvent event) { // checks if order is valid and add it to the grand list of things i will
-                                              // be sending over to the checkout screen, if it is not valid, show what
-                                              // is missing
-        //System.out.println(appetizers_num);
-        //System.out.println(sides_num);
-        //System.out.println(entrees_num);
-        //System.out.println(drinks_num);
-        //System.out.println(type_of_order);
-        menu_items_display.setItems(null);
-        if (appetizers_num == 0 && sides_num == 0 && entrees_num == 0 && drinks_num == 0 && type_of_order == 1) {
-            //System.out.println(order_names);
+    private void resetButtonStyles() {
+        // Reset all button styles to default
+        bowlButton.setStyle(null);
+        plateButton.setStyle(null);
+        biggerPlateButton.setStyle(null);
+        appetizerButton.setStyle(null);
+        drinksButton.setStyle(null);
+        sideButton.setStyle(null); // Reset side button style
+        entreeButton.setStyle(null); // Reset entree button style
+        
+        // Reset all entree button styles to default
+        for (Button entreeButton : entreeButtons) {
+            entreeButton.setStyle(null);
+        }
+    }
+    
+    // Load side buttons from the database
+    private void showSideButtons() {
+        dynamicButtons.getChildren().clear(); // Clear previous buttons
+        
+        // Add a label for picking a side
+        Label pickSideLabel = new Label("Please Pick a Side:");
+        dynamicButtons.getChildren().add(pickSideLabel);
 
-            //System.out.println("confirm button clicked1");
-            orders.add(new ArrayList<>(order)); // list are mutable so add a copy
-            orders_names.add(new ArrayList<>(order_names));
-            for (List<Integer> order : orders) {
-                //System.out.println(order);
+        String query = "SELECT item_name FROM menu_item WHERE item_category = 'Side'";
+
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String sideName = rs.getString("item_name");
+                Button sideButton = new Button(sideName);
+                sideButton.setOnAction(event -> loadEntreeButtons(sideName)); // Load entrees for the selected side
+                dynamicButtons.getChildren().add(sideButton);
             }
-            //System.out.println(orders);
-            //System.out.println(orders_names);
-            order.clear();
-            order_names.clear();
-            cancel();
-        } else if (appetizers_num > 0 || sides_num > 0 || entrees_num > 0 || drinks_num > 0) {
-            showPopupMessage("Please select the correct amount of items: \n" + appetizers_num + " appetizers,\n"
-                    + sides_num + " sides,\n" + entrees_num + " entrees, \n" + drinks_num + " drinks");
-           // System.out.println("Please select the correct amount of items: " + appetizers_num + " appetizers, "
-            //        + sides_num + " sides, " + entrees_num + " entrees, " + drinks_num + " drinks");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Load all entree buttons based on the selected side
+    private void loadEntreeButtons(String selectedSide) {
+        dynamicButtons.getChildren().clear(); // Clear previous buttons
+        selectedEntrees.clear(); // Clear previously selected entrees
+        this.selectedSide = selectedSide; // Set the selected side
+        entreeButtons.clear(); // Clear the list of entree buttons
+
+        // Add a label for picking an entree
+        Label pickEntreeLabel = new Label("Please Pick an Entree:");
+        dynamicButtons.getChildren().add(pickEntreeLabel);
+
+        String query = "SELECT item_name FROM menu_item WHERE item_category = 'Entree'";
+
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String entreeName = rs.getString("item_name");
+                Button entreeButton = new Button(entreeName);
+                entreeButton.setOnAction(event -> handleEntreeSelection(entreeButton, entreeName)); // Handle entree selection
+                dynamicButtons.getChildren().add(entreeButton);
+                entreeButtons.add(entreeButton); // Track this button
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    private void handleEntreeSelection(Button entreeButton, String entreeName) {
+        int maxEntrees = 0;
+
+        // Determine the maximum number of entrees based on the plate type
+        switch (selectedPlateType) {
+            case "Bowl":
+                maxEntrees = 1;
+                break;
+            case "Plate":
+                maxEntrees = 2;
+                break;
+            case "Bigger Plate":
+                maxEntrees = 3;
+                break;
+        }
+
+        // Check if entree has already been selected and increase its count
+        int currentCount = selectedEntrees.getOrDefault(entreeName, 0);
+
+        if (currentCount > 0) {
+            if (currentCount < 3) { // If already selected and less than 3 times, increase count
+                selectedEntrees.put(entreeName, currentCount + 1);
+                changeButtonColor(entreeButton, currentCount + 1); // Darker color for multiple selections
+            } else {
+                System.out.println("Maximum times this entree can be selected reached.");
+            }
         } else {
-            //System.out.println("confirm button clicked");
+            // If it's the first time selecting the entree, add it
+            if (selectedEntrees.size() < maxEntrees) {
+                selectedEntrees.put(entreeName, 1);
+                changeButtonColor(entreeButton, 1); // Lightest color for first selection
+            } else {
+                System.out.println("Maximum number of entrees reached.");
+            }
         }
 
+        // Automatically add to order when max entrees are reached
+        int totalSelected = selectedEntrees.values().stream().mapToInt(Integer::intValue).sum();
+        if (totalSelected == maxEntrees) {
+            addToOrder(selectedSide);
+        }
     }
 
+    // Method to change button color based on selection count
+    private void changeButtonColor(Button entreeButton, int count) {
+        String color;
+        switch (count) {
+            case 1:
+                color = "#ff9999"; // Light color for first selection
+                break;
+            case 2:
+                color = "#ff6666"; // Darker color for second selection
+                break;
+            case 3:
+                color = "#ff3333"; // Darkest color for third selection
+                break;
+            default:
+                color = "#ffcccc"; // Default color if something goes wrong
+                break;
+        }
+        entreeButton.setStyle("-fx-background-color: " + color);
+    }
+
+    // Adjusted addToOrder to handle multiple counts for entrees
+    private void addToOrder(String side) {
+        double platePrice = fetchPriceFromDatabase(selectedPlateType); // Fetch price for the plate type
+        double sidePrice = fetchPriceFromDatabase(side); // Fetch price for the side
+        
+        StringBuilder orderItem = new StringBuilder(selectedPlateType + " (" + side);
+        orderTotal += platePrice; // Add the plate price to the total
+        orderTotal += sidePrice;  // Add the side price to the total
+        
+        // Add each entree with its count and update the total price
+        for (Map.Entry<String, Integer> entry : selectedEntrees.entrySet()) {
+            for (int i = 0; i < entry.getValue(); i++) {
+                double entreePrice = fetchPriceFromDatabase(entry.getKey()); // Fetch price for the entree
+                orderItem.append(", ").append(entry.getKey()).append(" ($").append(String.format("%.2f", entreePrice)).append(")"); // Include price with entree
+                orderTotal += entreePrice; // Add entree price to the total
+            }
+        }
+        orderItem.append(")\n$").append(String.format("%.2f", platePrice + sidePrice)); // Display total price for plate and side
+        
+        currentOrder.add(orderItem.toString());
+        currentOrderList.getItems().add(orderItem.toString()); // Add item with price
+        
+        updateOrderTotal(); // Update the total displayed in the UI
+        
+        // Reset selections
+        resetSelections();
+    }
+    
+
+    private void addToOrderAppetizer(String item) {
+        double appetizerPrice = fetchPriceFromDatabase("Appetizer"); // Fetch price for the appetizer
+        String orderItem = "Appetizer (" + item + ")\n$" + String.format("%.2f", appetizerPrice);
+        
+        orderTotal += appetizerPrice; // Update the total
+        
+        currentOrder.add(orderItem);
+        currentOrderList.getItems().add(orderItem); // Add item with price
+        
+        updateOrderTotal(); // Update the total displayed in the UI
+        
+        resetSelections();
+    }
+    
+    
+    private void addToOrderDrink(String item) {
+        double drinkPrice = fetchPriceFromDatabase(item); // Fetch price for the drink
+        String orderItem = "Drink (" + item + ")\n$" + String.format("%.2f", drinkPrice);
+        
+        orderTotal += drinkPrice; // Update the total
+        
+        currentOrder.add(orderItem);
+        currentOrderList.getItems().add(orderItem); // Add item with price
+        
+        updateOrderTotal(); // Update the total displayed in the UI
+        
+        resetSelections();
+    }
+    
+
+    private void addToOrderSide(String side) {
+        double sidePrice = fetchPriceFromDatabase(side); // Fetch price for the side
+        double aLaCarteSidePrice = fetchPriceFromDatabase("A La Carte Side"); // Fetch a la carte side price
+        
+        String orderItem = "Side (" + side + ")\n$" + String.format("%.2f", sidePrice + aLaCarteSidePrice);
+        
+        orderTotal += sidePrice + aLaCarteSidePrice; // Add to total
+        
+        currentOrder.add(orderItem);
+        currentOrderList.getItems().add(orderItem); // Add item with price
+        
+        updateOrderTotal(); // Update total
+        
+        resetSelections();
+    }
+    
+
+    private void addToOrderEntree(String entree) {
+        double entreePrice = fetchPriceFromDatabase(entree); // Fetch price for the entree
+        double aLaCarteEntreePrice = fetchPriceFromDatabase("A La Carte Entree"); // Fetch a la carte entree price
+        
+        String orderItem = "Entree (" + entree + ")\n$" + String.format("%.2f", entreePrice + aLaCarteEntreePrice);
+        
+        orderTotal += entreePrice + aLaCarteEntreePrice; // Add to total
+        
+        currentOrder.add(orderItem);
+        currentOrderList.getItems().add(orderItem); // Add item with price
+        
+        updateOrderTotal(); // Update total
+        
+        resetSelections();
+    }
+    
+    
+    
+    // Fetch the price of an item from the database
+    private double fetchPriceFromDatabase(String itemName) {
+        String query = "SELECT item_price FROM menu_item WHERE item_name = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, itemName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                double price = rs.getDouble("item_price");
+                System.out.println("Price for " + itemName + ": " + price);  // Debugging price retrieval
+                return price; // Return the price of the item
+            } else {
+                System.out.println("Item not found in database: " + itemName); // Debugging if item is missing
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0; // Return 0 if the item is not found
+    }
+    
+    
+
+    private void updateOrderTotal() {
+        orderTotalLabel.setText(String.format("Total: $%.2f", orderTotal));
+    }
+    
+    
+    
+    
+
+    // Reset selections for all items
+    private void resetSelections() {
+        selectedEntrees.clear();
+        selectedSide = "";
+        dynamicButtons.getChildren().clear();
+        resetButtonStyles();
+    }
+    
+    // Load items (sides or entrees) based on category
+    private void loadItems(String category) {
+        dynamicButtons.getChildren().clear(); // Clear previous buttons
+    
+        String query = "SELECT item_name, item_price FROM menu_item WHERE item_category = ?";
+    
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, category); // Set the category (Appetizer, Drink, Side, or Entree)
+            ResultSet rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                String itemName = rs.getString("item_name");
+                Button itemButton;
+    
+                if (category.equals("Drink")) {
+                    double itemPrice = rs.getDouble("item_price"); // Fetch price for drinks
+                    // Set the button text to include both the name and price for drinks
+                    itemButton = new Button(itemName + " ($" + String.format("%.2f", itemPrice) + ")");
+                    itemButton.setOnAction(event -> addToOrderDrink(itemName)); // Add drink to order
+                } else {
+                    // For other categories, just show the item name
+                    itemButton = new Button(itemName);
+    
+                    if (category.equals("Appetizer")) {
+                        itemButton.setOnAction(event -> addToOrderAppetizer(itemName)); // Add appetizer to order
+                    } else if (category.equals("Side")) {
+                        itemButton.setOnAction(event -> addToOrderSide(itemName)); // Add side to order
+                    } else if (category.equals("Entree")) {
+                        itemButton.setOnAction(event -> addToOrderEntree(itemName)); // Add entree to order
+                    }
+                }
+    
+                dynamicButtons.getChildren().add(itemButton); // Add button to the dynamic button panel
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+
+    // Confirm order
     @FXML
-    private void previous_screen(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Menu.fxml"));
-            Parent root = loader.load();
+    public void confirmOrder() {
+        StringBuilder orderDetails = new StringBuilder("Order confirmed: ");
+        for (String item : currentOrder) {
+            orderDetails.append(item).append(", ");
+        }
+        // Remove trailing comma and space
+        if (orderDetails.length() > 2) {
+            orderDetails.setLength(orderDetails.length() - 2);
+        }
+        System.out.println(orderDetails);
+    }
 
-            // Get the controller and cast to the correct type
-            MenuController menuController = loader.getController();
+    // Delete selected item from the order
+    @FXML
+    private void deleteSelectedItem() {
+        String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            // Calculate the price of the item being deleted
+            double itemPrice = calculateOrderItemPrice(selectedItem);
+            // Subtract the price of the deleted item from the total
+            orderTotal -= itemPrice;
+            
+            // Remove the item from the current order
+            currentOrder.remove(selectedItem);
+            currentOrderList.getItems().remove(selectedItem);
+            
+            // Update the total label
+            updateOrderTotal();
+        }
+    }
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
+
+    private double calculateOrderItemPrice(String orderItem) {
+        double totalPrice = 0.0;
+    
+        if (orderItem.startsWith("Appetizer")) {
+            totalPrice = fetchPriceFromDatabase("Appetizer"); // Always use generic "Appetizer" item
+        } else if (orderItem.startsWith("Drink")) {
+            String drinkName = orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")"));
+            totalPrice = fetchPriceFromDatabase(drinkName);
+        } else if (orderItem.startsWith("Side")) {
+            String sideName = orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")"));
+            totalPrice = fetchPriceFromDatabase("A La Carte Side");
+            totalPrice+= fetchPriceFromDatabase(sideName);
+        } else if (orderItem.startsWith("Entree")) {
+            String entreeName = orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")"));
+            totalPrice = fetchPriceFromDatabase(entreeName);
+            totalPrice += fetchPriceFromDatabase("A La Carte Entree");
+        } else {
+            // Handle bowls, plates, and bigger plates
+            String[] parts = orderItem.split(" \\+ ");
+            for (String part : parts) {
+                totalPrice += fetchPriceFromDatabase(part.trim());
+            }
+        }
+    
+        return totalPrice;
+    }
+
+
+    // Edit selected item from the order
+    @FXML
+    public void editSelectedItem() {
+        String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) {
+            showAlert("No Item Selected", "Please select an item from the order list to edit.");
+            return;
+        }
+
+        if (selectedItem.startsWith("Appetizer")) {
+            String appetizerName = selectedItem.substring(selectedItem.indexOf("(") + 1, selectedItem.indexOf(")"));
+            editingIndex = currentOrder.indexOf(selectedItem); // Store the index of the item being edited
+            showSelectionDialog("Appetizer", "Appetizer", appetizerName);
+        } else if (selectedItem.startsWith("Drink")) {
+            String drinkName = selectedItem.substring(selectedItem.indexOf("(") + 1, selectedItem.indexOf(")"));
+            editingIndex = currentOrder.indexOf(selectedItem); // Store the index of the item being edited
+            showSelectionDialog("Drink", "Drink", drinkName);
+        } else if (selectedItem.startsWith("Side")) {
+            String sideName = selectedItem.substring(selectedItem.indexOf("(") + 1, selectedItem.indexOf(")"));
+            editingIndex = currentOrder.indexOf(selectedItem); // Store the index of the item being edited
+            showSelectionDialog("Side", "Side", sideName);
+        } else if (selectedItem.startsWith("Entree")) {
+            String entreeName = selectedItem.substring(selectedItem.indexOf("(") + 1, selectedItem.indexOf(")"));
+            editingIndex = currentOrder.indexOf(selectedItem); // Store the index of the item being edited
+            showSelectionDialog("Entree", "Entree", entreeName);
+        } else {
+            String[] parts = selectedItem.split(" \\+ ");
+            String plateType = parts[0];
+            selectedSide = parts[1];
+            List<String> selectedEntrees = new ArrayList<>();
+
+            for (int i = 2; i < parts.length; i++) {
+                selectedEntrees.add(parts[i].trim());
+            }
+
+            editingIndex = currentOrder.indexOf(selectedItem); // Store the index of the item being edited
+
+            if (plateType.equals("Bowl")) {
+                selectedPlateType = "Bowl";
+                showSelectionDialog(plateType, "Side", 1, selectedSide, selectedEntrees);
+            } else if (plateType.equals("Plate")) {
+                selectedPlateType = "Plate";
+                showSelectionDialog(plateType, "Side", 2, selectedSide, selectedEntrees);
+            } else if (plateType.equals("Bigger Plate")) {
+                selectedPlateType = "Bigger Plate";
+                showSelectionDialog(plateType, "Side", 3, selectedSide, selectedEntrees);
+            }
+        }
+    }
+
+    // Show a selection dialog based on item type
+    private void showSelectionDialog(String type, String itemType, String preFillItem) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Edit " + itemType);
+        dialog.setHeaderText("Edit your " + itemType);
+
+        VBox dialogPane = new VBox();
+        Label itemLabel = new Label(itemType + ":");
+        ComboBox<String> comboBox = new ComboBox<>();
+
+        // Load items into the dropdown
+        loadComboBoxItems(itemType, comboBox);
+        comboBox.getSelectionModel().select(preFillItem);
+
+        dialogPane.getChildren().addAll(itemLabel, comboBox);
+
+        dialog.getDialogPane().setContent(dialogPane);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String selectedItem = comboBox.getSelectionModel().getSelectedItem();
+                // Update the order for Appetizer or Drink
+                if (type.equals("Appetizer")) {
+                    updateAppetizerOrder(selectedItem);
+                } else if (type.equals("Drink")) {
+                    updateDrinkOrder(selectedItem);
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    // Update method for appetizers
+    private void updateAppetizerOrder(String appetizer) {
+        // Subtract the price of the old item (generic Appetizer price) from the total
+        double oldPrice = fetchPriceFromDatabase("Appetizer"); // Always use "Appetizer" price
+        orderTotal -= oldPrice;
+        
+        // Add the price of the new item (still the generic Appetizer price)
+        double newPrice = fetchPriceFromDatabase("Appetizer"); // Always use "Appetizer" price
+        orderTotal += newPrice;
+
+        // Update the order item with the new appetizer name
+        String orderItem = "Appetizer (" + appetizer + ")";
+        currentOrder.set(editingIndex, orderItem);
+        currentOrderList.getItems().set(editingIndex, orderItem);
+
+        // Update the total label
+        updateOrderTotal();
+
+        resetSelections();
+    }
+
+
+    // Update method for drinks
+    private void updateDrinkOrder(String drink) {
+        // Subtract the price of the old item from the total
+        double oldPrice = calculateOrderItemPrice(currentOrder.get(editingIndex));
+        orderTotal -= oldPrice;
+        
+        // Add the price of the new item
+        double newPrice = fetchPriceFromDatabase(drink);
+        orderTotal += newPrice;
+
+        String orderItem = "Drink (" + drink + ")";
+        currentOrder.set(editingIndex, orderItem);
+        currentOrderList.getItems().set(editingIndex, orderItem);
+
+        // Update the total label
+        updateOrderTotal();
+
+        resetSelections();
+    }
+
+
+
+
+    // Show a pop-up alert dialog
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // Show a selection dialog based on item type
+    private void showSelectionDialog(String type, String itemType, int maxEntrees, String preFillSide, List<String> preFillEntrees) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Edit " + selectedPlateType);  // Use selectedPlateType here
+        dialog.setHeaderText("Edit your " + selectedPlateType + " order");
+
+        VBox dialogPane = new VBox();
+
+        // Add a label and ComboBox for the side
+        Label sideLabel = new Label("Side:");
+        ComboBox<String> sideComboBox = new ComboBox<>();
+        loadComboBoxItems("Side", sideComboBox);
+        sideComboBox.getSelectionModel().select(preFillSide);
+
+        dialogPane.getChildren().addAll(sideLabel, sideComboBox);
+
+        // Add labels and ComboBoxes for entrees
+        List<ComboBox<String>> entreeComboBoxes = new ArrayList<>();
+        for (int i = 0; i < maxEntrees; i++) {
+            Label entreeLabel = new Label("Entree " + (i + 1) + ":");
+            ComboBox<String> entreeComboBox = new ComboBox<>();
+            loadComboBoxItems("Entree", entreeComboBox);
+            if (i < preFillEntrees.size()) {
+                entreeComboBox.getSelectionModel().select(preFillEntrees.get(i));
+            }
+            entreeComboBoxes.add(entreeComboBox);
+            dialogPane.getChildren().addAll(entreeLabel, entreeComboBox);
+        }
+
+        dialog.getDialogPane().setContent(dialogPane);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String selectedSide = sideComboBox.getSelectionModel().getSelectedItem();
+                List<String> selectedEntrees = new ArrayList<>();
+                for (ComboBox<String> entreeComboBox : entreeComboBoxes) {
+                    selectedEntrees.add(entreeComboBox.getSelectionModel().getSelectedItem());
+                }
+                // Call updateOrder instead of addToOrder
+                updateOrder(selectedSide, selectedEntrees);
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    // Update the current order at the selected index instead of adding a new one
+    private void updateOrder(String side, List<String> entrees) {
+        StringBuilder orderItem = new StringBuilder(selectedPlateType + " + " + side); 
+        for (String entree : entrees) {
+            if (entree != null) {
+                orderItem.append(" + ").append(entree);
+            }
+        }
+
+        // Replace the existing item in the order list
+        currentOrder.set(editingIndex, orderItem.toString());
+        currentOrderList.getItems().set(editingIndex, orderItem.toString());
+
+        resetSelections();
+    }
+
+    // Method to load items into ComboBox
+    private void loadComboBoxItems(String category, ComboBox<String> comboBox) {
+        String query = "SELECT item_name FROM menu_item WHERE item_category = ?";
+        try (Connection conn = Database.connect(); 
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, category);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                comboBox.getItems().add(rs.getString("item_name"));
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void showPopupMessage(String message) { // popup message for bad orders
-        // Create a new Stage (window)
-        Stage popupStage = new Stage();
-        popupStage.setAlwaysOnTop(true);
 
-        // Create a Label to display the message
-        Label messageLabel = new Label(message);
-
-        // Create a layout and add the Label to it
-        StackPane layout = new StackPane(messageLabel);
-        Scene scene = new Scene(layout, 300, 100);
-
-        // Set the scene to the Stage
-        popupStage.setScene(scene);
-
-        // Show the Stage
-        popupStage.show();
-
-        // Create a Timeline to hide the Stage after 1 second
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(2.5), e -> popupStage.hide()));
-        timeline.play();
+    @FXML
+    public void cancelOrder() {
+        // Clear the order list and reset the total
+        currentOrderList.getItems().clear();
+        currentOrder.clear();
+        dynamicButtons.getChildren().clear(); // Clear any dynamic buttons
+        resetButtonStyles(); // Reset button styles
+        selectedEntrees.clear(); // Clear selected entrees
+        selectedSide = ""; // Clear selected side
+        
+        // Reset the total to 0
+        orderTotal = 0.0;
+        updateOrderTotal();
     }
 
-    public List<List<String>> getOrderNames() {
-        return orders_names;
+    @FXML
+    private void increaseItemQuantity() {
+        String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            final int[] currentQuantity = {1}; // Use an array to store currentQuantity
+            String itemName;
+            final double[] itemPrice = {0.0}; // Use an array to store itemPrice
+
+            // Check if the selected item contains a quantity indicator (e.g., " x2")
+            if (selectedItem.contains("x")) {
+                try {
+                    int quantityIndex = selectedItem.lastIndexOf("x");
+                    itemName = selectedItem.substring(0, quantityIndex).trim(); // Get the item name
+                    currentQuantity[0] = Integer.parseInt(selectedItem.substring(quantityIndex + 1).trim()); // Extract quantity
+                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                    showAlert("Error", "Failed to parse item quantity. Please check the item format.");
+                    return;
+                }
+            } else {
+                // No quantity indicator, so assume it's a single item
+                itemName = selectedItem.trim();
+            }
+
+            // Create a TextInputDialog for the user to input the new quantity
+            TextInputDialog quantityDialog = new TextInputDialog(String.valueOf(currentQuantity[0])); // Pre-fill with current quantity
+            quantityDialog.setTitle("Select Quantity");
+            quantityDialog.setHeaderText("Change the quantity for: " + itemName);
+            quantityDialog.setContentText("Please enter the desired quantity:");
+
+            // Show the dialog and wait for user input
+            quantityDialog.showAndWait().ifPresent(input -> {
+                try {
+                    int newQuantity = Integer.parseInt(input);
+
+                    // Ensure the quantity is positive
+                    if (newQuantity <= 0) {
+                        showAlert("Invalid Quantity", "Please enter a positive number for the quantity.");
+                        return;
+                    }
+
+                    // Calculate the price for the item
+                    itemPrice[0] = calculateOrderItemPrice(itemName); // Assume the price calculation logic exists
+                    double updatedTotalPrice = itemPrice[0] * newQuantity;
+
+                    // Update the order item string to show the new quantity and updated price
+                    String updatedItem = itemName + " x" + newQuantity + "\n$" + String.format("%.2f", updatedTotalPrice);
+
+                    // Replace the selected item with the updated item in the order
+                    int selectedIndex = currentOrderList.getSelectionModel().getSelectedIndex();
+                    currentOrder.set(selectedIndex, updatedItem); // Update in the order list
+                    currentOrderList.getItems().set(selectedIndex, updatedItem); // Update in the ListView
+
+                    // Update the total order amount by adjusting the difference in quantity
+                    double oldTotalPrice = itemPrice[0] * currentQuantity[0]; // Previous total for the item
+                    orderTotal += (updatedTotalPrice - oldTotalPrice); // Update total with new quantity
+                    updateOrderTotal(); // Update the total displayed in the UI
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid Input", "Please enter a valid number.");
+                }
+            });
+
+        } else {
+            showAlert("No Item Selected", "Please select an item from the order list to change its quantity.");
+        }
     }
 
-    public void checkout(ActionEvent event) { // switches scene to checkout
-        cancel();
+    @FXML
+    public void handleConfirmButton() {
+        // Check if both an employee and a customer have been selected
+        if (selectedEmployeeId == 0 || selectedCustomerId == 0) {
+            // Show an alert if either is missing
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Missing Information");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select both an employee and a customer before confirming the order.");
+            alert.showAndWait();
+            return; // Exit the method if validation fails
+        }
+
+        // Create a custom dialog for order confirmation
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Confirm Order");
+        dialog.setHeaderText("Please review your order and select a payment type.");
+
+        // Create a VBox to hold the current order details, total, tax, and payment type
+        VBox dialogPaneContent = new VBox();
+        dialogPaneContent.setSpacing(10); // Add some spacing between elements
+
+        // Display the current order
+        Label orderLabel = new Label("Current Order: (" + customerFullName + ")");
+        ListView<String> orderListView = new ListView<>();
+        orderListView.getItems().addAll(currentOrder); // Add current orders to the ListView
+        orderListView.setPrefHeight(200); // Adjust height to fit the orders
+
+        // Calculate tax and total
+        double tax = orderTotal * 0.0825; // Assume 8.25% sales tax
+        double totalWithTax = orderTotal + tax;
+
+        Label totalLabel = new Label(String.format("Total: $%.2f", orderTotal));
+        Label taxLabel = new Label(String.format("Tax (8.25%%): $%.2f", tax));
+        Label totalWithTaxLabel = new Label(String.format("Total with Tax: $%.2f", totalWithTax));
+
+        // Add a ComboBox for payment type selection
+        Label paymentTypeLabel = new Label("Payment Type:");
+        ComboBox<String> paymentTypeComboBox = new ComboBox<>();
+        paymentTypeComboBox.getItems().addAll("Credit/Debit", "Dining Dollars", "Gift Card");
+        paymentTypeComboBox.setValue("Credit/Debit"); // Set default payment type
+
+        // Add all elements to the VBox
+        dialogPaneContent.getChildren().addAll(orderLabel, orderListView, totalLabel, taxLabel, totalWithTaxLabel, paymentTypeLabel, paymentTypeComboBox);
+
+        // Set the dialog content
+        dialog.getDialogPane().setContent(dialogPaneContent);
+
+        // Add "Go Back" and "Confirm Order" buttons
+        ButtonType goBackButton = new ButtonType("Go Back", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType confirmOrderButton = new ButtonType("Confirm Order", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(goBackButton, confirmOrderButton);
+
+        // Handle the result of the dialog
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == confirmOrderButton) {
+                // Confirm the order and insert into the database with the selected payment type
+                String selectedPaymentType = paymentTypeComboBox.getValue();
+                placeOrderInDatabase(totalWithTax, selectedPaymentType);
+            } else {
+                // User clicked "Go Back"
+                System.out.println("Order not confirmed.");
+            }
+            return null;
+        });
+
+        // Show the dialog and wait for user response
+        dialog.showAndWait();
+        customerFullName = ""; // Reset customer name after order is confirmed
+    }
+
+    // Extract the item quantity from the order string (e.g., "Entree (Chicken) x2")
+    private int extractItemQuantity(String orderItem) {
+        if (orderItem.contains("x")) {
+            try {
+                // Find the index of "x" and extract only the number after "x"
+                int quantityIndex = orderItem.lastIndexOf("x");
+                String quantityString = orderItem.substring(quantityIndex + 1).trim();
+                // Ensure the string doesn't contain any price or extra characters
+                quantityString = quantityString.split("\\s")[0]; // Split by space and take the first part (the number)
+                return Integer.parseInt(quantityString);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                // Default to 1 if the quantity is not properly parsed
+                return 1;
+            }
+        }
+        // Default to 1 if no "x" is found in the string (no quantity specified)
+        return 1;
+    }
+
+
+    // Method to place the order in the database
+    private void placeOrderInDatabase(double totalWithTax, String paymentType) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet generatedKeys = null;
+        int transactionId = -1;
+    
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Checkout.fxml"));
-            Parent root = loader.load();
+            conn = Database.connect(); // Open a connection to the database
+            conn.setAutoCommit(false);  // Turn off auto-commit for transaction handling
+    
+            // Step 1: Insert the transaction into the "transaction" table with the selected payment type
+            String transactionQuery = "INSERT INTO transaction (total_cost, transaction_time, transaction_date, transaction_type, customer_id, employee_id, week_number) VALUES (?, CURRENT_TIME, CURRENT_DATE, ?, ?, ?, 40)";
+            stmt = conn.prepareStatement(transactionQuery, PreparedStatement.RETURN_GENERATED_KEYS);
+            stmt.setDouble(1, totalWithTax);  // Set total cost with tax
+            stmt.setString(2, paymentType);  // Set the selected payment type
+            stmt.setInt(3, selectedCustomerId);  // Set the customer ID
+            stmt.setInt(4, selectedEmployeeId);  // Set the employee ID
+            stmt.executeUpdate();
+    
+            // Get the generated transaction ID
+            generatedKeys = stmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                transactionId = generatedKeys.getInt(1);  // Store the transaction ID
+            }
+    
+            // Step 2: Insert each item from the current order into the "menu_item_transaction" table
+            if (transactionId != -1) {
+                String itemQuery = "INSERT INTO menu_item_transaction (menu_item_id, transaction_id, item_quantity) VALUES (?, ?, ?)";
+                stmt = conn.prepareStatement(itemQuery);
+    
+                for (String orderItem : currentOrder) {
+                    String itemName = extractItemName(orderItem);  // Extract the item name from the order
+                    int menuItemId = fetchMenuItemId(itemName);  // Get the menu item ID from the database
+                    int quantity = extractItemQuantity(orderItem);  // Get the item quantity (from the updated method)
+    
+                    stmt.setInt(1, menuItemId);  // Set menu item ID
+                    stmt.setInt(2, transactionId);  // Set transaction ID
+                    stmt.setInt(3, quantity);  // Set item quantity
+                    stmt.addBatch();  // Add this item to the batch
+                }
+                stmt.executeBatch();  // Execute all the items in the batch
+            }
+    
+            conn.commit();  // Commit the transaction if everything is successful
+    
+            // Reset the order after successful insertion
+            currentOrder.clear();
+            currentOrderList.getItems().clear();
+            orderTotal = 0.0;
+            updateOrderTotal();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();  // Rollback transaction on error
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            // Close resources
+            if (generatedKeys != null) try { generatedKeys.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (stmt != null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+    
+    
+    // Extract the item name from the order string
+    private String extractItemName(String orderItem) {
+        return orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")"));  // Adjust parsing logic based on your format
+    }
 
-            // Get the controller and set the variable
-            CheckoutController checkoutController = loader.getController();
-            checkoutController.setOrderNames(orders_names);
-            checkoutController.setOrder(orders);
+    // Fetch menu item ID from the menu_item table
+    private int fetchMenuItemId(String itemName) {
+        String query = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, itemName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("menu_item_id");  // Return the ID of the menu item
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;  // Return -1 if item is not found
+    }
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
+    public void showCustomerDialog() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Add Customer");
+        dialog.setHeaderText("Select or Add a Customer");
+    
+        // Create a VBox for the layout
+        VBox dialogPaneContent = new VBox();
+    
+        // Create the dropdown (ComboBox) for existing customers
+        Label existingCustomerLabel = new Label("Existing Customer:");
+        ComboBox<String> customerComboBox = new ComboBox<>();
+    
+        // Load customers from the database into the ComboBox
+        Map<String, Integer> customerMap = loadCustomersFromDatabase();
+        customerComboBox.getItems().addAll(customerMap.keySet());
+    
+        // Create fields for customer details
+        Label firstNameLabel = new Label("First Name:");
+        TextField firstNameField = new TextField();
+    
+        Label lastNameLabel = new Label("Last Name:");
+        TextField lastNameField = new TextField();
+    
+        Label emailLabel = new Label("Email:");
+        TextField emailField = new TextField();
+    
+        Label phoneLabel = new Label("Phone:");
+        TextField phoneField = new TextField();
+    
+        // Auto-fill fields when an existing customer is selected
+        customerComboBox.setOnAction(event -> {
+            String selectedCustomerName = customerComboBox.getSelectionModel().getSelectedItem();
+            if (selectedCustomerName != null) {
+                selectedCustomerId = customerMap.get(selectedCustomerName); // Store the customer ID
+                // Fetch customer details and auto-fill the fields
+                loadCustomerDetails(selectedCustomerId, firstNameField, lastNameField, emailField, phoneField);
+            }
+        });
+    
+        // Create a clear button to reset all fields
+        Button clearButton = new Button("Clear");
+        clearButton.setOnAction(event -> {
+            firstNameField.clear();
+            lastNameField.clear();
+            emailField.clear();
+            phoneField.clear();
+            customerComboBox.getSelectionModel().clearSelection();
+        });
+    
+        dialogPaneContent.getChildren().addAll(existingCustomerLabel, customerComboBox, firstNameLabel, firstNameField, lastNameLabel, lastNameField, emailLabel, emailField, phoneLabel, phoneField, clearButton);
+    
+        dialog.getDialogPane().setContent(dialogPaneContent);
+    
+        // Add Save and Cancel buttons
+        ButtonType saveButton = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = ButtonType.CANCEL;
+        dialog.getDialogPane().getButtonTypes().addAll(saveButton, cancelButton);
+    
+        // Handle button clicks
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButton) {
+                if (selectedCustomerId == -1) {
+                    // If no existing customer is selected, add a new customer
+                    customerFullName = firstNameField.getText() + " " + lastNameField.getText();
+                    saveNewCustomer(firstNameField.getText(), lastNameField.getText(), emailField.getText(), phoneField.getText());
+                    customerLabel.setText(String.format("Selected Customer: " +  customerFullName));
+                } else {
+                    // Existing customer selected; update the label in the main dialog
+                    customerFullName = firstNameField.getText() + " " + lastNameField.getText();
+                    customerLabel.setText(String.format("Selected Customer: " +  customerFullName));
+                }
+            }
+            return null; // Close only the customer dialog
+        });
+    
+        dialog.showAndWait(); // Only closes the Add Customer dialog when done
+
+    }
+    
+    // Method to load customers from the database into the ComboBox
+    private Map<String, Integer> loadCustomersFromDatabase() {
+        Map<String, Integer> customerMap = new HashMap<>();
+    
+        String query = "SELECT customer_id, first_name FROM customer"; // Adjust table and column names
+    
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
+    
+            while (rs.next()) {
+                int customerId = rs.getInt("customer_id");
+                String customerName = rs.getString("first_name");
+                customerMap.put(customerName, customerId); // Map customer name to ID
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return customerMap;
+    }
+    
+    // Method to load selected customer details into the fields
+    private void loadCustomerDetails(int customerId, TextField firstNameField, TextField lastNameField, TextField emailField, TextField phoneField) {
+        String query = "SELECT first_name, last_name, email, phone FROM customer WHERE customer_id = ?";
+    
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, customerId); // Set the customer ID
+            ResultSet rs = stmt.executeQuery();
+    
+            if (rs.next()) {
+                firstNameField.setText(rs.getString("first_name"));
+                lastNameField.setText(rs.getString("last_name"));
+                emailField.setText(rs.getString("email"));
+                phoneField.setText(rs.getString("phone"));
+            }
+    
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
-    public void initialize() {
-        // Your logic for initializing the controller
-        drinks.setDisable(true);
-        sides.setDisable(true);
-        entrees.setDisable(true);
-        appetizers.setDisable(true);
-        current_order.setText("Current Order: ");
-    }
-
-    @FXML
-    private void add_1(ActionEvent event) {
-        //System.out.println("works add 1");
-
-        if (getNums(tagger) > 0) {
-            updateNums(tagger);
-            order_names.add(current_display.get(0));
-            order.add(ids.get(0));
-            //System.out.println(order_names);
-            current_order.setText("Current Order:\n" + order_names);
-            //System.out.println(order);
+    
+    // Method to save a new customer to the database
+    private void saveNewCustomer(String firstName, String lastName, String email, String phone) {
+        String query = "INSERT INTO customer (first_name, last_name, email, phone) VALUES (?, ?, ?, ?)";
+    
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, firstName);
+            stmt.setString(2, lastName);
+            stmt.setString(3, email);
+            stmt.setString(4, phone);
+    
+            stmt.executeUpdate();
+            System.out.println("New customer added: " + firstName + " " + lastName);
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
-
-    @FXML
-    private void add_2(ActionEvent event) {
-        if (getNums(tagger) > 0) {
-            updateNums(tagger);
-            order_names.add(current_display.get(1));
-            order.add(ids.get(1));
-           // System.out.println(order_names);
-            current_order.setText("Current Order:\n" + order_names);
-            //System.out.println(order);
-        }
-    }
-
-    @FXML
-    private void add_3(ActionEvent event) {
-        if (getNums(tagger) > 0) {
-            updateNums(tagger);
-            order_names.add(current_display.get(2));
-            order.add(ids.get(2));
-            //System.out.println(order_names);
-            current_order.setText("Current Order:\n" + order_names);
-            //System.out.println(order);
-        }
-    }
-
-    @FXML
-    private void add_4(ActionEvent event) {
-        if (getNums(tagger) > 0) {
-            updateNums(tagger);
-            order_names.add(current_display.get(3));
-            order.add(ids.get(3));
-            //System.out.println(order_names);
-            current_order.setText("Current Order:\n" + order_names);
-            //System.out.println(order);
-        }
-    }
-
-}
+}    
