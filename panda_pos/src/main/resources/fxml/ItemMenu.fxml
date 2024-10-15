@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+    minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ItemMenuController">
+    <children>
+        <TabPane>
+            <tabs>
+                <Tab text="Menu" closable="false">
+                    <VBox alignment="CENTER" spacing="10">
+                        <padding>
+                            <Insets top="0" bottom="15" left="15" right="15" />
+                        </padding>
+                        <TableView fx:id="menuTable" prefWidth="600" prefHeight="600">
+                            <columns>
+                                <TableColumn fx:id="itemIdColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="menuItemID" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="currentServingsColumn" text="Servings">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="currentServings" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemNameColumn" text="Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="itemName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemPriceColumn" text="Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="itemPrice" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="itemCategoryColumn" text="Category">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="itemCategory" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="ingredientsColumn" text="Ingredients">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredients" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <!-- Button to open the Add Item dialog -->
+                        <VBox alignment="CENTER" spacing="10">
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button text="Add Item" onAction="#showAddItemDialog" />
+                                <Button text="Edit Item" onAction="#showEditItemDialog" />
+                                <Button mnemonicParsing="false" text="Delete Item"
+                                    onAction="#handleDeleteItem" />
+                            </HBox>
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button mnemonicParsing="false" onAction="#switchToManager"
+                                    text="Go Back" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</VBox>

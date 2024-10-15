@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+    minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.InventoryRestockController">
+    <children>
+        <TabPane>
+            <tabs>
+                <Tab text="Inventory" closable="false">
+                    <VBox alignment="CENTER" spacing="10">
+                        <padding>
+                            <Insets top="0" bottom="15" left="15" right="15" />
+                        </padding>
+                        <TableView fx:id="inventoryTable" prefWidth="600" prefHeight="600">
+                            <columns>
+                                <TableColumn fx:id="ingredientIdColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientID" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="ingredientNameColumn" text="Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="currentStockColumn" text="Current Stock">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="currentStock" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="priceColumn" text="Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="price" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="unitColumn" text="Unit">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="unit" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="minStockColumn" text="Min Stock">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="minStock" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <VBox alignment="CENTER" spacing="10">
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button text="Add Item" onAction="#showAddInventoryItemDialog" />
+                                <Button text="Edit Item" onAction="#showEditInventoryItemDialog" />
+                                <Button text="Delete Item" onAction="#showDeleteInventoryItemDialog" />
+                            </HBox>
+
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button mnemonicParsing="false" onAction="#switchToManager"
+                                    text="Go Back" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</VBox>
