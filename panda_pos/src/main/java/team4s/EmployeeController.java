@@ -33,24 +33,26 @@ public class EmployeeController {
     private Scene scene;
     private Parent root;
     private Connection conn;
+
     @FXML
     private TableView<Employee> employeeTable;
-        // Method to initialize only when Manager.fxml is loaded
-        public void initialize() {
-            try {
-                conn = Database.connect();
-                //System.out.println("Database connection opened");
-    
-    
-                // load the employees
-                loadEmployees();
-    
-                conn.close();
-                //System.out.println("Database connection closed");
-            } catch (SQLException e) {
-                System.err.println("Database connection error");
-            }
+
+    // initialize the employee table view
+    public void initialize() {
+        try {
+            conn = Database.connect();
+            // System.out.println("Database connection opened");
+
+            // load the employees
+            loadEmployees();
+
+            conn.close();
+            // System.out.println("Database connection closed");
+        } catch (SQLException e) {
+            System.err.println("Database connection error");
         }
+    }
+
     // load employees into the table view
     private void loadEmployees() {
         ObservableList<Employee> employees = FXCollections.observableArrayList();
@@ -76,6 +78,7 @@ public class EmployeeController {
         // set the employees in the table view
         employeeTable.setItems(employees);
     }
+
     public void showAddEmployeeModal() {
         // create a stage for the modal
         Stage modal = new Stage();
@@ -267,10 +270,13 @@ public class EmployeeController {
             return;
         }
     };
+
     // Switch to manager menu
     public void switchToManager(ActionEvent event) {
         try {
-            root = FXMLLoader.load(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            root = loader.load();
+
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);

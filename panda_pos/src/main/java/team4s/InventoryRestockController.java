@@ -32,6 +32,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 public class InventoryRestockController {
     private Stage stage;
     private Scene scene;
@@ -40,21 +41,21 @@ public class InventoryRestockController {
 
     @FXML
     private TableView<InventoryItem> inventoryTable;
-    // Method to initialize only when Manager.fxml is loaded
+
+    // initialize inventory items in the TableView
     public void initialize() {
         try {
             conn = Database.connect();
-            //System.out.println("Database connection opened");
 
             // Load the menu items into the TableView
             loadInventoryItems();
 
             conn.close();
-            //System.out.println("Database connection closed");
         } catch (SQLException e) {
             System.err.println("Database connection error");
         }
     }
+
     // Load Inventory Items
     private void loadInventoryItems() {
         ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
@@ -143,6 +144,7 @@ public class InventoryRestockController {
             }
         });
     }
+
     // Method to handle the Add Inventory Item button
     public void showAddInventoryItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
@@ -414,10 +416,13 @@ public class InventoryRestockController {
             e.printStackTrace();
         }
     }
+
     // Switch to manager menu
     public void switchToManager(ActionEvent event) {
         try {
-            root = FXMLLoader.load(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            root = loader.load();
+
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);

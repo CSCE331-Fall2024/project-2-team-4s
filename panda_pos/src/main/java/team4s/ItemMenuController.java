@@ -38,23 +38,23 @@ public class ItemMenuController {
     private Parent root;
     private Connection conn;
 
-
     @FXML
     private TableView<MenuItem> menuTable;
+
+    // initialize menu items
     public void initialize() {
         try {
             conn = Database.connect();
-            //System.out.println("Database connection opened");
 
             // Load the menu items into the TableView
             loadMenuItems();
 
             conn.close();
-            //System.out.println("Database connection closed");
         } catch (SQLException e) {
-            //System.err.println("Database connection error");
+            System.err.println("Database connection error");
         }
     }
+
     // load menu items into the TableView
     private void loadMenuItems() {
         ObservableList<MenuItem> menu_items = FXCollections.observableArrayList();
@@ -84,6 +84,7 @@ public class ItemMenuController {
         // Set the items in the TableView
         menuTable.setItems(menu_items);
     }
+
     // Load Ingredients
     private void loadIngredients(ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
@@ -149,6 +150,7 @@ public class ItemMenuController {
             }
         });
     }
+
     // Method to handle the Add Ingredients button
     public void showAddItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
@@ -569,10 +571,13 @@ public class ItemMenuController {
             }
         }
     }
+
     // Switch to manager menu
     public void switchToManager(ActionEvent event) {
         try {
-            root = FXMLLoader.load(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            root = loader.load();
+
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
@@ -582,4 +587,3 @@ public class ItemMenuController {
         }
     }
 }
-

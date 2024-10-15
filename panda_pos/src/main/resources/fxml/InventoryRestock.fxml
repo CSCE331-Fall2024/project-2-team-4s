@@ -11,18 +11,20 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.geometry.Insets?>
 
-<HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-    minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21"
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+    minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21"
     xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.InventoryRestockController">
     <children>
-        <Button mnemonicParsing="false" onAction="#switchToManager" text="Manager" />
-        <!-- tab automatically positioned at the top -->
         <TabPane>
             <tabs>
                 <Tab text="Inventory" closable="false">
                     <VBox alignment="CENTER" spacing="10">
-                        <TableView fx:id="inventoryTable" prefWidth="600" prefHeight="400">
+                        <padding>
+                            <Insets top="0" bottom="15" left="15" right="15" />
+                        </padding>
+                        <TableView fx:id="inventoryTable" prefWidth="600" prefHeight="600">
                             <columns>
                                 <TableColumn fx:id="ingredientIdColumn" text="ID">
                                     <cellValueFactory>
@@ -57,14 +59,21 @@
                             </columns>
                         </TableView>
 
-                        <HBox alignment="CENTER" spacing="10">
-                            <Button text="Add Item" onAction="#showAddInventoryItemDialog" />
-                            <Button text="Edit Item" onAction="#showEditInventoryItemDialog" />
-                            <Button text="Delete Item" onAction="#showDeleteInventoryItemDialog" />
-                        </HBox>
+                        <VBox alignment="CENTER" spacing="10">
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button text="Add Item" onAction="#showAddInventoryItemDialog" />
+                                <Button text="Edit Item" onAction="#showEditInventoryItemDialog" />
+                                <Button text="Delete Item" onAction="#showDeleteInventoryItemDialog" />
+                            </HBox>
+
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button mnemonicParsing="false" onAction="#switchToManager"
+                                    text="Go Back" />
+                            </HBox>
+                        </VBox>
                     </VBox>
                 </Tab>
             </tabs>
         </TabPane>
     </children>
-</HBox>
+</VBox>

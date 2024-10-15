@@ -199,7 +199,9 @@ public class ReportsController {
     // Switch to manager menu
     public void switchToManager(ActionEvent event) {
         try {
-            root = FXMLLoader.load(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
+            root = loader.load();
+
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
@@ -208,5 +210,4 @@ public class ReportsController {
             e.printStackTrace();
         }
     }
-
 }

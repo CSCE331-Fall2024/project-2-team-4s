@@ -18,10 +18,6 @@ public class MenuController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
             root = loader.load();
 
-            // Get the controller for Manager.fxml and initialize the table view
-            // ManagerController controller = loader.getController();
-            // controller.initializeManager(); // Initialize the Manager-specific logic
-
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
@@ -34,7 +30,9 @@ public class MenuController {
     // Switch to cashier GUI (Cashier.fxml)
     public void switchToCashier(ActionEvent event) {
         try {
-            root = FXMLLoader.load(getClass().getResource("/fxml/Cashier.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cashier.fxml"));
+            root = loader.load();
+
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
