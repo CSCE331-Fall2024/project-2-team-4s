@@ -1,29 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-    minWidth="-Infinity"
-    prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21"
-    xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ReportsController">
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ReportsController">
     <children>
-        <TabPane>
+           <TabPane>
             <tabs>
-                <Tab text="Reports" closable="false">
-                    <VBox alignment="CENTER" prefWidth="600" prefHeight="600">
+                <Tab closable="false" text="Reports">
+                    <VBox alignment="CENTER" prefHeight="600" prefWidth="600">
                         <padding>
-                            <Insets top="0" bottom="15" left="15" right="15" />
+                            <Insets bottom="15" left="15" right="15" top="0" />
                         </padding>
                         <!-- area to display the generated chart -->
                         <VBox fx:id="chartArea" alignment="CENTER">
@@ -33,13 +24,14 @@
                         <!-- buttons for customizing/exporting -->
                         <VBox alignment="CENTER" spacing="10">
                             <HBox alignment="CENTER" spacing="10">
-                                <Button text="Customize Report" onAction="#showReportCustomizer" />
-                                <Button text="Export Report" onAction="#exportReport" />
+                                <Button onAction="#showReportCustomizer" text="Customize Report" />
+                                <Button onAction="#exportReport" text="Export Report" />
+                        <Button id="x_report" mnemonicParsing="false" onAction="#x_report" text="X Report" fx:id="x_report" />
+                        <Button id="z_report" fx:id="z_report" mnemonicParsing="false" onAction="#z_report" text="Z Report" />
                             </HBox>
 
                             <HBox alignment="CENTER" spacing="10">
-                                <Button mnemonicParsing=" false" onAction="#switchToManager"
-                                    text="Go Back" />
+                                <Button mnemonicParsing=" false" onAction="#switchToManager" text="Go Back" />
                             </HBox>
                         </VBox>
                     </VBox>

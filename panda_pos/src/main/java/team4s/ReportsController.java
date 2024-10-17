@@ -1,9 +1,20 @@
 package team4s;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
@@ -12,22 +23,15 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.geometry.Insets;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.Node;
-import javafx.event.ActionEvent;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Optional;
-import java.sql.PreparedStatement;
 
 public class ReportsController {
     private Stage stage;
@@ -37,6 +41,8 @@ public class ReportsController {
 
     @FXML
     private VBox chartArea;
+    @FXML
+    private Button z_report;
 
     // Show the customizer for generating charts
     @FXML
@@ -208,6 +214,243 @@ public class ReportsController {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    @FXML 
+    private void x_report(ActionEvent event){
+        
+        // get the current day in formatter, and the current hour in formatter2
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedCurrentTime = currentTime.format(formatter);
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern( "HH");
+        
+        //convert it into an hour to safeguard against generating x report after 9 PM
+        int current_hour = Integer.parseInt(currentTime.format(formatter2));
+        if (current_hour > 21){
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Error");
+            alert.setHeaderText("It is after 9:00 PM");
+            alert.setContentText("The restaurant is closed- Override?");
+            
+            // Add Yes and No buttons
+            ButtonType buttonYes = new ButtonType("Yes");
+            ButtonType buttonNo = new ButtonType("No");
+            alert.getButtonTypes().setAll(buttonYes, buttonNo);
+
+            Optional<ButtonType> override = alert.showAndWait();
+            if (override.get() == buttonYes) {
+                int empty;
+            }
+            else{
+                return;
+            }
+        }
+
+        //confirmation dialog, main function starts here
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("X Report");
+        alert.setHeaderText("Are you sure you want to generate an X Report?");
+        alert.setContentText("This will generate an X Report for the current day.");
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.get() == ButtonType.OK) {
+            // Logic to generate X Report
+            System.out.println("Generating X Report...");
+            //loop for starting time
+            for (int i = 9; i < current_hour; i++) {
+                //Sales per hour sicne 9 AM
+                System.out.println("--------------------------------------");
+                String selectQuery = "SELECT SUM(total_cost) AS total_cost_sum FROM transaction WHERE transaction_date = '10-15-24' AND EXTRACT(HOUR FROM transaction_time) BETWEEN ? AND ?";
+                try (Connection conn = Database.connect();
+                    PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                        stmt.setInt(1, i);
+                        stmt.setInt(2, i+1);
+                        ResultSet rs = stmt.executeQuery();
+                        boolean empty = true;
+                        while (rs.next()) {
+                            empty = false;
+                            System.out.println("Sales for hour " + i + " to " + (i+ 1) + ": " + rs.getDouble("total_cost_sum"));
+                        }
+                        if (empty) {
+                            System.out.println("No sales for hour " + i + " to " + (i+ 1));
+                        }
+                    } catch (SQLException e) {
+                        System.err.println("Failed to load items from the database.");
+                        e.printStackTrace();
+                    }
+
+
+                //Items sold per hour since 9 AM
+                System.out.println();
+                selectQuery = "SELECT mi.menu_item_id, mi.item_name, SUM(mt.item_quantity) AS total_quantity FROM menu_item mi JOIN menu_item_transaction mt ON mi.menu_item_id = mt.menu_item_id JOIN transaction t ON mt.transaction_id = t.transaction_id WHERE t.transaction_date = '10-15-24' AND EXTRACT(HOUR FROM t.transaction_time) BETWEEN ? AND ? GROUP BY mi.menu_item_id, mi.item_name ORDER BY total_quantity DESC";
+                try (Connection conn = Database.connect();
+                    PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                        stmt.setInt(1, i);
+                        stmt.setInt(2, i+1);
+                        ResultSet rs = stmt.executeQuery();
+                        boolean empty = true;
+                        while (rs.next()) {
+                            empty = false;
+                            System.out.println("Item: " + rs.getString("item_name") + " Quantity: " + rs.getInt("total_quantity"));
+                        }
+                        if (empty) {
+                            System.out.println("No items sold for hour " + i + " to " + (i+ 1));
+                        }
+
+                    } catch (SQLException e) {
+                        System.err.println("Failed to load items from the database.");
+                        e.printStackTrace();
+                    }
+
+
+                //Transaction type per hour since 9 AM
+                System.out.println();
+                selectQuery = "SELECT transaction_type, COUNT(*) AS type_count FROM transaction WHERE transaction_date = '10-15-24' AND EXTRACT(HOUR FROM transaction_time) BETWEEN ? AND ? GROUP BY transaction_type;";
+                try (Connection conn = Database.connect();
+                    PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                        stmt.setInt(1, i);
+                        stmt.setInt(2, i+1);
+                        ResultSet rs = stmt.executeQuery();
+                        boolean empty = true;
+                        while (rs.next()) {
+                            empty = false;
+                            System.out.println("Transaction Type: " + rs.getString("transaction_type") + " Count: " + rs.getInt("type_count"));
+                        }
+                        if (empty) {
+                            System.out.println("No transactions for hour " + i + " to " + (i+ 1));
+                        }
+                    } catch (SQLException e) {
+                        System.err.println("Failed to load items from the database.");
+                        e.printStackTrace();
+            }
+            System.out.println("--------------------------------------"); //end of loop
+            
+        }
+    }
+    }
+    @FXML
+    private void z_report(ActionEvent event){
+        
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedCurrentTime = currentTime.format(formatter);
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern( "HH");
+        int current_hour = Integer.parseInt(currentTime.format(formatter2));
+
+        //shows warning about generating z report before 9 PM, gives option to override
+        if (current_hour < 21){
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Error");
+            alert.setHeaderText("Cannot generate Z Report");
+            alert.setContentText("Z Reports can only be generated after 9 PM. - Override?");
+            
+            // Add Yes and No buttons
+            ButtonType buttonYes = new ButtonType("Yes");
+            ButtonType buttonNo = new ButtonType("No");
+            alert.getButtonTypes().setAll(buttonYes, buttonNo);
+
+            Optional<ButtonType> override = alert.showAndWait();
+            if (override.get() == buttonYes) {
+                int empty;
+            }
+            else{
+                return;
+            }
+        }
+        //actual report
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Z Report");
+        alert.setHeaderText("Are you sure you want to generate a Z Report?");
+        alert.setContentText("This will generate a Z Report for the current day.");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK) {
+            // Logic to generate Z Report
+            System.out.println("Generating Z Report...");
+
+            System.out.println("Z Report generated at: " + formattedCurrentTime);
+            System.out.println();
+
+
+            //total cost of all orders, number of orders generation
+            double total_cost = 0;
+            int number_of_orders = 0;
+            String selectQuery = "SELECT total_cost FROM transaction WHERE transaction_date = '10-15-24'";
+            try (Connection conn = Database.connect();
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                    /* 
+                LocalDate localDate = LocalDate.parse(formattedCurrentTime, formatter);
+                Date sqlDate = Date.valueOf(localDate);
+
+                // Set the transaction_date parameter
+                stmt.setDate(1, sqlDate);
+                */
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    //PRINT THIS - TOTAL COST OF ALL ORDERS
+                    total_cost += rs.getDouble("total_cost");
+                    number_of_orders++;
+
+
+                }
+                System.out.println("Total Cost: " + total_cost);
+                System.out.println("Number of Orders: " + number_of_orders);
+                System.out.println();     
+    
+            } catch (SQLException e) {
+                System.err.println("Failed to load items from the database.");
+                e.printStackTrace();
+            }
+            System.out.println();
+            //Items sold arranged by quantity
+            selectQuery = "SELECT mi.menu_item_id, mi.item_name, SUM(mt.item_quantity) AS total_quantity FROM menu_item mi JOIN menu_item_transaction mt ON mi.menu_item_id = mt.menu_item_id JOIN transaction t ON mt.transaction_id = t.transaction_id WHERE t.transaction_date = '10-15-24' GROUP BY mi.menu_item_id, mi.item_name ORDER BY total_quantity DESC";
+            try (Connection conn = Database.connect();
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                /* 
+                LocalDate localDate = LocalDate.parse(formattedCurrentTime, formatter);
+                Date sqlDate = Date.valueOf(localDate);
+                
+
+                // Set the transaction_date parameter
+                stmt.setDate(1, sqlDate);
+                */
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    //PRINT THIS - ALL ITEMS SOLD ARRANGED BY QUANTITY
+                    System.out.println("Item: " + rs.getString("item_name") + " Quantity: " + rs.getInt("total_quantity"));
+                }
+                
+    
+            } catch (SQLException e) {
+                System.err.println("Failed to load items from the database.");
+                e.printStackTrace();
+            }
+            System.out.println();
+
+            //Transaction type
+            selectQuery = "SELECT transaction_type, count(*) FROM transaction WHERE transaction_date = '10-15-24' GROUP BY transaction_type";
+            try (Connection conn = Database.connect();
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                    /* 
+                LocalDate localDate = LocalDate.parse(formattedCurrentTime, formatter);
+                Date sqlDate = Date.valueOf(localDate);
+
+                // Set the transaction_date parameter
+                stmt.setDate(1, sqlDate);
+                */
+                ResultSet rs = stmt.executeQuery();
+    
+                while (rs.next()) {
+                    //PRINT THIS - TRANSACTION TYPE AND COUNT
+                    System.out.println("Transaction Type: " + rs.getString("transaction_type") + " Count: " + rs.getInt("count"));
+
+
+                }
+            } catch (SQLException e) {
+                System.err.println("Failed to load items from the database.");
+                e.printStackTrace();
+            }
+
         }
     }
 }
