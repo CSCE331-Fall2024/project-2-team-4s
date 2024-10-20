@@ -42,7 +42,11 @@ public class InventoryRestockController {
     @FXML
     private TableView<InventoryItem> inventoryTable;
 
-    // initialize inventory items in the TableView
+    /*
+     * Initializes the database connection and loads the inventory items into the
+     * table view.
+     * 
+     */
     public void initialize() {
         try {
             conn = Database.connect();
@@ -56,7 +60,10 @@ public class InventoryRestockController {
         }
     }
 
-    // Load Inventory Items
+    /*
+     * Load inventory items into the table view
+     * 
+     */
     private void loadInventoryItems() {
         ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
@@ -79,7 +86,12 @@ public class InventoryRestockController {
         inventoryTable.setItems(inventoryItems);
     }
 
-    // Load Ingredients
+    /*
+     * Load ingredients into the ListView
+     * 
+     * @param ingredientListView the ListView to load the ingredients into
+     * 
+     */
     private void loadIngredients(ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
 
@@ -145,7 +157,12 @@ public class InventoryRestockController {
         });
     }
 
-    // Method to handle the Add Inventory Item button
+    /*
+     * Handle the Restock Inventory button
+     * 
+     * @param event the ActionEvent object
+     * 
+     */
     public void showAddInventoryItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
@@ -253,6 +270,10 @@ public class InventoryRestockController {
     }
 
     // Method to handle the Edit Inventory Item button
+    /*
+     *  Show the dialog to edit an inventory item
+     * 
+     */
     public void showEditInventoryItemDialog() {
         InventoryItem selectedItem = inventoryTable.getSelectionModel().getSelectedItem();
 
@@ -372,6 +393,12 @@ public class InventoryRestockController {
     }
 
     // Method to handle the Delete Inventory Item button
+    /*
+     * Show the dialog to delete an inventory item
+     * 
+     * @param event the ActionEvent object
+     * 
+     */
     public void showDeleteInventoryItemDialog(ActionEvent event) {
         // Get the selected inventory item
         InventoryItem selectedItem = inventoryTable.getSelectionModel().getSelectedItem();
@@ -402,6 +429,12 @@ public class InventoryRestockController {
     }
 
     // Method to delete the selected item from the database
+    /*
+     * Delete an inventory item from the database
+     * 
+     * @param item the InventoryItem object to delete
+     * 
+     */
     private void deleteItemFromInventoryDatabase(InventoryItem item) {
         String deleteQuery = "DELETE FROM inventory WHERE ingredient_id = ?";
 
@@ -418,6 +451,12 @@ public class InventoryRestockController {
     }
 
     // Switch to manager menu
+    /*
+     * Switch to the Manager Menu
+     * 
+     * @param event the ActionEvent object
+     * 
+     */
     public void switchToManager(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));

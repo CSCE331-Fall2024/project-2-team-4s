@@ -26,6 +26,9 @@ public class MenuController {
     private Connection conn;
 
     // Show modal to validate the user for access to the manager GUI
+    /*
+     * Shows a modal to validate the user for access to the manager GUI.
+     */
     public void showValidateManager() {
         Stage modal = new Stage();
         modal.initModality(Modality.APPLICATION_MODAL);
@@ -98,6 +101,12 @@ public class MenuController {
     }
 
     // Switch to manager GUI (Manager.fxml)
+    /*
+     * Switches to the manager GUI (Manager.fxml) when the "Manager" button is
+     * clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToManager(ActionEvent event) {
         showValidateManager();
 
@@ -117,6 +126,12 @@ public class MenuController {
     }
 
     // Switch to cashier GUI (Cashier.fxml)
+    /*
+     * Switches to the cashier GUI (Cashier.fxml) when the "Cashier" button is
+     * clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToCashier(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Cashier.fxml"));
