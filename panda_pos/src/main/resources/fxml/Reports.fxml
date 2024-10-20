@@ -43,6 +43,12 @@
 
         <DatePicker fx:id="datePicker" />
 
+        <Label text="Select Start Time:"/>
+        <ComboBox fx:id="startTimeComboBox" prefWidth="100"/>
+
+        <Label text="Select End Time:"/>
+        <ComboBox fx:id="endTimeComboBox" prefWidth="100"/>
+
         <!-- Generate Report Button -->
         <Button text="Generate Report" onAction="#generateReport" />
         <Button text="Reset" onAction="#resetForm" />

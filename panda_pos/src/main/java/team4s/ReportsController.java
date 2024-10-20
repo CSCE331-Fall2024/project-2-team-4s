@@ -10,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -71,6 +73,10 @@ public class ReportsController {
     private HBox scatterplotButtons;
     @FXML
     private DatePicker datePicker;
+    @FXML
+    private ComboBox<Integer> startTimeComboBox;
+    @FXML
+    private ComboBox<Integer> endTimeComboBox;
 
 
     @FXML
@@ -81,10 +87,19 @@ public class ReportsController {
         secondTableButtons.setVisible(false);
         datePicker.setValue(LocalDate.now());
         datePicker.setVisible(false);
+        startTimeComboBox.setVisible(false);
+        endTimeComboBox.setVisible(false);
+
+        // Populate the start and end time ComboBoxes with values from 9 to 21 (9 AM to 9 PM)
+        startTimeComboBox.setItems(FXCollections.observableArrayList(IntStream.rangeClosed(9, 21).boxed().collect(Collectors.toList())));
+        endTimeComboBox.setItems(FXCollections.observableArrayList(IntStream.rangeClosed(9, 21).boxed().collect(Collectors.toList())));
+
+        startTimeComboBox.setValue(9); 
+        endTimeComboBox.setValue(21); 
     }
     //creates the dropdown menu for the graph types
     private void populateGraphTypeComboBox() {
-        graphTypeComboBox.setItems(FXCollections.observableArrayList("Product Usage", "X-report", "z-report", "Pie Chart", "Bar Chart", "Line Graph"));
+        graphTypeComboBox.setItems(FXCollections.observableArrayList("Product Usage", "X-report", "Z-report", "Pie Chart", "Bar Chart", "Line Graph"));
         graphTypeComboBox.setOnAction(this::handleGraphTypeSelection);
     }
     //sets yes for scatterplot if the yes button for scatterplot is clicked
@@ -107,7 +122,12 @@ public class ReportsController {
         if("Product Usage".equals(selectedGraphType)){
             System.out.println("will add soon");
         }
-        else if("X-report".equals(selectedGraphType) || "z-report".equals(selectedGraphType)){
+        else if("X-report".equals(selectedGraphType)){
+            datePicker.setVisible(true);
+            startTimeComboBox.setVisible(true);
+            endTimeComboBox.setVisible(true);
+        }
+        else if("Z-report".equals(selectedGraphType)){
             datePicker.setVisible(true);
         }
         else if ("Line Graph".equals(selectedGraphType)) {
@@ -231,6 +251,15 @@ public class ReportsController {
         String xAxis = xAxisComboBox.getValue();
         String tableTwo = (tableTwoComboBox != null && tableTwoComboBox.isVisible()) ? tableTwoComboBox.getValue() : null;
         String yAxis = yAxisComboBox.getValue();
+        // get the current day in formatter, and the current hour in formatter2
+        LocalDate selectedDate = datePicker.getValue();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = selectedDate.format(formatter);
+
+        LocalDate fixedDate = LocalDate.parse("2024-10-15", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if(fixedDate.isBefore(selectedDate)){
+            selectedDate = fixedDate;
+        }
 
         switch (graphType) {
             case "Line Graph":
@@ -252,19 +281,16 @@ public class ReportsController {
                 chartArea.getChildren().add(pieChart);
                 break;
             case "X-report":
-                // get the current day in formatter, and the current hour in formatter2
-                LocalDate selectedDate = datePicker.getValue();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                String formattedDate = selectedDate.format(formatter);
-
-                LocalDate fixedDate = LocalDate.parse("2024-10-15", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                if(fixedDate.isBefore(selectedDate)){
-                    selectedDate = fixedDate;
-                }
-                chartArea.getChildren().add(x_report_hourly_sales(selectedDate));
-                chartArea.getChildren().add(x_report_items_sold(selectedDate));
-                chartArea.getChildren().add(transactionTypes_xreport(selectedDate));
+                chartArea.getChildren().add(x_report_hourly_sales(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
+                chartArea.getChildren().add(x_report_items_sold(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
+                chartArea.getChildren().add(transactionTypes_xreport(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
                 break;
+            case "Z-report":
+                chartArea.getChildren().add(z_report_hourly_sales(selectedDate));
+                chartArea.getChildren().add(z_report_items_sold(selectedDate));
+                chartArea.getChildren().add(transactionTypes_zreport(selectedDate));
+                break;
+ 
             default:
                 System.out.println("Unknown graph type selected.");
         }
@@ -446,14 +472,15 @@ public class ReportsController {
             e.printStackTrace();
         }
     }
-    private LineChart<String, Number> x_report_hourly_sales(LocalDate selectedDate){
+    private LineChart<String, Number> x_report_hourly_sales(LocalDate selectedDate, int startHour, int endHour){
 
         LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH");
 
         //convert it into an hour to safeguard against generating x report after 9 PM
         int current_hour = Integer.parseInt(currentTime.format(formatter2));
-        if (current_hour > 21){
+        if (current_hour > 21 && selectedDate.equals(LocalDate.now())){
+            //shows warning about generating x report after 9 PM, gives option to override
             Alert alert = new Alert(AlertType.CONFIRMATION);
             alert.setTitle("Error");
             alert.setHeaderText("It is after 9:00 PM");
@@ -479,7 +506,68 @@ public class ReportsController {
         yAxis.setLabel("Total Sales");
 
         LineChart<String, Number> totalSalesChart = new LineChart<>(xAxis, yAxis);
-        totalSalesChart.setTitle("Total Sales per Hour");
+        totalSalesChart.setTitle("Total Sales From Hour " + startHour + " to Hour " + endHour + " on " + selectedDate);
+
+        XYChart.Series<String, Number> totalCostSeries = new XYChart.Series<>();
+        totalCostSeries.setName("Sales per Hour");
+        totalSalesChart.setLegendVisible(false);
+
+        // Fetch the data for each hour and populate the series
+        for (int i = startHour; i < endHour; i++) {
+            String selectQuery = "SELECT SUM(total_cost) AS total_cost_sum FROM transaction WHERE transaction_date = ? AND EXTRACT(HOUR FROM transaction_time) BETWEEN ? AND ?";
+            try (Connection conn = Database.connect();
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                stmt.setDate(1, java.sql.Date.valueOf(selectedDate));
+                stmt.setInt(2, i);
+                stmt.setInt(3, i+1);
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    totalCostSeries.getData().add(new XYChart.Data<>("Hour " + i, rs.getDouble("total_cost_sum")));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        totalSalesChart.getData().add(totalCostSeries);
+        return totalSalesChart;
+
+    }
+    private LineChart<String, Number> z_report_hourly_sales(LocalDate selectedDate){
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH");
+
+        //convert it into an hour to safeguard against generating z report before 9 PM
+        int current_hour = Integer.parseInt(currentTime.format(formatter2));
+        if (current_hour < 21 && selectedDate.equals(LocalDate.now())){
+            //shows warning about generating z report before 9 PM, gives option to override
+            Alert alert = new Alert(AlertType.CONFIRMATION);
+            alert.setTitle("Error");
+            alert.setHeaderText("Cannot generate Z Report");
+            alert.setContentText("Z Reports can only be generated after 9 PM. - Override?");
+            
+            // Add Yes and No buttons
+            ButtonType buttonYes = new ButtonType("Yes");
+            ButtonType buttonNo = new ButtonType("No");
+            alert.getButtonTypes().setAll(buttonYes, buttonNo);
+
+            Optional<ButtonType> override = alert.showAndWait();
+            if (override.get() == buttonYes) {
+                int empty;
+            }
+            else{
+                return null;
+            }
+        }
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Time (Hours)");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Total Sales");
+
+        LineChart<String, Number> totalSalesChart = new LineChart<>(xAxis, yAxis);
+        totalSalesChart.setTitle("Total Sales per Hour on " + selectedDate);
 
         XYChart.Series<String, Number> totalCostSeries = new XYChart.Series<>();
         totalCostSeries.setName("Sales per Hour");
@@ -505,8 +593,9 @@ public class ReportsController {
         totalSalesChart.getData().add(totalCostSeries);
         return totalSalesChart;
     }
+
     // Create the BarChart for Items Sold per Hour
-    private BarChart<String, Number> x_report_items_sold(LocalDate selectedDate) {
+    private BarChart<String, Number> x_report_items_sold(LocalDate selectedDate, int startHour, int endHour) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
 
@@ -514,7 +603,43 @@ public class ReportsController {
         yAxis.setLabel("Items Sold");
 
         BarChart<String, Number> itemsSoldChart = new BarChart<>(xAxis, yAxis);
-        itemsSoldChart.setTitle("Items Sold per Hour");
+        itemsSoldChart.setTitle("Items Sold from Hour " + startHour + " to Hour " + endHour + " on " + selectedDate);
+        itemsSoldChart.setLegendVisible(false);
+
+        XYChart.Series<String, Number> itemsSoldSeries = new XYChart.Series<>();
+        itemsSoldSeries.setName("Items per Hour");
+
+        // Fetch the data for each hour and populate the series
+        for (int i = startHour; i < endHour; i++) {
+            String selectQuery = "SELECT SUM(mt.item_quantity) AS total_quantity FROM menu_item_transaction mt JOIN transaction t ON mt.transaction_id = t.transaction_id WHERE t.transaction_date = ? AND EXTRACT(HOUR FROM t.transaction_time) BETWEEN ? AND ?";
+            try (Connection conn = Database.connect();
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                stmt.setDate(1, java.sql.Date.valueOf(selectedDate));
+                stmt.setInt(2, i);
+                stmt.setInt(3, i+1);
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    itemsSoldSeries.getData().add(new XYChart.Data<>("Hour " + i, rs.getInt("total_quantity")));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        itemsSoldChart.getData().add(itemsSoldSeries);
+        return itemsSoldChart;
+    }
+
+    // Create the BarChart for Items Sold per Hour
+    private BarChart<String, Number> z_report_items_sold(LocalDate selectedDate) {
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Time (Hours)");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Items Sold");
+
+        BarChart<String, Number> itemsSoldChart = new BarChart<>(xAxis, yAxis);
+        itemsSoldChart.setTitle("Items Sold per Hour on " + selectedDate);
         itemsSoldChart.setLegendVisible(false);
 
         XYChart.Series<String, Number> itemsSoldSeries = new XYChart.Series<>();
@@ -540,9 +665,72 @@ public class ReportsController {
         itemsSoldChart.getData().add(itemsSoldSeries);
         return itemsSoldChart;
     }
+    // Create a generalized function for Transaction Types per Hour
+    private LineChart<String, Number> transactionTypes_xreport(LocalDate selectedDate, int startHour, int endHour) {
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Time (Hours)");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Transaction Count");
+
+        LineChart<String, Number> transactionTypeChart = new LineChart<>(xAxis, yAxis);
+        transactionTypeChart.setTitle("Transaction Types from Hour " + startHour + " to Hour " + endHour + " on " + selectedDate);
+
+        // Create separate series for each transaction type
+        XYChart.Series<String, Number> creditDebitSeries = new XYChart.Series<>();
+        creditDebitSeries.setName("Credit/Debit");
+
+        XYChart.Series<String, Number> diningDollarsSeries = new XYChart.Series<>();
+        diningDollarsSeries.setName("Dining Dollars");
+
+        XYChart.Series<String, Number> maroonMealSeries = new XYChart.Series<>();
+        maroonMealSeries.setName("Maroon Meal");
+
+        XYChart.Series<String, Number> giftCardSeries = new XYChart.Series<>();
+        giftCardSeries.setName("Gift Card");
+
+        // Fetch the data for each hour and populate the series
+        for (int i = startHour; i < endHour; i++) {
+            String selectQuery = "SELECT transaction_type, COUNT(*) AS type_count " +
+                                "FROM transaction " +
+                                "WHERE transaction_date = ? AND EXTRACT(HOUR FROM transaction_time) BETWEEN ? AND ? " +
+                                "GROUP BY transaction_type";
+            try (Connection conn = Database.connect();
+                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
+                stmt.setDate(1, java.sql.Date.valueOf(selectedDate));
+                stmt.setInt(2, i);
+                stmt.setInt(3, i + 1);
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    String transactionType = rs.getString("transaction_type");
+                    int count = rs.getInt("type_count");
+                    switch (transactionType) {
+                        case "Credit/Debit":
+                            creditDebitSeries.getData().add(new XYChart.Data<>("Hour " + i, count));
+                            break;
+                        case "Dining Dollars":
+                            diningDollarsSeries.getData().add(new XYChart.Data<>("Hour " + i, count));
+                            break;
+                        case "Maroon Meal":
+                            maroonMealSeries.getData().add(new XYChart.Data<>("Hour " + i, count));
+                            break;
+                        case "Gift Card":
+                            giftCardSeries.getData().add(new XYChart.Data<>("Hour " + i, count));
+                            break;
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Add all series to the chart
+        transactionTypeChart.getData().addAll(creditDebitSeries, diningDollarsSeries, maroonMealSeries, giftCardSeries);
+        return transactionTypeChart;
+    }
 
     // Create the LineChart for Transaction Types per Hour
-    private LineChart<String, Number> transactionTypes_xreport(LocalDate selectedDate) {
+    private LineChart<String, Number> transactionTypes_zreport(LocalDate selectedDate) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
     
@@ -550,7 +738,7 @@ public class ReportsController {
         yAxis.setLabel("Transaction Count");
     
         LineChart<String, Number> transactionTypeChart = new LineChart<>(xAxis, yAxis);
-        transactionTypeChart.setTitle("Transaction Types per Hour");
+        transactionTypeChart.setTitle("Transaction Types per Hour on " + selectedDate);
     
         // Create separate series for each transaction type
         XYChart.Series<String, Number> creditDebitSeries = new XYChart.Series<>();
@@ -601,129 +789,5 @@ public class ReportsController {
         transactionTypeChart.getData().addAll(creditDebitSeries, diningDollarsSeries, maroonMealSeries, giftCardSeries);
     
         return transactionTypeChart;
-    }
-    @FXML
-    private void z_report(ActionEvent event){
-        
-        LocalDateTime currentTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String formattedCurrentTime = currentTime.format(formatter);
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern( "HH");
-        int current_hour = Integer.parseInt(currentTime.format(formatter2));
-
-        //shows warning about generating z report before 9 PM, gives option to override
-        if (current_hour < 21){
-            Alert alert = new Alert(AlertType.CONFIRMATION);
-            alert.setTitle("Error");
-            alert.setHeaderText("Cannot generate Z Report");
-            alert.setContentText("Z Reports can only be generated after 9 PM. - Override?");
-            
-            // Add Yes and No buttons
-            ButtonType buttonYes = new ButtonType("Yes");
-            ButtonType buttonNo = new ButtonType("No");
-            alert.getButtonTypes().setAll(buttonYes, buttonNo);
-
-            Optional<ButtonType> override = alert.showAndWait();
-            if (override.get() == buttonYes) {
-                int empty;
-            }
-            else{
-                return;
-            }
-        }
-        //actual report
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle("Z Report");
-        alert.setHeaderText("Are you sure you want to generate a Z Report?");
-        alert.setContentText("This will generate a Z Report for the current day.");
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK) {
-            // Logic to generate Z Report
-            System.out.println("Generating Z Report...");
-
-            System.out.println("Z Report generated at: " + formattedCurrentTime);
-            System.out.println();
-
-
-            //total cost of all orders, number of orders generation
-            double total_cost = 0;
-            int number_of_orders = 0;
-            String selectQuery = "SELECT total_cost FROM transaction WHERE transaction_date = '10-15-24'";
-            try (Connection conn = Database.connect();
-                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
-                    /* 
-                LocalDate localDate = LocalDate.parse(formattedCurrentTime, formatter);
-                Date sqlDate = Date.valueOf(localDate);
-
-                // Set the transaction_date parameter
-                stmt.setDate(1, sqlDate);
-                */
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()) {
-                    //PRINT THIS - TOTAL COST OF ALL ORDERS
-                    total_cost += rs.getDouble("total_cost");
-                    number_of_orders++;
-
-
-                }
-                System.out.println("Total Cost: " + total_cost);
-                System.out.println("Number of Orders: " + number_of_orders);
-                System.out.println();     
-    
-            } catch (SQLException e) {
-                System.err.println("Failed to load items from the database.");
-                e.printStackTrace();
-            }
-            System.out.println();
-            //Items sold arranged by quantity
-            selectQuery = "SELECT mi.menu_item_id, mi.item_name, SUM(mt.item_quantity) AS total_quantity FROM menu_item mi JOIN menu_item_transaction mt ON mi.menu_item_id = mt.menu_item_id JOIN transaction t ON mt.transaction_id = t.transaction_id WHERE t.transaction_date = '10-15-24' GROUP BY mi.menu_item_id, mi.item_name ORDER BY total_quantity DESC";
-            try (Connection conn = Database.connect();
-                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
-                /* 
-                LocalDate localDate = LocalDate.parse(formattedCurrentTime, formatter);
-                Date sqlDate = Date.valueOf(localDate);
-                
-
-                // Set the transaction_date parameter
-                stmt.setDate(1, sqlDate);
-                */
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()) {
-                    //PRINT THIS - ALL ITEMS SOLD ARRANGED BY QUANTITY
-                    System.out.println("Item: " + rs.getString("item_name") + " Quantity: " + rs.getInt("total_quantity"));
-                }
-                
-    
-            } catch (SQLException e) {
-                System.err.println("Failed to load items from the database.");
-                e.printStackTrace();
-            }
-            System.out.println();
-
-            //Transaction type
-            selectQuery = "SELECT transaction_type, count(*) FROM transaction WHERE transaction_date = '10-15-24' GROUP BY transaction_type";
-            try (Connection conn = Database.connect();
-                PreparedStatement stmt = conn.prepareStatement(selectQuery)) {
-                    /* 
-                LocalDate localDate = LocalDate.parse(formattedCurrentTime, formatter);
-                Date sqlDate = Date.valueOf(localDate);
-
-                // Set the transaction_date parameter
-                stmt.setDate(1, sqlDate);
-                */
-                ResultSet rs = stmt.executeQuery();
-    
-                while (rs.next()) {
-                    //PRINT THIS - TRANSACTION TYPE AND COUNT
-                    System.out.println("Transaction Type: " + rs.getString("transaction_type") + " Count: " + rs.getInt("count"));
-
-
-                }
-            } catch (SQLException e) {
-                System.err.println("Failed to load items from the database.");
-                e.printStackTrace();
-            }
-
-        }
     }
 }
