@@ -64,10 +64,14 @@ public class ItemMenuController {
                 + "FROM menu_item mi "
                 + "LEFT JOIN inventory_menu_item im ON mi.menu_item_id = im.menu_item_id "
                 + "LEFT JOIN inventory i ON im.ingredient_id = i.ingredient_id "
+                + "WHERE mi.on_menu = true "
                 + "GROUP BY mi.menu_item_id "
                 + "ORDER BY mi.menu_item_id";
 
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
             while (rs.next()) {
                 menu_items.add(new MenuItem(
                         rs.getInt("menu_item_id"),
@@ -75,7 +79,7 @@ public class ItemMenuController {
                         rs.getString("item_name"),
                         rs.getFloat("item_price"),
                         rs.getString("item_category"),
-                        rs.getString("ingredients"))); // Added ingredients column
+                        rs.getString("ingredients")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -93,6 +97,7 @@ public class ItemMenuController {
         try {
             conn = Database.connect();
             String fetchIngredientsQuery = "SELECT ingredient_id, ingredient_name, current_stock, price, unit, min_stock FROM inventory ORDER BY ingredient_name";
+
             try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(fetchIngredientsQuery)) {
                 while (rs.next()) {
                     int ingredientId = rs.getInt("ingredient_id");
@@ -201,6 +206,7 @@ public class ItemMenuController {
                 errorAlert.setHeaderText("Missing Information");
                 errorAlert.setContentText("Please fill out all fields.");
                 errorAlert.showAndWait();
+
                 return; // Exit the method early
             }
 
@@ -209,46 +215,88 @@ public class ItemMenuController {
                 float itemPrice = Float.parseFloat(itemPriceText);
                 int currentServings = Integer.parseInt(currentServingsText);
 
-                // Insert the new item into the database
+                // Check if the item already exists and is just not displayed
                 conn = Database.connect();
-                String insertMenuItemQuery = "INSERT INTO menu_item (current_servings, item_name, item_price, item_category) VALUES (?, ?, ?, ?)";
+                String checkItemQuery = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
+                PreparedStatement checkStmt = conn.prepareStatement(checkItemQuery);
+                checkStmt.setString(1, itemName);
+                ResultSet rs = checkStmt.executeQuery();
 
-                PreparedStatement stmt = conn.prepareStatement(insertMenuItemQuery, Statement.RETURN_GENERATED_KEYS);
-                stmt.setInt(1, currentServings);
-                stmt.setString(2, itemName);
-                stmt.setFloat(3, itemPrice);
-                stmt.setString(4, itemCategory);
+                if (rs.next()) {
+                    // Item exists, update the existing item
+                    int existingItemID = rs.getInt("menu_item_id");
+                    String updateMenuItemQuery = "UPDATE menu_item SET current_servings = ?, item_price = ?, item_category = ?, on_menu = true WHERE menu_item_id = ?";
+                    PreparedStatement updateStmt = conn.prepareStatement(updateMenuItemQuery);
+                    updateStmt.setInt(1, currentServings);
+                    updateStmt.setFloat(2, itemPrice);
+                    updateStmt.setString(3, itemCategory);
+                    updateStmt.setInt(4, existingItemID);
+                    updateStmt.executeUpdate();
 
-                int rowsInserted = stmt.executeUpdate(); // Execute the INSERT
-                if (rowsInserted > 0) {
-                    System.out.println("A new menu item was inserted successfully!");
+                    // Delete existing ingredient records for this menu item
+                    String deleteIngredientsQuery = "DELETE FROM inventory_menu_item WHERE menu_item_id = ?";
+                    PreparedStatement deleteStmt = conn.prepareStatement(deleteIngredientsQuery);
+                    deleteStmt.setInt(1, existingItemID);
+                    deleteStmt.executeUpdate();
 
-                    // Get the generated menu item ID
-                    ResultSet generatedKeys = stmt.getGeneratedKeys();
-                    int newMenuItemId = 0;
-                    if (generatedKeys.next()) {
-                        newMenuItemId = generatedKeys.getInt(1);
-                    }
-
-                    // Insert selected ingredients with amounts into inventory_menu_item table
+                    // Insert new ingredients with inputted amounts into join table
                     for (InventoryItem ingredient : ingredientListView.getItems()) {
                         if (ingredient.isSelected()) {
                             String insertIngredientQuery = "INSERT INTO inventory_menu_item (menu_item_id, ingredient_id, ingredient_amount) VALUES (?, ?, ?)";
-
                             PreparedStatement ingredientStmt = conn.prepareStatement(insertIngredientQuery);
-                            ingredientStmt.setInt(1, newMenuItemId);
+                            ingredientStmt.setInt(1, existingItemID);
                             ingredientStmt.setInt(2, ingredient.getIngredientID());
                             ingredientStmt.setInt(3, ingredient.getAmount()); // Use the selected amount
-
                             ingredientStmt.executeUpdate();
                         }
                     }
 
-                    // Reload the menu items into the table after the insert
                     loadMenuItems(); // Refresh the table view
+
+                    conn.close(); // Close the connection after updating the existing item
+                } else {
+                    // Insert the new item into the database
+                    String insertMenuItemQuery = "INSERT INTO menu_item (current_servings, item_name, item_price, item_category) VALUES (?, ?, ?, ?)";
+
+                    PreparedStatement stmt = conn.prepareStatement(insertMenuItemQuery,
+                            Statement.RETURN_GENERATED_KEYS);
+                    stmt.setInt(1, currentServings);
+                    stmt.setString(2, itemName);
+                    stmt.setFloat(3, itemPrice);
+                    stmt.setString(4, itemCategory);
+
+                    int rowsInserted = stmt.executeUpdate(); // Execute the INSERT
+                    if (rowsInserted > 0) {
+                        System.out.println("A new menu item was inserted successfully!");
+
+                        // Get the generated menu item ID
+                        ResultSet generatedKeys = stmt.getGeneratedKeys();
+                        int newMenuItemId = 0;
+                        if (generatedKeys.next()) {
+                            newMenuItemId = generatedKeys.getInt(1);
+                        }
+
+                        // Insert selected ingredients with amounts into inventory_menu_item table
+                        for (InventoryItem ingredient : ingredientListView.getItems()) {
+                            if (ingredient.isSelected()) {
+                                String insertIngredientQuery = "INSERT INTO inventory_menu_item (menu_item_id, ingredient_id, ingredient_amount) VALUES (?, ?, ?)";
+
+                                PreparedStatement ingredientStmt = conn.prepareStatement(insertIngredientQuery);
+                                ingredientStmt.setInt(1, newMenuItemId);
+                                ingredientStmt.setInt(2, ingredient.getIngredientID());
+                                ingredientStmt.setInt(3, ingredient.getAmount()); // Use the selected amount
+
+                                ingredientStmt.executeUpdate();
+                            }
+                        }
+
+                        // Reload the menu items into the table after the insert
+                        loadMenuItems(); // Refresh the table view
+                    }
+
+                    conn.close(); // Close the connection only after all operations are complete
                 }
 
-                conn.close(); // Close the connection only after all operations are complete
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
@@ -459,10 +507,11 @@ public class ItemMenuController {
 
         // Set the ingredients in ListView with checkboxes and spinners for amounts
         ingredientListView.setItems(ingredients);
+
         ingredientListView.setCellFactory(param -> new ListCell<>() {
-            private final CheckBox checkBox = new CheckBox();
-            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Default range 1-100
-            private final HBox hbox = new HBox(10); // Layout
+            CheckBox checkBox = new CheckBox();
+            Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Default range 1-100
+            HBox hbox = new HBox(10); // Layout
 
             {
                 amountSpinner.setPrefWidth(70);
@@ -494,8 +543,8 @@ public class ItemMenuController {
         });
     }
 
-    // Method to handle the Delete Item button
-    public void handleDeleteItem(ActionEvent event) {
+    // Method to handle the deleting menu items (change on_menu to false)
+    public void showDeleteItemDialog(ActionEvent event) {
         // Get the selected item
         MenuItem selectedItem = menuTable.getSelectionModel().getSelectedItem();
 
@@ -508,8 +557,24 @@ public class ItemMenuController {
 
             // Wait for user confirmation
             if (confirmationAlert.showAndWait().get() == ButtonType.OK) {
-                // If user confirms, proceed with the deletion
-                deleteItemFromDatabase(selectedItem);
+                // If user confirms, proceed with changing item's on_menu status to false
+                try {
+                    conn = Database.connect();
+
+                    // Update the on_menu status to false
+                    String deleteQuery = "UPDATE menu_item SET on_menu = false WHERE menu_item_id = ?";
+                    PreparedStatement stmt = conn.prepareStatement(deleteQuery);
+
+                    stmt.setInt(1, selectedItem.getMenuItemID());
+                    stmt.executeUpdate();
+
+                    System.out.println("Menu item deleted: " + selectedItem.getItemName());
+
+                    conn.close(); // Close the connection after the change
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 // Remove the item from the table view
                 menuTable.getItems().remove(selectedItem);
             }
@@ -520,55 +585,6 @@ public class ItemMenuController {
             errorAlert.setHeaderText("No item selected");
             errorAlert.setContentText("Please select an item to delete.");
             errorAlert.showAndWait();
-        }
-    }
-
-    // Method to delete the selected item from the database, including its
-    // ingredients
-    private void deleteItemFromDatabase(MenuItem item) {
-        String deleteIngredientsQuery = "DELETE FROM inventory_menu_item WHERE menu_item_id = ?";
-        String deleteMenuItemQuery = "DELETE FROM menu_item WHERE menu_item_id = ?";
-
-        try {
-            conn = Database.connect();
-
-            // Start a transaction
-            conn.setAutoCommit(false);
-
-            // Delete ingredients associated with the menu item
-            try (PreparedStatement stmt = conn.prepareStatement(deleteIngredientsQuery)) {
-                stmt.setInt(1, item.getMenuItemID());
-                stmt.executeUpdate();
-            }
-
-            // Delete the menu item itself
-            try (PreparedStatement stmt = conn.prepareStatement(deleteMenuItemQuery)) {
-                stmt.setInt(1, item.getMenuItemID());
-                stmt.executeUpdate();
-            }
-
-            // Commit the transaction
-            conn.commit();
-            System.out
-                    .println("Menu item and associated ingredients deleted from the database: " + item.getItemName());
-        } catch (SQLException e) {
-            try {
-                if (conn != null) {
-                    conn.rollback(); // Rollback transaction if an error occurs
-                }
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true); // Reset auto-commit
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
