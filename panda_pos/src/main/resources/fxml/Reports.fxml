@@ -1,42 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ReportsController">
-    <children>
-           <TabPane>
-            <tabs>
-                <Tab closable="false" text="Reports">
-                    <VBox alignment="CENTER" prefHeight="600" prefWidth="600">
-                        <padding>
-                            <Insets bottom="15" left="15" right="15" top="0" />
-                        </padding>
-                        <!-- area to display the generated chart -->
-                        <VBox fx:id="chartArea" alignment="CENTER">
-                            <!-- the chart will be dynamically added here -->
-                        </VBox>
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ReportsController" spacing="10" alignment="TOP_LEFT">
+    <!-- Left side for graph -->
+    <VBox fx:id="chartArea" alignment="CENTER" prefHeight="600" prefWidth="600" style="-fx-border-color: black;">
+        <!-- This area will be dynamically updated with the chart -->
+    </VBox>
 
-                        <!-- buttons for customizing/exporting -->
-                        <VBox alignment="CENTER" spacing="10">
-                            <HBox alignment="CENTER" spacing="10">
-                                <Button onAction="#showReportCustomizer" text="Customize Report" />
-                                <Button onAction="#exportReport" text="Export Report" />
-                        <Button id="x_report" mnemonicParsing="false" onAction="#x_report" text="X Report" fx:id="x_report" />
-                        <Button id="z_report" fx:id="z_report" mnemonicParsing="false" onAction="#z_report" text="Z Report" />
-                            </HBox>
+    <!-- Right side for customization -->
+    <VBox fx:id="controlsArea" alignment="TOP_LEFT" prefWidth="400" spacing="10" style="-fx-border-color: black;">
+        <Label text="Select Graph Type:" />
+        <ComboBox fx:id="graphTypeComboBox" prefWidth="200" onAction="#handleGraphTypeSelection" />
+        
+        <Button fx:id="selectTableOneButton" text="Select First Table" onAction="#selectFirstTable" visible="false" />
 
-                            <HBox alignment="CENTER" spacing="10">
-                                <Button mnemonicParsing=" false" onAction="#switchToManager" text="Go Back" />
-                            </HBox>
-                        </VBox>
-                    </VBox>
-                </Tab>
-            </tabs>
-        </TabPane>
-    </children>
-</VBox>
+        <Label text="Select First Table:" />
+        <ComboBox fx:id="tableOneComboBox" prefWidth="200" visible="false" />
+
+        <Label text="Select X Axis:" />
+        <ComboBox fx:id="xAxisComboBox" prefWidth="200" visible="false" />
+
+        <Label text="Select Y Axis:" />
+        <ComboBox fx:id="yAxisComboBox" prefWidth="200" visible="false" />
+
+        <!-- Scatterplot Button -->
+        <Label fx:id="scatterplotLabel" text="Display as Scatterplot?" visible="false" />
+        <HBox fx:id="scatterplotButtons" spacing="10" visible="false">
+            <Button fx:id="yesScatterButton" text="Yes" onAction="#setScatterplot" />
+            <Button fx:id="noScatterButton" text="No" onAction="#setSummedData" />
+        </HBox>
+
+        <!-- Yes/No Buttons for Adding Second Table -->
+        <Label fx:id="secondTableLabel" text="Do you want to add a second table?" visible="false" />
+        <HBox fx:id="secondTableButtons" spacing="10" visible="false">
+            <Button fx:id="yesButton" text="Yes" onAction="#addSecondTable" />
+            <Button fx:id="noButton" text="No" onAction="#skipSecondTable" />
+        </HBox>
+        <ComboBox fx:id="tableTwoComboBox" prefWidth="200" visible="false"/>
+
+        <DatePicker fx:id="datePicker" />
+
+        <!-- Generate Report Button -->
+        <Button text="Generate Report" onAction="#generateReport" />
+        <Button text="Reset" onAction="#resetForm" />
+        <Button text="back" onAction="#switchToManager" />
+    </VBox>
+</HBox>
