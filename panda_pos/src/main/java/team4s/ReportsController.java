@@ -8,7 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,6 +35,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -78,6 +82,8 @@ public class ReportsController {
     @FXML
     private HBox scatterplotButtons;
     @FXML
+    private Label dateLabel;
+    @FXML
     private DatePicker datePicker;
     @FXML
     private Label startTimeLabel;
@@ -87,7 +93,18 @@ public class ReportsController {
     private Label endTimeLabel;
     @FXML
     private ComboBox<Integer> endTimeComboBox;
-
+    @FXML
+    private Label startDayLabel;
+    @FXML
+    private Label endDayLabel;
+    @FXML
+    private DatePicker startDay;
+    @FXML
+    private DatePicker endDay;
+    @FXML
+    private ScrollPane chartScrollPane;
+    @FXML
+    private GridPane chartGrid;
 
     @FXML
     public void initialize() {
@@ -99,6 +116,10 @@ public class ReportsController {
         datePicker.setVisible(false);
         startTimeComboBox.setVisible(false);
         endTimeComboBox.setVisible(false);
+        startDay.setValue(LocalDate.now());
+        startDay.setVisible(false);
+        endDay.setValue(LocalDate.now());
+        endDay.setVisible(false);
 
         // Populate the start and end time ComboBoxes with values from 9 to 21 (9 AM to 9 PM)
         startTimeComboBox.setItems(FXCollections.observableArrayList(IntStream.rangeClosed(9, 21).boxed().collect(Collectors.toList())));
@@ -129,9 +150,17 @@ public class ReportsController {
         String selectedGraphType = graphTypeComboBox.getValue();
     
         if("Product Usage".equals(selectedGraphType)){
-            System.out.println("will add soon");
+            startDayLabel.setVisible(true);
+            startDay.setVisible(true);
+            endDayLabel.setVisible(true);
+            endDay.setVisible(true);
+            startTimeLabel.setVisible(true);
+            endTimeLabel.setVisible(true);
+            startTimeComboBox.setVisible(true);
+            endTimeComboBox.setVisible(true);
         }
         else if("X-report".equals(selectedGraphType)){
+            dateLabel.setVisible(true);
             datePicker.setVisible(true);
             startTimeLabel.setVisible(true);
             endTimeLabel.setVisible(true);
@@ -162,6 +191,7 @@ public class ReportsController {
     @FXML
     private void selectFirstTable(ActionEvent event) {
         tableOneComboBox.setVisible(true);
+        firstTableLabel.setVisible(true);
         tableOneComboBox.setItems(FXCollections.observableArrayList("inventory", "transaction", "employee", "customer", "menu_item"));
         tableOneComboBox.setOnAction(this::populateXAxisOptions);
     }
@@ -171,6 +201,7 @@ public class ReportsController {
         String selectedTable = tableOneComboBox.getValue();
         if (selectedTable != null) {
             xAxisComboBox.setVisible(true);
+            xAxisLabel.setVisible(true);
             switch (selectedTable) {
                 case "inventory":
                     xAxisComboBox.setItems(FXCollections.observableArrayList("ingredient_name", "current_stock", "price"));
@@ -195,6 +226,7 @@ public class ReportsController {
     @FXML
     private void addSecondTable(ActionEvent event) {
         tableTwoComboBox.setVisible(true);
+        secondTableLabel.setVisible(true);
         tableTwoComboBox.setItems(FXCollections.observableArrayList("inventory", "transaction", "employee", "customer", "menu_item"));
         tableTwoComboBox.setOnAction(this::populateYAxisFromSecondTable);
     }
@@ -203,6 +235,7 @@ public class ReportsController {
     @FXML
     private void skipSecondTable(ActionEvent event) {
         yAxisComboBox.setVisible(true);
+        yAxisLabel.setVisible(true);
         populateYAxisFromFirstTable();
     }
 
@@ -286,8 +319,7 @@ public class ReportsController {
                 }
                 break;
             case "Bar Chart":
-                BarChart<String, Number> barChart = createBarChart(xAxis, yAxis, tableOne, tableTwo);
-                chartArea.getChildren().add(barChart);
+                chartArea.getChildren().add(createBarChart(xAxis, yAxis, tableOne, tableTwo));
                 break;
             case "Pie Chart":
                 PieChart pieChart = createPieChart(xAxis, yAxis, tableOne, tableTwo);
@@ -303,7 +335,28 @@ public class ReportsController {
                 chartArea.getChildren().add(z_report_items_sold(selectedDate));
                 chartArea.getChildren().add(transactionTypes_zreport(selectedDate));
                 break;
- 
+            case "Product Usage":
+                // Get the charts for each unit
+                List<BarChart<String, Number>> unitBarCharts = productUsageChart(startDay.getValue(), endDay.getValue(), startTimeComboBox.getValue(), endTimeComboBox.getValue());
+
+                // Log the number of charts created
+                System.out.println("Number of bar charts created: " + unitBarCharts.size());
+
+                // Clear previous content from the chart area
+                chartArea.getChildren().clear();
+
+                // Add each chart to the VBox (chartArea)
+                for (BarChart<String, Number> barChart : unitBarCharts) {
+                    barChart.setPrefWidth(600);  // Adjust chart width
+                    barChart.setPrefHeight(400); // Adjust chart height
+
+                    // Add the chart directly to the VBox
+                    chartArea.getChildren().add(barChart);
+                }
+
+                // Ensure the layout is updated
+                chartArea.layout();
+                break;
             default:
                 System.out.println("Unknown graph type selected.");
         }
@@ -488,6 +541,86 @@ public class ReportsController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public List<BarChart<String, Number>> productUsageChart(LocalDate startDate, LocalDate endDate, int startHour, int endHour) {
+        List<BarChart<String, Number>> unitBarCharts = new ArrayList<>();
+    
+        // Query to fetch the inventory usage data grouped by units
+        String query = "SELECT i.ingredient_name, i.unit, " +
+                       "SUM(mit.item_quantity * imi.ingredient_amount / 10) AS total_used " +
+                       "FROM transaction t " +
+                       "JOIN menu_item_transaction mit ON t.transaction_id = mit.transaction_id " +
+                       "JOIN menu_item mi ON mit.menu_item_id = mi.menu_item_id " +
+                       "JOIN inventory_menu_item imi ON mi.menu_item_id = imi.menu_item_id " +
+                       "JOIN inventory i ON imi.ingredient_id = i.ingredient_id " +
+                       "WHERE t.transaction_date BETWEEN ? AND ? " +
+                       "AND EXTRACT(HOUR FROM t.transaction_time) BETWEEN ? AND ? " +
+                       "GROUP BY i.unit, i.ingredient_name " +
+                       "ORDER BY i.unit";
+    
+        try (Connection conn = Database.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+    
+            // Set the date range and time window as parameters
+            stmt.setDate(1, java.sql.Date.valueOf(startDate));
+            stmt.setDate(2, java.sql.Date.valueOf(endDate)); 
+            stmt.setInt(3, startHour); 
+            stmt.setInt(4, endHour);  
+    
+            // Execute the query and process the results
+            ResultSet rs = stmt.executeQuery();
+    
+            // Create a map to store ingredients and usage amounts by unit
+            Map<String, List<XYChart.Data<String, Number>>> unitDataMap = new HashMap<>();
+    
+            while (rs.next()) {
+                String ingredientName = rs.getString("ingredient_name");
+                String unit = rs.getString("unit");
+                double totalUsed = rs.getDouble("total_used");
+    
+                // Add data to the corresponding unit's list of data
+                unitDataMap.computeIfAbsent(unit, k -> new ArrayList<>())
+                           .add(new XYChart.Data<>(ingredientName, totalUsed));
+            }
+    
+            // creates a separate BarChart for each unit
+            for (Map.Entry<String, List<XYChart.Data<String, Number>>> entry : unitDataMap.entrySet()) {
+                String unit = entry.getKey();
+                List<XYChart.Data<String, Number>> unitData = entry.getValue();
+    
+                // Create axes for the BarChart
+                CategoryAxis xAxis = new CategoryAxis();
+                xAxis.setLabel("Ingredient");
+    
+                NumberAxis yAxis = new NumberAxis();
+                yAxis.setLabel("Total Amount Used");
+                yAxis.setAutoRanging(true);
+    
+                // Create the BarChart object
+                BarChart<String, Number> unitBarChart = new BarChart<>(xAxis, yAxis);
+                unitBarChart.setTitle("Inventory Usage for Unit: " + unit + " (from " + startHour + ":00 to " + endHour + ":00)");
+                unitBarChart.setLegendVisible(false);
+
+                // Create a series to hold the data for this unit
+                XYChart.Series<String, Number> unitSeries = new XYChart.Series<>();
+                unitSeries.setName("Unit: " + unit);
+    
+                // Add data to the series
+                unitSeries.getData().addAll(unitData);
+    
+                // Add the series to the BarChart
+                unitBarChart.getData().add(unitSeries);
+    
+                // Add the BarChart to the list of charts
+                unitBarCharts.add(unitBarChart);
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Return a bar chart for each different unit, as a list
+        return unitBarCharts;  
     }
     private LineChart<String, Number> x_report_hourly_sales(LocalDate selectedDate, int startHour, int endHour){
 

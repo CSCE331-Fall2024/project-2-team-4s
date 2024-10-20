@@ -4,55 +4,70 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<HBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ReportsController" spacing="10" alignment="TOP_LEFT">
-    <!-- Left side for graph -->
-    <VBox fx:id="chartArea" alignment="CENTER" prefHeight="600" prefWidth="600" style="-fx-border-color: black;">
-        <!-- This area will be dynamically updated with the chart -->
-    </VBox>
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="team4s.ReportsController" spacing="10" alignment="TOP_LEFT" prefWidth="1000" prefHeight="600">
+    <!-- Left side for graph and scrolling -->
+    <ScrollPane fx:id="chartScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" HBox.hgrow="ALWAYS">
+        <VBox fx:id="chartArea" alignment="CENTER" spacing="10" />
+    </ScrollPane>
 
     <!-- Right side for customization -->
-    <VBox fx:id="controlsArea" alignment="TOP_LEFT" prefWidth="400" spacing="10" style="-fx-border-color: black;">
+    <VBox fx:id="controlsArea" alignment="TOP_RIGHT" prefWidth="400" spacing="10" style="-fx-border-color: red; -fx-border-width: 3;" HBox.hgrow="NEVER">
         <Label text="Select Graph Type:" />
-        <ComboBox fx:id="graphTypeComboBox" prefWidth="200" onAction="#handleGraphTypeSelection" />
+        <ComboBox fx:id="graphTypeComboBox" prefWidth="200" onAction="#handleGraphTypeSelection" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
         
-        <Button fx:id="selectTableOneButton" text="Select First Table" onAction="#selectFirstTable" visible="false" />
+        <Button fx:id="selectTableOneButton" text="Select First Table" onAction="#selectFirstTable" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
 
-        <Label fx:id="firstTableLabel" text="Select First Table:" visible="false" />
+        <Label fx:id="firstTableLabel" text="Select First Table:" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
         <ComboBox fx:id="tableOneComboBox" prefWidth="200" visible="false" />
-
-        <Label fx:id = "xAxisLabel" text="Select X Axis:" visible ="false" />
-        <ComboBox fx:id="xAxisComboBox" prefWidth="200" visible="false" />
-
-        <Label fx:id = "yAxisLabel" text="Select Y Axis:" visible = "false"/>
-        <ComboBox fx:id="yAxisComboBox" prefWidth="200" visible="false" />
-
+        <HBox> 
+            <VBox>
+                <Label fx:id = "xAxisLabel" text="Select X Axis:" visible ="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+                <ComboBox fx:id="xAxisComboBox" prefWidth="200" visible="false" />
+            </VBox>
+            <VBox>
+                <Label fx:id = "yAxisLabel" text="Select Y Axis:" visible = "false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+                <ComboBox fx:id="yAxisComboBox" prefWidth="200" visible="false" />
+            </VBox>
+        </HBox>
         <!-- Scatterplot Button -->
-        <Label fx:id="scatterplotLabel" text="Display as Scatterplot?" visible="false" />
         <HBox fx:id="scatterplotButtons" spacing="10" visible="false">
-            <Button fx:id="yesScatterButton" text="Yes" onAction="#setScatterplot" />
-            <Button fx:id="noScatterButton" text="No" onAction="#setSummedData" />
+            <Label fx:id="scatterplotLabel" text="Display as Scatterplot?" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <Button fx:id="yesScatterButton" text="Yes" onAction="#setScatterplot" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+            <Button fx:id="noScatterButton" text="No" onAction="#setSummedData" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
         </HBox>
 
         <!-- Yes/No Buttons for Adding Second Table -->
-        <Label fx:id="secondTableLabel" text="Do you want to add a second table?" visible="false" />
         <HBox fx:id="secondTableButtons" spacing="10" visible="false">
-            <Button fx:id="yesButton" text="Yes" onAction="#addSecondTable" />
-            <Button fx:id="noButton" text="No" onAction="#skipSecondTable" />
+            <Label fx:id="secondTableLabel" text="Do you want to add a second table?" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <Button fx:id="yesButton" text="Yes" onAction="#addSecondTable" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <Button fx:id="noButton" text="No" onAction="#skipSecondTable" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
         </HBox>
         <ComboBox fx:id="tableTwoComboBox" prefWidth="200" visible="false"/>
 
-        <Label fx:id= "dateLabel" text="Select the Date:" visible = "false"/>
-        <DatePicker fx:id="datePicker" />
+        <HBox>
+            <Label fx:id= "dateLabel" text="Select the Date:" visible = "false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <DatePicker fx:id="datePicker" />
+        </HBox>
 
-        <Label fx:id="startTimeLabel" text="Select Start Time:" visible="false"/>
-        <ComboBox fx:id="startTimeComboBox" prefWidth="100"/>
-
-        <Label fx:id="endTimeLabel" text="Select End Time:" visible="false"/>
-        <ComboBox fx:id="endTimeComboBox" prefWidth="100"/>
-
+        <HBox>
+            <Label fx:id= "startDayLabel" text="Start Date:" visible = "false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <DatePicker fx:id="startDay" />
+        </HBox>
+        <HBox>
+            <Label fx:id= "endDayLabel" text="End Date:" visible = "false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <DatePicker fx:id="endDay" />
+        </HBox>
+        <HBox>
+            <Label fx:id="startTimeLabel" text="Select Start Time:" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <ComboBox fx:id="startTimeComboBox" prefWidth="100"/>
+        </HBox>
+        <HBox>
+            <Label fx:id="endTimeLabel" text="Select End Time:" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
+            <ComboBox fx:id="endTimeComboBox" prefWidth="100"/>
+        </HBox>
         <!-- Generate Report Button -->
-        <Button text="Generate Report" onAction="#generateReport" />
-        <Button text="Reset" onAction="#resetForm" />
-        <Button text="back" onAction="#switchToManager" />
+        <Button text="Generate Report" onAction="#generateReport" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+        <Button text="Reset" onAction="#resetForm" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+        <Button text="back" onAction="#switchToManager" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
     </VBox>
 </HBox>
