@@ -65,7 +65,7 @@
                                 <Button text="Add Item" onAction="#showAddItemDialog" />
                                 <Button text="Edit Item" onAction="#showEditItemDialog" />
                                 <Button mnemonicParsing="false" text="Delete Item"
-                                    onAction="#handleDeleteItem" />
+                                    onAction="#showDeleteItemDialog" />
                             </HBox>
                             <HBox alignment="CENTER" spacing="10">
                                 <Button mnemonicParsing="false" onAction="#switchToManager"
