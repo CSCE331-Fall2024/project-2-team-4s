@@ -17,13 +17,13 @@
         
         <Button fx:id="selectTableOneButton" text="Select First Table" onAction="#selectFirstTable" visible="false" />
 
-        <Label text="Select First Table:" />
+        <Label fx:id="firstTableLabel" text="Select First Table:" visible="false" />
         <ComboBox fx:id="tableOneComboBox" prefWidth="200" visible="false" />
 
-        <Label text="Select X Axis:" />
+        <Label fx:id = "xAxisLabel" text="Select X Axis:" visible ="false" />
         <ComboBox fx:id="xAxisComboBox" prefWidth="200" visible="false" />
 
-        <Label text="Select Y Axis:" />
+        <Label fx:id = "yAxisLabel" text="Select Y Axis:" visible = "false"/>
         <ComboBox fx:id="yAxisComboBox" prefWidth="200" visible="false" />
 
         <!-- Scatterplot Button -->
@@ -41,12 +41,13 @@
         </HBox>
         <ComboBox fx:id="tableTwoComboBox" prefWidth="200" visible="false"/>
 
+        <Label fx:id= "dateLabel" text="Select the Date:" visible = "false"/>
         <DatePicker fx:id="datePicker" />
 
-        <Label text="Select Start Time:"/>
+        <Label fx:id="startTimeLabel" text="Select Start Time:" visible="false"/>
         <ComboBox fx:id="startTimeComboBox" prefWidth="100"/>
 
-        <Label text="Select End Time:"/>
+        <Label fx:id="endTimeLabel" text="Select End Time:" visible="false"/>
         <ComboBox fx:id="endTimeComboBox" prefWidth="100"/>
 
         <!-- Generate Report Button -->

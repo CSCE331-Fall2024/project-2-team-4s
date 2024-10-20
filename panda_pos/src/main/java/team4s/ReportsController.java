@@ -50,11 +50,17 @@ public class ReportsController {
     @FXML
     private Button selectTableOneButton;
     @FXML
+    private Label firstTableLabel;
+    @FXML
     private ComboBox<String> tableOneComboBox;
+    @FXML
+    private Label xAxisLabel;
     @FXML
     private ComboBox<String> xAxisComboBox;
     @FXML
     private ComboBox<String> tableTwoComboBox;
+    @FXML
+    private Label yAxisLabel;
     @FXML
     private ComboBox<String> yAxisComboBox;
     @FXML
@@ -74,7 +80,11 @@ public class ReportsController {
     @FXML
     private DatePicker datePicker;
     @FXML
+    private Label startTimeLabel;
+    @FXML
     private ComboBox<Integer> startTimeComboBox;
+    @FXML
+    private Label endTimeLabel;
     @FXML
     private ComboBox<Integer> endTimeComboBox;
 
@@ -117,13 +127,14 @@ public class ReportsController {
     @FXML
     private void handleGraphTypeSelection(ActionEvent event) {
         String selectedGraphType = graphTypeComboBox.getValue();
-        selectTableOneButton.setVisible(true);
     
         if("Product Usage".equals(selectedGraphType)){
             System.out.println("will add soon");
         }
         else if("X-report".equals(selectedGraphType)){
             datePicker.setVisible(true);
+            startTimeLabel.setVisible(true);
+            endTimeLabel.setVisible(true);
             startTimeComboBox.setVisible(true);
             endTimeComboBox.setVisible(true);
         }
@@ -131,6 +142,7 @@ public class ReportsController {
             datePicker.setVisible(true);
         }
         else if ("Line Graph".equals(selectedGraphType)) {
+            selectTableOneButton.setVisible(true);
             yAxisComboBox.setVisible(false);
             secondTableLabel.setVisible(true);
             secondTableButtons.setVisible(true);
@@ -138,6 +150,7 @@ public class ReportsController {
             scatterplotButtons.setVisible(true);
         } 
         else {
+            selectTableOneButton.setVisible(true);
             scatterplotLabel.setVisible(false);
             scatterplotButtons.setVisible(false);
             secondTableLabel.setVisible(true);
@@ -453,6 +466,10 @@ public class ReportsController {
         tableTwoComboBox.setVisible(false);
         datePicker.setValue(LocalDate.now());
         datePicker.setVisible(false);
+        startTimeComboBox.setVisible(false);
+        startTimeLabel.setVisible(false);
+        endTimeComboBox.setVisible(false);
+        endTimeLabel.setVisible(false);
 
         // Clear the chart area
         chartArea.getChildren().clear();
@@ -665,7 +682,7 @@ public class ReportsController {
         itemsSoldChart.getData().add(itemsSoldSeries);
         return itemsSoldChart;
     }
-    // Create a generalized function for Transaction Types per Hour
+    //transaction types for an x report
     private LineChart<String, Number> transactionTypes_xreport(LocalDate selectedDate, int startHour, int endHour) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
@@ -729,7 +746,7 @@ public class ReportsController {
         return transactionTypeChart;
     }
 
-    // Create the LineChart for Transaction Types per Hour
+    //transaction type for z report
     private LineChart<String, Number> transactionTypes_zreport(LocalDate selectedDate) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
