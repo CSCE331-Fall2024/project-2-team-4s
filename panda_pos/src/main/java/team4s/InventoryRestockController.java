@@ -6,7 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
-
+import java.util.List;
+import java.util.ArrayList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,15 +21,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -38,21 +34,42 @@ public class InventoryRestockController {
     private Scene scene;
     private Parent root;
     private Connection conn;
+    private double orderTotal = 0.0;
 
     @FXML
     private TableView<InventoryItem> inventoryTable;
 
-    /*
-     * Initializes the database connection and loads the inventory items into the
-     * table view.
-     * 
-     */
+    @FXML
+    private TableView<InventoryItem> recommendedRestockTable;
+
+    @FXML
+    private ComboBox<String> ingredientComboBox;
+
+    @FXML
+    private TextField quantityTextField;
+
+    @FXML
+    private TableView<RestockInventoryItem> restockOrderTable;
+
+    @FXML
+    private Label errorLabel;
+
+    @FXML
+    private Label orderTotalLabel;
+
+    // initialize inventory items in the TableView
     public void initialize() {
         try {
             conn = Database.connect();
 
             // Load the menu items into the TableView
             loadInventoryItems();
+
+            // Load the recommended restock items into the TableView
+            loadRestockRecommendations();
+
+            // Load the ingredientComboBox
+            loadIngredientComboBox();
 
             conn.close();
         } catch (SQLException e) {
@@ -68,7 +85,10 @@ public class InventoryRestockController {
         ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
         String query = "SELECT * FROM inventory ORDER BY ingredient_id";
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
             while (rs.next()) {
                 inventoryItems.add(new InventoryItem(
                         rs.getInt("ingredient_id"),
@@ -87,82 +107,10 @@ public class InventoryRestockController {
     }
 
     /*
-     * Load ingredients into the ListView
-     * 
-     * @param ingredientListView the ListView to load the ingredients into
+     * Add a new inventory item
      * 
      */
-    private void loadIngredients(ListView<InventoryItem> ingredientListView) {
-        ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
-
-        // Fetch ingredients from the database
-        try {
-            conn = Database.connect();
-            String fetchIngredientsQuery = "SELECT ingredient_id, ingredient_name, current_stock, price, unit, min_stock FROM inventory ORDER BY ingredient_name";
-            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(fetchIngredientsQuery)) {
-                while (rs.next()) {
-                    int ingredientId = rs.getInt("ingredient_id");
-                    String ingredientName = rs.getString("ingredient_name");
-                    int currentStock = rs.getInt("current_stock");
-                    double price = rs.getDouble("price");
-                    String unit = rs.getString("unit");
-                    int minStock = rs.getInt("min_stock");
-
-                    // Create the InventoryItem object
-                    InventoryItem item = new InventoryItem(ingredientId, ingredientName, currentStock, price, unit,
-                            minStock);
-                    ingredients.add(item);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // Set the ingredients in ListView
-        ingredientListView.setItems(ingredients);
-
-        // Set a custom cell factory to add checkboxes and amount spinners to the
-        // ListView
-        ingredientListView.setCellFactory(param -> new ListCell<>() {
-            private final CheckBox checkBox = new CheckBox();
-            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Spinner for amount, range 1-100,
-                                                                                     // default 1
-            private final HBox hbox = new HBox(10); // HBox to arrange CheckBox and Spinner
-
-            {
-                amountSpinner.setPrefWidth(70);
-            }
-
-            @Override
-            protected void updateItem(InventoryItem item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                } else {
-                    checkBox.setText(
-                            item.getIngredientName() + " (" + item.getCurrentStock() + " " + item.getUnit() + ")");
-                    checkBox.setSelected(item.isSelected()); // Bind the checkbox to the item’s selected state
-                    amountSpinner.getValueFactory().setValue(item.getAmount()); // Bind the spinner to the item’s amount
-
-                    // Update item state when checkbox is clicked
-                    checkBox.setOnAction(event -> item.setSelected(checkBox.isSelected()));
-
-                    // Update item state when spinner value changes
-                    amountSpinner.valueProperty().addListener((obs, oldValue, newValue) -> item.setAmount(newValue));
-
-                    hbox.getChildren().setAll(checkBox, amountSpinner); // Add CheckBox and Spinner to HBox
-                    setGraphic(hbox);
-                }
-            }
-        });
-    }
-
-    /*
-     * Handle the Restock Inventory button
-     * 
-     * @param event the ActionEvent object
-     * 
-     */
+    // Method to handle the Add Inventory Item button
     public void showAddInventoryItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
@@ -447,6 +395,194 @@ public class InventoryRestockController {
             System.out.println("Inventory item deleted from database: " + item.getIngredientName());
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    // Load recommended restock items
+    private void loadRestockRecommendations() {
+        ObservableList<InventoryItem> recommendedRestockItems = FXCollections.observableArrayList();
+
+        String query = "SELECT * FROM inventory WHERE current_stock < min_stock ORDER BY ingredient_id";
+
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                recommendedRestockItems.add(new InventoryItem(
+                        rs.getInt("ingredient_id"),
+                        rs.getString("ingredient_name"),
+                        rs.getInt("current_stock"),
+                        rs.getDouble("price"),
+                        rs.getString("unit"),
+                        rs.getInt("min_stock")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Set the items in the TableView
+        recommendedRestockTable.setItems(recommendedRestockItems);
+    }
+
+    // load the ingredientComboBox
+    public void loadIngredientComboBox() {
+        ObservableList<String> ingredients = FXCollections.observableArrayList();
+
+        String fetchIngredientsQuery = "SELECT ingredient_id, ingredient_name, current_stock, price, unit, min_stock FROM inventory ORDER BY ingredient_name";
+
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(fetchIngredientsQuery);
+
+            while (rs.next()) {
+                String ingredientName = rs.getString("ingredient_name");
+
+                ingredients.add(ingredientName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Set the ingredients in the ComboBox
+        ingredientComboBox.setItems(ingredients);
+    }
+
+    // Add to restock order
+    public void addToRestockOrder(ActionEvent event) {
+        String ingredientName = ingredientComboBox.getValue();
+        String quantityText = quantityTextField.getText();
+
+        // Error handling
+        if (ingredientName == null || ingredientName.isEmpty()) {
+            errorLabel.setText("Please select an ingredient.");
+            return;
+        }
+
+        if (quantityText == null || quantityText.isEmpty()) {
+            errorLabel.setText("Please enter a quantity.");
+            return;
+        }
+
+        int quantity = Integer.parseInt(quantityText);
+        String fetchIngredientQuery = "SELECT * FROM inventory WHERE ingredient_name = ?";
+
+        try {
+            conn = Database.connect();
+
+            PreparedStatement stmt = conn.prepareStatement(fetchIngredientQuery);
+            stmt.setString(1, ingredientName);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int ingredientID = rs.getInt("ingredient_id");
+                double price = rs.getDouble("price");
+                String unit = rs.getString("unit");
+                double totalPrice = price * quantity;
+
+                // Create a new RestockInventoryItem object
+                RestockInventoryItem item = new RestockInventoryItem(ingredientID, ingredientName, quantity, price,
+                        unit, totalPrice);
+
+                // Add the item to the restock order table
+                restockOrderTable.getItems().add(item);
+
+                // Update the order total
+                orderTotal += totalPrice;
+                orderTotalLabel.setText(String.format("Order Total: $%.2f", orderTotal));
+
+                // Clear combo box
+                ingredientComboBox.setValue(null);
+
+                // Clear the quantity text field
+                quantityTextField.clear();
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Remove from restock order
+    public void removeFromRestockOrder(ActionEvent event) {
+        RestockInventoryItem selectedItem = restockOrderTable.getSelectionModel().getSelectedItem();
+
+        if (selectedItem != null) {
+            // Remove the item from the table
+            restockOrderTable.getItems().remove(selectedItem);
+
+            // Update the order total
+            orderTotal -= selectedItem.getTotalPrice();
+            orderTotalLabel.setText(String.format("Order Total: $%.2f", orderTotal));
+        } else {
+            // Show alert if no item is selected
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Item Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an ingredient to remove from the restock order");
+            alert.showAndWait();
+            return;
+        }
+    }
+
+    // Clear restock order
+    public void clearRestockOrder(ActionEvent event) {
+        restockOrderTable.getItems().clear();
+        orderTotal = 0.0;
+        orderTotalLabel.setText("Order Total: $0.00");
+    }
+
+    // Submit restock order
+    public void submitRestockOrder(ActionEvent event) {
+        if (restockOrderTable.getItems().isEmpty()) {
+            // Show an error alert if the order is empty
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setTitle("Empty Order");
+            errorAlert.setHeaderText(null);
+            errorAlert.setContentText("Please add items to the restock order before submitting");
+            errorAlert.showAndWait();
+            return;
+        }
+
+        // Show a confirmation dialog
+        Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
+        confirmationAlert.setTitle("Confirm Restock Order");
+        confirmationAlert.setHeaderText("Are you sure you want to submit this order?");
+        confirmationAlert.setContentText("Order Total: $" + orderTotal);
+
+        Optional<ButtonType> result = confirmationAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // On confirmation, update the inventory and clear the order
+            try {
+                conn = Database.connect();
+
+                // Put items in a separate list to avoid exception
+                List<RestockInventoryItem> itemsToUpdate = new ArrayList<>(restockOrderTable.getItems());
+
+                for (RestockInventoryItem item : itemsToUpdate) {
+                    int ingredientID = item.getIngredientID();
+                    int quantity = item.getQuantity();
+
+                    // Update the inventory
+                    String updateInventoryQuery = "UPDATE inventory SET current_stock = current_stock + ? WHERE ingredient_id = ?";
+                    PreparedStatement stmt = conn.prepareStatement(updateInventoryQuery);
+                    stmt.setInt(1, quantity);
+                    stmt.setInt(2, ingredientID);
+                    stmt.executeUpdate();
+
+                    System.out.println("Inventory updated for ingredient ID " + ingredientID);
+                }
+
+                // Clear the order
+                restockOrderTable.getItems().clear();
+
+                // Update the inventory table
+                loadInventoryItems();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

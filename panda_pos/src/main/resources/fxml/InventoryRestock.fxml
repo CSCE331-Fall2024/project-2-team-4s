@@ -12,6 +12,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TextField?>
 
 <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
     minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21"
@@ -51,7 +52,7 @@
                                         <PropertyValueFactory property="unit" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn fx:id="minStockColumn" text="Min Stock">
+                                <TableColumn fx:id="minStockColumn" text="Minimum Stock">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="minStock" />
                                     </cellValueFactory>
@@ -69,6 +70,112 @@
                             <HBox alignment="CENTER" spacing="10">
                                 <Button mnemonicParsing="false" onAction="#switchToManager"
                                     text="Go Back" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </Tab>
+
+                <Tab text="Restock" closable="false">
+                    <VBox alignment="CENTER" spacing="10">
+                        <padding>
+                            <Insets top="0" bottom="15" left="15" right="15" />
+                        </padding>
+                        <Label text="Recommended Items to Restock" />
+                        <TableView fx:id="recommendedRestockTable" prefWidth="600" prefHeight="200">
+                            <placeholder>
+                                <Label text="No recommended items to restock" />
+                            </placeholder>
+                            <columns>
+                                <TableColumn fx:id="recommendedIngredientIdColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientID" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="recommendedIngredientNameColumn" text="Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="recommendedCurrentStockColumn"
+                                    text="Current Stock">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="currentStock" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="recommendedPriceColumn" text="Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="price" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="recommendedUnitColumn" text="Unit">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="unit" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="recommendedMinStockColumn" text="Minimum Stock">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="minStock" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <HBox alignment="CENTER" spacing="10">
+                            <Label text="Select Ingredient:" />
+                            <ComboBox fx:id="ingredientComboBox" />
+                        </HBox>
+                        <HBox alignment="CENTER" spacing="10">
+                            <Label text="Quantity:" />
+                            <TextField fx:id="quantityTextField" />
+                        </HBox>
+                        <VBox alignment="CENTER" spacing="10">
+                            <Button text="Add to Order" onAction="#addToRestockOrder" />
+                            <Label fx:id="errorLabel" />
+                        </VBox>
+                        <TableView fx:id="restockOrderTable" prefWidth="600" prefHeight="200">
+                            <placeholder>
+                                <Label text="No items in restock order" />
+                            </placeholder>
+                            <columns>
+                                <TableColumn fx:id="orderIngredientIdColumn" text="ID">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientID" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="orderIngredientNameColumn" text="Name">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="ingredientName" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="orderQuantityColumn" text="Quantity">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="quantity" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="orderPriceColumn" text="Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="price" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="orderUnitColumn" text="Unit">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="unit" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="orderTotalPriceColumn" text="Total Price">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="totalPrice" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+                        <VBox alignment="CENTER" spacing="10">
+                            <Label fx:id="orderTotalLabel" text="Total Price: $0.00" />
+                            <Button text="Submit Order" onAction="#submitRestockOrder" />
+
+                            <HBox alignment="CENTER" spacing="10">
+                                <Button text="Remove from Order" onAction="#removeFromRestockOrder" />
+                                <Button text="Clear Order" onAction="#clearRestockOrder" />
                             </HBox>
                         </VBox>
                     </VBox>
