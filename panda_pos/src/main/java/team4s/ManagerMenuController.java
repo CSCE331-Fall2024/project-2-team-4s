@@ -13,6 +13,12 @@ public class ManagerMenuController {
     private Parent root;
 
     // Switch to employee GUI (Employee.fxml)
+    /*
+     * Switches to the employee GUI (Employee.fxml) when the "Employee" button is
+     * clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToEmployee(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Employee.fxml"));
@@ -28,6 +34,12 @@ public class ManagerMenuController {
     }
 
     // Switch to inventory restock GUI (InventoryRestock.fxml)
+    /*
+     * Switches to the inventory restock GUI (InventoryRestock.fxml) when the
+     * "Inventory Restock" button is clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToInventoryRestock(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/InventoryRestock.fxml"));
@@ -43,6 +55,12 @@ public class ManagerMenuController {
     }
 
     // Switch to item menu GUI (ItemMenu.fxml)
+    /*
+     * Switches to the item menu GUI (ItemMenu.fxml) when the "Item Menu" button is
+     * clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToItemMenu(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ItemMenu.fxml"));
@@ -58,6 +76,12 @@ public class ManagerMenuController {
     }
 
     // Switch to reports GUI (Reports.fxml)
+    /*
+     * Switches to the reports GUI (Reports.fxml) when the "Reports" button is
+     * clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToReports(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Reports.fxml"));
@@ -73,6 +97,11 @@ public class ManagerMenuController {
     }
 
     // Switch to menu GUI (Menu.fxml)
+    /*
+     * Switches to the menu GUI (Menu.fxml) when the "Menu" button is clicked.
+     * 
+     * @param event the ActionEvent object
+     */
     public void switchToMenu(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Menu.fxml"));

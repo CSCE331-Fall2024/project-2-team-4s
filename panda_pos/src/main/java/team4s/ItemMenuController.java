@@ -42,6 +42,10 @@ public class ItemMenuController {
     private TableView<MenuItem> menuTable;
 
     // initialize menu items
+    /*
+     * Initializes the database connection and loads the menu items into the table
+     * view.
+     */
     public void initialize() {
         try {
             conn = Database.connect();
@@ -56,6 +60,9 @@ public class ItemMenuController {
     }
 
     // load menu items into the TableView
+    /*
+     * Load menu items into the table view
+     */
     private void loadMenuItems() {
         ObservableList<MenuItem> menu_items = FXCollections.observableArrayList();
 
@@ -90,6 +97,12 @@ public class ItemMenuController {
     }
 
     // Load Ingredients
+    /*
+     * Load ingredients into the ListView
+     * 
+     * @param ingredientListView the ListView to load the ingredients into
+     * 
+     */
     private void loadIngredients(ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
 
@@ -156,7 +169,14 @@ public class ItemMenuController {
         });
     }
 
+
     // Method to handle the Add Ingredients button
+    /*
+     * Show the dialog to add a new menu item
+     * 
+     * @param event the ActionEvent that triggered the method
+     * 
+     */
     public void showAddItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
@@ -329,6 +349,10 @@ public class ItemMenuController {
     }
 
     // Method to handle the Edit Item button
+    /*
+     * Show the dialog to edit a menu item
+     * 
+     */
     public void showEditItemDialog() {
         MenuItem selectedItem = menuTable.getSelectionModel().getSelectedItem();
 
@@ -467,6 +491,15 @@ public class ItemMenuController {
 
     // Load all ingredients, marking those that are currently selected for the given
     // menu item
+    /*
+     * Load all ingredients into the ListView, marking the ones that are currently
+     * selected for the given menu item
+     * 
+     * @param menuItemId the ID of the menu item
+     * 
+     * @param ingredientListView the ListView to load the ingredients into
+     * 
+     */
     private void loadAllIngredientsWithCurrentSelection(int menuItemId, ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
 
@@ -544,6 +577,12 @@ public class ItemMenuController {
     }
 
     // Method to handle the deleting menu items (change on_menu to false)
+    /*
+     * Show the dialog to delete a menu item
+     * 
+     * @param event the ActionEvent that triggered the method
+     * 
+     */
     public void showDeleteItemDialog(ActionEvent event) {
         // Get the selected item
         MenuItem selectedItem = menuTable.getSelectionModel().getSelectedItem();
@@ -589,6 +628,11 @@ public class ItemMenuController {
     }
 
     // Switch to manager menu
+    /*
+     * Switch to the manager menu
+     * 
+     * @param event the ActionEvent that triggered the method
+     */
     public void switchToManager(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));

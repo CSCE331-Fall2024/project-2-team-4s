@@ -28,12 +28,17 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+
 public class EmployeeController {
     private Stage stage;
     private Scene scene;
     private Parent root;
     private Connection conn;
-
+    /**
+     * Initializes the database connection and loads the employees into the table view.
+     * 
+     * 
+     */
     @FXML
     private TableView<Employee> employeeTable;
 
@@ -52,8 +57,11 @@ public class EmployeeController {
             System.err.println("Database connection error");
         }
     }
+    /*
+     * Load employees into the table view
+     * 
+     */
 
-    // load employees into the table view
     private void loadEmployees() {
         ObservableList<Employee> employees = FXCollections.observableArrayList();
 
@@ -78,6 +86,10 @@ public class EmployeeController {
         // set the employees in the table view
         employeeTable.setItems(employees);
     }
+    /*
+     * Show the modal to add a new employee
+     * 
+     */
 
     public void showAddEmployeeModal() {
         // create a stage for the modal
@@ -145,6 +157,10 @@ public class EmployeeController {
         modal.setScene(modalScene);
         modal.showAndWait();
     }
+    /*
+     * Show the modal to edit an employee
+     * 
+     */
 
     public void showEditEmployeeModal() {
         // get the selected employee
@@ -224,6 +240,10 @@ public class EmployeeController {
         modal.setScene(modalScene);
         modal.showAndWait();
     };
+    /*
+     * Delete an employee
+     * 
+     */
 
     public void showDeleteEmployeeModal() {
         // get the selected employee
@@ -270,6 +290,12 @@ public class EmployeeController {
             return;
         }
     };
+
+    /*
+     * Switch to manager menu
+     * 
+     * @param event the action event
+     */
 
     // Switch to manager menu
     public void switchToManager(ActionEvent event) {
