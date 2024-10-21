@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.imageio.ImageIO;
+
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,11 +24,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -41,46 +43,30 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.FileWriter;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.WritableImage;
+import javafx.stage.FileChooser;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+
 public class ReportsController {
     private Stage stage;
     private Scene scene;
     private Parent root;
     private Connection conn;
-    
-    private boolean isScatterplot = false;
+    private Node selectedGraph;
+    private XYChart<String, Number> selectedChart;
 
     @FXML
     private ComboBox<String> graphTypeComboBox;
     @FXML
-    private Button selectTableOneButton;
-    @FXML
-    private Label firstTableLabel;
-    @FXML
-    private ComboBox<String> tableOneComboBox;
-    @FXML
-    private Label xAxisLabel;
-    @FXML
-    private ComboBox<String> xAxisComboBox;
-    @FXML
-    private ComboBox<String> tableTwoComboBox;
-    @FXML
-    private Label yAxisLabel;
-    @FXML
-    private ComboBox<String> yAxisComboBox;
-    @FXML
     private VBox inputArea;
-    @FXML
-    private Label secondTableLabel;
-    @FXML
-    private HBox secondTableButtons;
     @FXML
     private VBox chartArea;
     @FXML
     private Button returnToManagerButton;
-    @FXML
-    private Label scatterplotLabel;
-    @FXML
-    private HBox scatterplotButtons;
     @FXML
     private Label dateLabel;
     @FXML
@@ -103,15 +89,10 @@ public class ReportsController {
     private DatePicker endDay;
     @FXML
     private ScrollPane chartScrollPane;
-    @FXML
-    private GridPane chartGrid;
 
     @FXML
     public void initialize() {
         populateGraphTypeComboBox();
-        selectTableOneButton.setVisible(false);
-        secondTableLabel.setVisible(false);
-        secondTableButtons.setVisible(false);
         datePicker.setValue(LocalDate.now());
         datePicker.setVisible(false);
         startTimeComboBox.setVisible(false);
@@ -130,18 +111,8 @@ public class ReportsController {
     }
     //creates the dropdown menu for the graph types
     private void populateGraphTypeComboBox() {
-        graphTypeComboBox.setItems(FXCollections.observableArrayList("Product Usage", "X-report", "Z-report", "Pie Chart", "Bar Chart", "Line Graph"));
+        graphTypeComboBox.setItems(FXCollections.observableArrayList("Product Usage", "X-report", "Z-report", "custom"));
         graphTypeComboBox.setOnAction(this::handleGraphTypeSelection);
-    }
-    //sets yes for scatterplot if the yes button for scatterplot is clicked
-    @FXML
-    private void setScatterplot(ActionEvent event) {
-        isScatterplot = true;
-    }
-    //sets no for scatterplot if the no button for scatterplot is clicked
-    @FXML
-    private void setSummedData(ActionEvent event) {
-        isScatterplot = false;
     }
 
     //updates the gui based on the selected graph type
@@ -170,121 +141,13 @@ public class ReportsController {
         else if("Z-report".equals(selectedGraphType)){
             datePicker.setVisible(true);
         }
-        else if ("Line Graph".equals(selectedGraphType)) {
-            selectTableOneButton.setVisible(true);
-            yAxisComboBox.setVisible(false);
-            secondTableLabel.setVisible(true);
-            secondTableButtons.setVisible(true);
-            scatterplotLabel.setVisible(true);
-            scatterplotButtons.setVisible(true);
-        } 
-        else {
-            selectTableOneButton.setVisible(true);
-            scatterplotLabel.setVisible(false);
-            scatterplotButtons.setVisible(false);
-            secondTableLabel.setVisible(true);
-            secondTableButtons.setVisible(true);
-        }
-    }
-
-    //populates the dropdown for the first table once the button is clicked and then sets the xaxis options, based on the selected value
-    @FXML
-    private void selectFirstTable(ActionEvent event) {
-        tableOneComboBox.setVisible(true);
-        firstTableLabel.setVisible(true);
-        tableOneComboBox.setItems(FXCollections.observableArrayList("inventory", "transaction", "employee", "customer", "menu_item"));
-        tableOneComboBox.setOnAction(this::populateXAxisOptions);
-    }
-
-    //populates the x axis options based on the selected value for the first table
-    private void populateXAxisOptions(ActionEvent event) {
-        String selectedTable = tableOneComboBox.getValue();
-        if (selectedTable != null) {
-            xAxisComboBox.setVisible(true);
-            xAxisLabel.setVisible(true);
-            switch (selectedTable) {
-                case "inventory":
-                    xAxisComboBox.setItems(FXCollections.observableArrayList("ingredient_name", "current_stock", "price"));
-                    break;
-                case "transaction":
-                    xAxisComboBox.setItems(FXCollections.observableArrayList("transaction_id", "total_cost", "transaction_time", "transaction_date", "transaction_type", "customer_id", "employee_id",  "week_number"));
-                    break;
-                case "employee":
-                    xAxisComboBox.setItems(FXCollections.observableArrayList("employee_id", "first_name", "last_name", "role"));
-                    break;
-                case "customer":
-                    xAxisComboBox.setItems(FXCollections.observableArrayList("customer_id", "first_name", "last_name", "reward_points"));
-                    break;
-                case "menu_item":
-                    xAxisComboBox.setItems(FXCollections.observableArrayList("menu_item_id", "current_servings", "item_name", "item_price", "item_category"));
-                    break;
-            }
-        }
-    }
-
-    //called when yes is selected for adding second table
-    @FXML
-    private void addSecondTable(ActionEvent event) {
-        tableTwoComboBox.setVisible(true);
-        secondTableLabel.setVisible(true);
-        tableTwoComboBox.setItems(FXCollections.observableArrayList("inventory", "transaction", "employee", "customer", "menu_item"));
-        tableTwoComboBox.setOnAction(this::populateYAxisFromSecondTable);
-    }
-
-    //called when no is selected for adding second table
-    @FXML
-    private void skipSecondTable(ActionEvent event) {
-        yAxisComboBox.setVisible(true);
-        yAxisLabel.setVisible(true);
-        populateYAxisFromFirstTable();
-    }
-
-    //populates the y axis values based on the selected second table, if addSecondTable was called
-    private void populateYAxisFromSecondTable(ActionEvent event) {
-        String selectedTable = tableTwoComboBox.getValue();
-        if (selectedTable != null) {
-            yAxisComboBox.setVisible(true);
-            switch (selectedTable) {
-                case "inventory":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList("current_stock", "price"));
-                    break;
-                case "transaction":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList( "total_cost", "week_number"));
-                    break;
-                case "employee":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList("employee_id"));
-                    break;
-                case "customer":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList( "reward_points"));
-                    break;
-                case "menu_item":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList( "current_servings", "item_price"));
-                    break;
-            }
-        }
-    }
-
-    //populates the y axis values based on the selected first table, if skipSecondTable was called
-    private void populateYAxisFromFirstTable() {
-        String selectedTable = tableOneComboBox.getValue();
-        if (selectedTable != null) {
-            switch (selectedTable) {
-                case "inventory":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList("current_stock", "price"));
-                    break;
-                case "transaction":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList("total_cost", "week_number"));
-                    break;
-                case "employee":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList("employee_id"));
-                    break;
-                case "customer":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList( "reward_points"));
-                    break;
-                case "menu_item":
-                    yAxisComboBox.setItems(FXCollections.observableArrayList( "current_servings", "item_price"));
-                    break;
-            }
+        else if("custom".equals(selectedGraphType)){
+            // Warning popup that custom is not currently implemented
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Future feature");
+            alert.setHeaderText("Custom is not currently available.");
+            alert.setContentText("Hopefully we can make it a feature in project 3!");
+            alert.showAndWait();
         }
     }
 
@@ -293,253 +156,50 @@ public class ReportsController {
     private void generateReport(ActionEvent event) {
         chartArea.getChildren().clear();
         String graphType = graphTypeComboBox.getValue();
-        String tableOne = tableOneComboBox.getValue();
-        String xAxis = xAxisComboBox.getValue();
-        String tableTwo = (tableTwoComboBox != null && tableTwoComboBox.isVisible()) ? tableTwoComboBox.getValue() : null;
-        String yAxis = yAxisComboBox.getValue();
         // get the current day in formatter, and the current hour in formatter2
         LocalDate selectedDate = datePicker.getValue();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = selectedDate.format(formatter);
-
-        LocalDate fixedDate = LocalDate.parse("2024-10-15", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        if(fixedDate.isBefore(selectedDate)){
-            selectedDate = fixedDate;
+        if(startTimeComboBox.getValue() > endTimeComboBox.getValue()){
+            //alerts if the user picks a starting hour that is after the end hour
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid End time");
+            alert.setHeaderText("Start time must come before end time.");
+            alert.setContentText("Please change the start and/or end time to make the start time come earlier. Then try again!");
+            alert.showAndWait();
         }
-
         switch (graphType) {
-            case "Line Graph":
-                if(isScatterplot){
-                    LineChart<String, Number> scatterplot = createScatterplot(xAxis, yAxis, tableOne, tableTwo);
-                    chartArea.getChildren().add(scatterplot);
-                }
-                else{
-                    LineChart<String, Number> lineChart = createLineChart(xAxis, yAxis, tableOne, tableTwo);
-                    chartArea.getChildren().add(lineChart);
-                }
-                break;
-            case "Bar Chart":
-                chartArea.getChildren().add(createBarChart(xAxis, yAxis, tableOne, tableTwo));
-                break;
-            case "Pie Chart":
-                PieChart pieChart = createPieChart(xAxis, yAxis, tableOne, tableTwo);
-                chartArea.getChildren().add(pieChart);
-                break;
             case "X-report":
-                chartArea.getChildren().add(x_report_hourly_sales(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
-                chartArea.getChildren().add(x_report_items_sold(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
-                chartArea.getChildren().add(transactionTypes_xreport(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
+                Node salesChart = wrapGraphForSelection(x_report_hourly_sales(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
+                Node itemsChart = wrapGraphForSelection(x_report_items_sold(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
+                Node typesChart = wrapGraphForSelection(transactionTypes_xreport(selectedDate, startTimeComboBox.getValue(), endTimeComboBox.getValue()));
+                chartArea.getChildren().addAll(salesChart, itemsChart, typesChart);
                 break;
             case "Z-report":
-                chartArea.getChildren().add(z_report_hourly_sales(selectedDate));
-                chartArea.getChildren().add(z_report_items_sold(selectedDate));
-                chartArea.getChildren().add(transactionTypes_zreport(selectedDate));
+                Node zSalesChart = wrapGraphForSelection(z_report_hourly_sales(selectedDate));
+                Node zItemsChart = wrapGraphForSelection(z_report_items_sold(selectedDate));
+                Node zTypesChart = wrapGraphForSelection(transactionTypes_zreport(selectedDate));
+                chartArea.getChildren().addAll(zSalesChart, zItemsChart, zTypesChart);
                 break;
             case "Product Usage":
-                // Get the charts for each unit
+                if(startDay.getValue().isAfter(endDay.getValue())){
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Invalid Days");
+                    alert.setHeaderText("Start day must come before end day.");
+                    alert.setContentText("Please change the start and/or end day to make the start day come first. Then try again!");
+                    alert.showAndWait();
+                }
                 List<BarChart<String, Number>> unitBarCharts = productUsageChart(startDay.getValue(), endDay.getValue(), startTimeComboBox.getValue(), endTimeComboBox.getValue());
 
-                // Log the number of charts created
-                System.out.println("Number of bar charts created: " + unitBarCharts.size());
-
-                // Clear previous content from the chart area
-                chartArea.getChildren().clear();
-
-                // Add each chart to the VBox (chartArea)
                 for (BarChart<String, Number> barChart : unitBarCharts) {
-                    barChart.setPrefWidth(600);  // Adjust chart width
-                    barChart.setPrefHeight(400); // Adjust chart height
-
-                    // Add the chart directly to the VBox
-                    chartArea.getChildren().add(barChart);
+                    Node wrappedBarChart = wrapGraphForSelection(barChart);
+                    chartArea.getChildren().add(wrappedBarChart);
                 }
-
-                // Ensure the layout is updated
-                chartArea.layout();
                 break;
+            case "custom":
+                System.out.println("Will be included in future update...");
             default:
                 System.out.println("Unknown graph type selected.");
-        }
-    }
-    //fetches the data so it can be put into the graph, when not a line graph
-    private List<XYChart.Data<String, Number>> fetchDataFromDatabase(String xAxis, String yAxis, String tableOne, String tableTwo) {
-        List<XYChart.Data<String, Number>> dataList = new ArrayList<>();
-        
-        String query;
-
-        if (tableTwo == null) {
-            // Single table query
-            query = "SELECT " + xAxis + ", " + yAxis + " FROM " + tableOne + " ORDER BY " + xAxis + " ASC";
-        } else {
-            // Two-table query with a JOIN
-            query = "SELECT " + tableOne + "." + xAxis + ", " + tableTwo + "." + yAxis + 
-                " FROM " + tableOne + 
-                " JOIN " + tableTwo + " ON " + tableOne + ".common_column = " + tableTwo + ".common_column" +
-                " ORDER BY " + tableOne + "." + xAxis + " ASC";
-        }
-
-        try {
-            conn = Database.connect();
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                String xValue = rs.getString(1);
-                Number yValue = rs.getDouble(2); 
-                dataList.add(new XYChart.Data<>(xValue, yValue));
-            }
-
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return dataList;
-    }
-    //this is only called when it is a line graph
-    private List<XYChart.Data<String, Number>> fetchSummedDataFromDatabase(String xAxis, String yAxis, String tableOne, String tableTwo) {
-        List<XYChart.Data<String, Number>> dataList = new ArrayList<>();
-
-        // SQL query to group and sum the Y values by the X values
-        String query = "SELECT " + xAxis + ", SUM(" + yAxis + ") FROM " + tableOne + " GROUP BY " + xAxis + " ORDER BY " + xAxis + " ASC";
-
-        try (Connection conn = Database.connect();
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String xValue = rs.getString(1);
-                Number yValue = rs.getDouble(2);
-                dataList.add(new XYChart.Data<>(xValue, yValue));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return dataList;
-    }
-
-    //this is called when the graph type was line graph, but then isScatterplot was true. It creates and displays the chart
-    private LineChart<String, Number> createScatterplot(String xAxisLabel, String yAxisLabel, String tableOne, String tableTwo) {
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel(xAxisLabel);
-
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel(yAxisLabel);
-
-        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("Line Graph of " + xAxisLabel + " vs " + yAxisLabel);
-
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Data");
-
-        List<XYChart.Data<String, Number>> dataList = fetchDataFromDatabase(xAxisLabel, yAxisLabel, tableOne, tableTwo);
-        series.getData().addAll(dataList);
-
-        lineChart.getData().add(series);
-        return lineChart;
-    }
-    //this is called when isScatterplot is false and the graph type was line graph. It creates and displays the chart
-    private LineChart<String, Number> createLineChart(String xAxisLabel, String yAxisLabel, String tableOne, String tableTwo) {
-        // Group by X value and sum the Y values
-        List<XYChart.Data<String, Number>> summedData = fetchSummedDataFromDatabase(xAxisLabel, yAxisLabel, tableOne, tableTwo);
-
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel(xAxisLabel);
-
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel(yAxisLabel);
-
-        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("Summed Line Graph of " + xAxisLabel + " vs " + yAxisLabel);
-
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Summed Data");
-
-        // Add summed data to the series
-        series.getData().addAll(summedData);
-
-        lineChart.getData().add(series);
-        return lineChart;
-    }
-
-
-    //creates the barChart (need to add more to this) TODO sum the x value entries so it can be displayed properly
-    private BarChart<String, Number> createBarChart(String xAxisLabel, String yAxisLabel, String tableOne, String tableTwo) {
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel(xAxisLabel);
-
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel(yAxisLabel);
-
-        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
-        barChart.setTitle("Bar Chart of " + xAxisLabel + " vs " + yAxisLabel);
-
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Data");
-
-        List<XYChart.Data<String, Number>> dataList = fetchDataFromDatabase(xAxisLabel, yAxisLabel, tableOne, tableTwo);
-        series.getData().addAll(dataList);
-
-        barChart.getData().add(series);
-        return barChart;
-    }
-    //creates the pieChart (need to do more to this) TODO actually calculate the percents for each component
-    private PieChart createPieChart(String xAxisLabel, String yAxisLabel, String tableOne, String tableTwo) {
-        PieChart pieChart = new PieChart();
-        pieChart.setTitle("Pie Chart of " + xAxisLabel + " vs " + yAxisLabel);
-
-        List<XYChart.Data<String, Number>> dataList = fetchDataFromDatabase(xAxisLabel, yAxisLabel, tableOne, tableTwo);
-
-        for (XYChart.Data<String, Number> data : dataList) {
-            pieChart.getData().add(new PieChart.Data(data.getXValue(), data.getYValue().doubleValue()));
-        }
-
-        return pieChart;
-    }
-    
-    //used to reset the graph ui back to its original form
-    @FXML
-    private void resetForm(ActionEvent event) {
-        graphTypeComboBox.getSelectionModel().clearSelection();
-        tableOneComboBox.getSelectionModel().clearSelection();
-        xAxisComboBox.getSelectionModel().clearSelection();
-        tableTwoComboBox.getSelectionModel().clearSelection();
-        yAxisComboBox.getSelectionModel().clearSelection();
-
-        selectTableOneButton.setVisible(false);
-        tableOneComboBox.setVisible(false);
-        xAxisComboBox.setVisible(false);
-        yAxisComboBox.setVisible(false);
-        scatterplotLabel.setVisible(false);
-        scatterplotButtons.setVisible(false);
-        secondTableLabel.setVisible(false);
-        secondTableButtons.setVisible(false);
-        tableTwoComboBox.setVisible(false);
-        datePicker.setValue(LocalDate.now());
-        datePicker.setVisible(false);
-        startTimeComboBox.setVisible(false);
-        startTimeLabel.setVisible(false);
-        endTimeComboBox.setVisible(false);
-        endTimeLabel.setVisible(false);
-
-        // Clear the chart area
-        chartArea.getChildren().clear();
-    }
-
-    //switches the screen back to the main manager page
-    public void switchToManager(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
-            root = loader.load();
-
-            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
     public List<BarChart<String, Number>> productUsageChart(LocalDate startDate, LocalDate endDate, int startHour, int endHour) {
@@ -567,7 +227,6 @@ public class ReportsController {
             stmt.setInt(3, startHour); 
             stmt.setInt(4, endHour);  
     
-            // Execute the query and process the results
             ResultSet rs = stmt.executeQuery();
     
             // Create a map to store ingredients and usage amounts by unit
@@ -940,4 +599,166 @@ public class ReportsController {
     
         return transactionTypeChart;
     }
+    
+    public void exportAsPNG(Node chart, String fileName) {
+        // Create a FileChooser to specify where to save the image
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Chart Image");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("PNG Files", "*.png")
+        );
+    
+        // Show save dialog
+        File file = fileChooser.showSaveDialog(stage);
+
+        if (file != null) {
+            // Capture the snapshot of the chart
+            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
+
+            // Write the image to the file
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                System.out.println("Chart saved to: " + file.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    
+    }
+    private void exportAsCSV(XYChart<String, Number> chart) {
+        // File chooser dialog for saving the CSV
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Chart Data");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showSaveDialog(chartArea.getScene().getWindow());
+        
+        if (file != null) {
+            try (FileWriter writer = new FileWriter(file)) {
+                // Write chart data to CSV
+                writer.append("X-Axis, Y-Axis\n");
+                for (XYChart.Series<String, Number> series : chart.getData()) {
+                    for (XYChart.Data<String, Number> data : series.getData()) {
+                        writer.append(data.getXValue()).append(",").append(data.getYValue().toString()).append("\n");
+                    }
+                }
+                writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //called when the exportPNG button is pressed
+    @FXML
+    private void handleExportAsPNG(ActionEvent event) {
+        if (selectedGraph != null) {
+            WritableImage image = selectedGraph.snapshot(new SnapshotParameters(), null);
+
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Graph as PNG");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
+            File file = fileChooser.showSaveDialog(selectedGraph.getScene().getWindow());
+
+            if (file != null) {
+                try {
+                    ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                    System.out.println("Graph saved as PNG: " + file.getPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Keep the graph highlighted after exporting
+            ((VBox) selectedGraph.getParent()).setStyle("-fx-border-color: blue; -fx-border-width: 3;");
+        } else {
+            // Warning popup if no chart is selected
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Graph");
+            alert.setHeaderText("A graph is not selected.");
+            alert.setContentText("Please select a graph and try again!");
+            alert.showAndWait();
+        }
+    }
+
+    // Method to wrap a graph in a VBox and handle selection
+    private VBox wrapGraphForSelection(Node graph) {
+        VBox graphContainer = new VBox(graph);
+        graphContainer.setStyle("-fx-border-color: transparent; -fx-border-width: 2;");
+
+        graphContainer.setOnMouseClicked(event -> {
+            // Clear selection from previously selected graph
+            if (selectedGraph != null) {
+                ((VBox) selectedGraph.getParent()).setStyle("-fx-border-color: transparent; -fx-border-width: 2;");
+            }
+
+            // Highlight the selected graph
+            graphContainer.setStyle("-fx-border-color: blue; -fx-border-width: 3;");
+
+            // Store the selected graph
+            selectedGraph = graph;
+
+            // If the selected graph is an instance of XYChart, store it in selectedChart
+            if (graph instanceof XYChart) {
+                selectedChart = (XYChart<String, Number>) graph;  // Cast to XYChart for CSV export
+            } else {
+                selectedChart = null;  // If it's not an XYChart, set selectedChart to null
+            }
+        });
+
+        return graphContainer;
+    }
+    //called when the exportCSV button is pressed
+    @FXML
+    private void handleExportAsCSV(ActionEvent event) {
+        if (selectedChart == null) {
+            // Warning popup if no chart is selected
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Chart Selected");
+            alert.setHeaderText("Please select a chart to export.");
+            alert.setContentText("You must select a chart before exporting it as a CSV.");
+            alert.showAndWait();
+        } else {
+            // Export selected chart data as CSV
+            exportAsCSV(selectedChart);
+        }
+    }
+     //used to reset the graph ui back to its original form
+     @FXML
+     private void resetForm(ActionEvent event) {
+         graphTypeComboBox.getSelectionModel().clearSelection();
+
+         datePicker.setValue(LocalDate.now());
+         datePicker.setVisible(false);
+         dateLabel.setVisible(false);
+         startTimeComboBox.setVisible(false);
+         startTimeLabel.setVisible(false);
+         endTimeComboBox.setVisible(false);
+         endTimeLabel.setVisible(false);
+         startDayLabel.setVisible(false);
+         startDay.setVisible(false);
+         endDayLabel.setVisible(false);
+         endDay.setVisible(false);
+ 
+         startDay.setValue(LocalDate.now());
+         endDay.setValue(LocalDate.now());
+         startTimeComboBox.setValue(9);
+         endTimeComboBox.setValue(21);
+ 
+         // Clear the chart area
+         chartArea.getChildren().clear();
+     }
+ 
+     //switches the screen back to the main manager page
+     public void switchToManager(ActionEvent event) {
+         try {
+             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
+             root = loader.load();
+ 
+             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+             scene = new Scene(root);
+             stage.setScene(scene);
+             stage.show();
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
 }

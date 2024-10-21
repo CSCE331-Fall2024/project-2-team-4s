@@ -15,35 +15,6 @@
         <Label text="Select Graph Type:" />
         <ComboBox fx:id="graphTypeComboBox" prefWidth="200" onAction="#handleGraphTypeSelection" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
         
-        <Button fx:id="selectTableOneButton" text="Select First Table" onAction="#selectFirstTable" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-
-        <Label fx:id="firstTableLabel" text="Select First Table:" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-        <ComboBox fx:id="tableOneComboBox" prefWidth="200" visible="false" />
-        <HBox> 
-            <VBox>
-                <Label fx:id = "xAxisLabel" text="Select X Axis:" visible ="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-                <ComboBox fx:id="xAxisComboBox" prefWidth="200" visible="false" />
-            </VBox>
-            <VBox>
-                <Label fx:id = "yAxisLabel" text="Select Y Axis:" visible = "false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-                <ComboBox fx:id="yAxisComboBox" prefWidth="200" visible="false" />
-            </VBox>
-        </HBox>
-        <!-- Scatterplot Button -->
-        <HBox fx:id="scatterplotButtons" spacing="10" visible="false">
-            <Label fx:id="scatterplotLabel" text="Display as Scatterplot?" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-            <Button fx:id="yesScatterButton" text="Yes" onAction="#setScatterplot" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
-            <Button fx:id="noScatterButton" text="No" onAction="#setSummedData" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
-        </HBox>
-
-        <!-- Yes/No Buttons for Adding Second Table -->
-        <HBox fx:id="secondTableButtons" spacing="10" visible="false">
-            <Label fx:id="secondTableLabel" text="Do you want to add a second table?" visible="false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-            <Button fx:id="yesButton" text="Yes" onAction="#addSecondTable" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-            <Button fx:id="noButton" text="No" onAction="#skipSecondTable" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
-        </HBox>
-        <ComboBox fx:id="tableTwoComboBox" prefWidth="200" visible="false"/>
-
         <HBox>
             <Label fx:id= "dateLabel" text="Select the Date:" visible = "false" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-font-family: 'Verdana';"/>
             <DatePicker fx:id="datePicker" />
@@ -66,8 +37,16 @@
             <ComboBox fx:id="endTimeComboBox" prefWidth="100"/>
         </HBox>
         <!-- Generate Report Button -->
-        <Button text="Generate Report" onAction="#generateReport" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
-        <Button text="Reset" onAction="#resetForm" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
-        <Button text="back" onAction="#switchToManager" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+        <HBox>
+            <VBox>
+                <Button text="Export As PNG" onAction="#handleExportAsPNG" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+                <Button text="Export as CSV" onAction="#handleExportAsCSV" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+            </VBox>
+            <VBox>
+                <Button text="Generate Report" onAction="#generateReport" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+                <Button text="Reset" onAction="#resetForm" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+                <Button text="back" onAction="#switchToManager" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-font-family: 'Verdana';"/>
+            </VBox>
+        </HBox>
     </VBox>
 </HBox>
