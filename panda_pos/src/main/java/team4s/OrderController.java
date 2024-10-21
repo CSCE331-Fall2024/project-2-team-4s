@@ -40,6 +40,8 @@ public class OrderController {
     private Button selectEmployeeButton;
     @FXML
     private Button addCustomerButton; // New button
+    @FXML
+    private Button disposablesButton; // New button for disposables
 
 
     private List<String> currentOrder = new ArrayList<>();
@@ -171,6 +173,217 @@ public class OrderController {
         loadItems("Entree");
     }
 
+    @FXML
+    public void selectDisposables() {
+        resetButtonStyles();
+        disposablesButton.setStyle("-fx-background-color: #ffcccc"); // Change background color
+        selectedPlateType = ""; // Reset plate type as it's not relevant for disposables
+        loadDisposables(); // Load disposables from inventory
+    }
+
+    // Load disposable items from the inventory table
+    private void loadDisposables() {
+        dynamicButtons.getChildren().clear(); // Clear previous buttons
+        
+        // Add a label for picking a disposable item
+        Label pickDisposableLabel = new Label("Please Pick a Disposable Item:");
+        dynamicButtons.getChildren().add(pickDisposableLabel);
+
+        String query = "SELECT ingredient_name FROM inventory WHERE ingredient_id IN (36,37,38,40)"; 
+
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String disposableName = rs.getString("ingredient_name");
+                Button disposableButton = new Button(disposableName);
+                disposableButton.setOnAction(event -> addToOrderDisposable(disposableName)); // Add disposable to the order
+                dynamicButtons.getChildren().add(disposableButton);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Add disposable item to the order and subtract servings from the inventory
+    private void addToOrderDisposable(String disposableName) {
+        String orderItem = "Disposable (" + disposableName + ")";
+        currentOrder.add(orderItem);
+        currentOrderList.getItems().add(orderItem);
+
+        // Subtract from inventory for disposables
+        updateInventoryServing(disposableName, 1); // Reduce the inventory count by 1 (or adjust based on required serving size)
+
+        updateOrderTotal();
+        resetSelections();
+    }
+
+    // Method to update the inventory by subtracting the number of servings for the specified item
+    private void updateInventoryServing(String itemName, int servingsUsed) {
+        String query = "UPDATE inventory SET current_stock = current_stock - ? WHERE ingredient_name = ?";
+
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, servingsUsed); // Subtract the number of servings used
+            stmt.setString(2, itemName); // Update the item by name
+
+            int rowsUpdated = stmt.executeUpdate(); // Execute the update
+            if (rowsUpdated > 0) {
+                System.out.println("Inventory updated for item: " + itemName);
+            } else {
+                System.out.println("No inventory record found for item: " + itemName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Fetch menu_item_id from menu_item table based on item name
+    private int getMenuItemId(String itemName) {
+        String query = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, itemName);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("menu_item_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Return -1 if no menu_item_id is found for the item
+    }
+
+
+    
+    @FXML
+    private void requestRestockForMenuItem() {
+        String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
+        if (selectedItem == null || (!selectedItem.startsWith("Entree") && !selectedItem.startsWith("Side"))) {
+            showAlert("No Item Selected", "Please select a valid menu item (entree or side) to restock.");
+            return;
+        }
+
+        String itemName = extractItemName(selectedItem);
+        int menuItemId = getMenuItemId(itemName);
+        if (menuItemId == -1) {
+            showAlert("Item Not Found", "Selected item is not available in the menu.");
+            return;
+        }
+
+        if (!canRestockServings(menuItemId)) {
+            showAlert("Insufficient Ingredients", "There are insufficient ingredients available to restock " + itemName);
+            return;
+        }
+
+        restockServings(menuItemId);
+        showAlert("Restock Successful", "Servings for " + itemName + " have been successfully restocked.");
+    }
+    
+
+    // Check if ingredients are available to restock servings
+    private boolean canRestockServings(int menuItemId) {
+        String query = "SELECT ingredient_id, ingredient_amount FROM inventory_menu_item WHERE menu_item_id = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, menuItemId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int ingredientId = rs.getInt("ingredient_id");
+                double amountNeeded = rs.getDouble("ingredient_amount");
+                if (!hasEnoughIngredients(ingredientId, amountNeeded)) {
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    // Fetch available servings for a menu item
+    private int getAvailableServings(String itemName) {
+        String query = "SELECT current_servings FROM menu_item WHERE item_name = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, itemName);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("current_servings");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
+    // Check if sufficient ingredients are available in the inventory
+    private boolean hasEnoughIngredients(int ingredientId, double amountNeeded) {
+        String query = "SELECT current_stock FROM inventory WHERE ingredient_id = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, ingredientId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                double currentStock = rs.getDouble("current_stock");
+                return currentStock >= amountNeeded;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Perform the restock operation by updating the servings and decrementing inventory
+    private void restockServings(int menuItemId) {
+        String query = "SELECT ingredient_id, ingredient_amount FROM inventory_menu_item WHERE menu_item_id = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, menuItemId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int ingredientId = rs.getInt("ingredient_id");
+                double amountUsed = rs.getDouble("ingredient_amount");
+
+                // Decrement the inventory by the amount used
+                decrementInventory(ingredientId, amountUsed);
+            }
+
+            // Increase the servings in the menu_item table
+            String updateQuery = "UPDATE menu_item SET current_servings = current_servings + 10 WHERE menu_item_id = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
+                updateStmt.setInt(1, menuItemId);
+                updateStmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Decrement the ingredient stock in the inventory
+    private void decrementInventory(int ingredientId, double amountUsed) {
+        String query = "UPDATE inventory SET current_stock = current_stock - ? WHERE ingredient_id = ?";
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setDouble(1, amountUsed);
+            stmt.setInt(2, ingredientId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     private void selectPlate(String plateType) {
         // Reset button styles
         resetButtonStyles();
@@ -204,6 +417,7 @@ public class OrderController {
         drinksButton.setStyle(null);
         sideButton.setStyle(null); // Reset side button style
         entreeButton.setStyle(null); // Reset entree button style
+        disposablesButton.setStyle(null);
         
         // Reset all entree button styles to default
         for (Button entreeButton : entreeButtons) {
@@ -362,18 +576,28 @@ public class OrderController {
     
 
     private void addToOrderAppetizer(String item) {
+        int availableServings = getAvailableServings(item);
+        if (availableServings <= 0) {
+            showAlert("Out of Stock", "No servings available for " + item);
+            return;
+        }
+    
         double appetizerPrice = fetchPriceFromDatabase("Appetizer"); // Fetch price for the appetizer
         String orderItem = "Appetizer (" + item + ")\n$" + String.format("%.2f", appetizerPrice);
-        
+    
         orderTotal += appetizerPrice; // Update the total
-        
+    
         currentOrder.add(orderItem);
         currentOrderList.getItems().add(orderItem); // Add item with price
-        
+    
         updateOrderTotal(); // Update the total displayed in the UI
-        
+    
+        // Subtract one serving from the menu_item table
+        updateMenuItemServing(item, 1); // Subtract one serving from the database
+    
         resetSelections();
     }
+    
     
     
     private void addToOrderDrink(String item) {
@@ -392,37 +616,57 @@ public class OrderController {
     
 
     private void addToOrderSide(String side) {
+        int availableServings = getAvailableServings(side);
+        if (availableServings <= 0) {
+            showAlert("Out of Stock", "No servings available for " + side);
+            return;
+        }
+    
         double sidePrice = fetchPriceFromDatabase(side); // Fetch price for the side
         double aLaCarteSidePrice = fetchPriceFromDatabase("A La Carte Side"); // Fetch a la carte side price
-        
+    
         String orderItem = "Side (" + side + ")\n$" + String.format("%.2f", sidePrice + aLaCarteSidePrice);
-        
+    
         orderTotal += sidePrice + aLaCarteSidePrice; // Add to total
-        
+    
         currentOrder.add(orderItem);
         currentOrderList.getItems().add(orderItem); // Add item with price
-        
+    
         updateOrderTotal(); // Update total
-        
+    
+        // Subtract one serving from the menu_item table
+        updateMenuItemServing(side, 1); // Subtract one serving from the database
+    
         resetSelections();
     }
     
+    
 
     private void addToOrderEntree(String entree) {
+        int availableServings = getAvailableServings(entree);
+        if (availableServings <= 0) {
+            showAlert("Out of Stock", "No servings available for " + entree);
+            return;
+        }
+    
         double entreePrice = fetchPriceFromDatabase(entree); // Fetch price for the entree
         double aLaCarteEntreePrice = fetchPriceFromDatabase("A La Carte Entree"); // Fetch a la carte entree price
-        
+    
         String orderItem = "Entree (" + entree + ")\n$" + String.format("%.2f", entreePrice + aLaCarteEntreePrice);
-        
+    
         orderTotal += entreePrice + aLaCarteEntreePrice; // Add to total
-        
+    
         currentOrder.add(orderItem);
         currentOrderList.getItems().add(orderItem); // Add item with price
-        
+    
         updateOrderTotal(); // Update total
-        
+    
+        // Subtract one serving from the menu_item table
+        updateMenuItemServing(entree, 1); // Subtract one serving from the database
+    
         resetSelections();
     }
+    
     
     
     
@@ -871,57 +1115,63 @@ public class OrderController {
 
     @FXML
     public void handleConfirmButton() {
-        // Check if both an employee and a customer have been selected
-        if (selectedEmployeeId == 0 || selectedCustomerId == 0) {
-            // Show an alert if either is missing
+        // Check if an employee has been selected (customer selection is optional now)
+        if (selectedEmployeeId == 0) {
+            // Show an alert if the employee is missing
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Missing Information");
             alert.setHeaderText(null);
-            alert.setContentText("Please select both an employee and a customer before confirming the order.");
+            alert.setContentText("Please select an employee before confirming the order.");
             alert.showAndWait();
             return; // Exit the method if validation fails
         }
-
+    
+        // Safely handle customerFullName being null
+        String orderLabelContent = "Current Order";
+        if (customerFullName != null && !customerFullName.isEmpty()) {
+            orderLabelContent = "Current Order: (" + customerFullName + ")";
+        }
+    
         // Create a custom dialog for order confirmation
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Confirm Order");
         dialog.setHeaderText("Please review your order and select a payment type.");
-
+    
         // Create a VBox to hold the current order details, total, tax, and payment type
         VBox dialogPaneContent = new VBox();
         dialogPaneContent.setSpacing(10); // Add some spacing between elements
-
+    
         // Display the current order
-        Label orderLabel = new Label("Current Order: (" + customerFullName + ")");
+        Label orderLabel = new Label(orderLabelContent);
         ListView<String> orderListView = new ListView<>();
         orderListView.getItems().addAll(currentOrder); // Add current orders to the ListView
         orderListView.setPrefHeight(200); // Adjust height to fit the orders
-
+    
         // Calculate tax and total
         double tax = orderTotal * 0.0825; // Assume 8.25% sales tax
         double totalWithTax = orderTotal + tax;
-
+    
         Label totalLabel = new Label(String.format("Total: $%.2f", orderTotal));
         Label taxLabel = new Label(String.format("Tax (8.25%%): $%.2f", tax));
         Label totalWithTaxLabel = new Label(String.format("Total with Tax: $%.2f", totalWithTax));
-
+    
         // Add a ComboBox for payment type selection
         Label paymentTypeLabel = new Label("Payment Type:");
         ComboBox<String> paymentTypeComboBox = new ComboBox<>();
         paymentTypeComboBox.getItems().addAll("Credit/Debit", "Dining Dollars", "Gift Card");
         paymentTypeComboBox.setValue("Credit/Debit"); // Set default payment type
-
+    
         // Add all elements to the VBox
         dialogPaneContent.getChildren().addAll(orderLabel, orderListView, totalLabel, taxLabel, totalWithTaxLabel, paymentTypeLabel, paymentTypeComboBox);
-
+    
         // Set the dialog content
         dialog.getDialogPane().setContent(dialogPaneContent);
-
+    
         // Add "Go Back" and "Confirm Order" buttons
         ButtonType goBackButton = new ButtonType("Go Back", ButtonBar.ButtonData.CANCEL_CLOSE);
         ButtonType confirmOrderButton = new ButtonType("Confirm Order", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(goBackButton, confirmOrderButton);
-
+    
         // Handle the result of the dialog
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == confirmOrderButton) {
@@ -934,11 +1184,12 @@ public class OrderController {
             }
             return null;
         });
-
+    
         // Show the dialog and wait for user response
         dialog.showAndWait();
         customerFullName = ""; // Reset customer name after order is confirmed
     }
+    
 
     // Extract the item quantity from the order string (e.g., "Entree (Chicken) x2")
     private int extractItemQuantity(String orderItem) {
@@ -961,7 +1212,6 @@ public class OrderController {
     }
 
 
-    // Method to place the order in the database
     private void placeOrderInDatabase(double totalWithTax, String paymentType) {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -977,8 +1227,15 @@ public class OrderController {
             stmt = conn.prepareStatement(transactionQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             stmt.setDouble(1, totalWithTax);  // Set total cost with tax
             stmt.setString(2, paymentType);  // Set the selected payment type
-            stmt.setInt(3, selectedCustomerId);  // Set the customer ID
             stmt.setInt(4, selectedEmployeeId);  // Set the employee ID
+    
+            // Check if a customer is selected, set the customer_id to NULL if not selected
+            if (selectedCustomerId == 0) {
+                stmt.setNull(3, java.sql.Types.INTEGER);  // Set customer_id to NULL
+            } else {
+                stmt.setInt(3, selectedCustomerId);  // Set the customer ID
+            }
+    
             stmt.executeUpdate();
     
             // Get the generated transaction ID
@@ -994,13 +1251,23 @@ public class OrderController {
     
                 for (String orderItem : currentOrder) {
                     String itemName = extractItemName(orderItem);  // Extract the item name from the order
-                    int menuItemId = fetchMenuItemId(itemName);  // Get the menu item ID from the database
-                    int quantity = extractItemQuantity(orderItem);  // Get the item quantity (from the updated method)
+                    int quantity = extractItemQuantity(orderItem);  // Get the item quantity
     
-                    stmt.setInt(1, menuItemId);  // Set menu item ID
-                    stmt.setInt(2, transactionId);  // Set transaction ID
-                    stmt.setInt(3, quantity);  // Set item quantity
-                    stmt.addBatch();  // Add this item to the batch
+                    // Determine if the item is disposable or a menu item
+                    if (orderItem.startsWith("Disposable")) {
+                        // Subtract from the inventory for disposables
+                        updateInventoryServing(itemName, quantity);
+                    } else {
+                        // Subtract from the menu_item table for menu items
+                        int menuItemId = fetchMenuItemId(itemName);  // Get the menu item ID from the database
+                        stmt.setInt(1, menuItemId);  // Set menu item ID
+                        stmt.setInt(2, transactionId);  // Set transaction ID
+                        stmt.setInt(3, quantity);  // Set item quantity
+                        stmt.addBatch();  // Add this item to the batch
+    
+                        // Subtract servings from menu_item table for non-disposable items
+                        updateMenuItemServing(itemName, quantity);
+                    }
                 }
                 stmt.executeBatch();  // Execute all the items in the batch
             }
@@ -1028,8 +1295,29 @@ public class OrderController {
             if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
     }
+
     
-    
+    // Method to update the menu_item table by subtracting the number of servings for the specified item
+    private void updateMenuItemServing(String itemName, int servingsUsed) {
+        String query = "UPDATE menu_item SET current_servings = current_servings - ? WHERE item_name = ?";
+
+        try (Connection conn = Database.connect();
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, servingsUsed); // Subtract the number of servings used
+            stmt.setString(2, itemName); // Update the item by name
+
+            int rowsUpdated = stmt.executeUpdate(); // Execute the update
+            if (rowsUpdated > 0) {
+                System.out.println("Menu item servings updated for: " + itemName);
+            } else {
+                System.out.println("No menu item record found for: " + itemName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     // Extract the item name from the order string
     private String extractItemName(String orderItem) {
         return orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")"));  // Adjust parsing logic based on your format
