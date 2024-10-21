@@ -41,10 +41,8 @@ public class ItemMenuController {
     @FXML
     private TableView<MenuItem> menuTable;
 
-    // initialize menu items
-    /*
-     * Initializes the database connection and loads the menu items into the table
-     * view.
+    /**
+     * Initialize the item menu screen by loading the menu items from the database.
      */
     public void initialize() {
         try {
@@ -59,9 +57,8 @@ public class ItemMenuController {
         }
     }
 
-    // load menu items into the TableView
-    /*
-     * Load menu items into the table view
+    /**
+     * Queries the database for menu items and loads them into the TableView.
      */
     private void loadMenuItems() {
         ObservableList<MenuItem> menu_items = FXCollections.observableArrayList();
@@ -96,12 +93,10 @@ public class ItemMenuController {
         menuTable.setItems(menu_items);
     }
 
-    // Load Ingredients
-    /*
-     * Load ingredients into the ListView
+    /**
+     * Queries the database for ingredients and loads them into the ListView.
      * 
      * @param ingredientListView the ListView to load the ingredients into
-     * 
      */
     private void loadIngredients(ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
@@ -136,10 +131,10 @@ public class ItemMenuController {
         // Set a custom cell factory to add checkboxes and amount spinners to the
         // ListView
         ingredientListView.setCellFactory(param -> new ListCell<>() {
-            private final CheckBox checkBox = new CheckBox();
-            private final Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Spinner for amount, range 1-100,
-                                                                                     // default 1
-            private final HBox hbox = new HBox(10); // HBox to arrange CheckBox and Spinner
+            CheckBox checkBox = new CheckBox();
+            Spinner<Integer> amountSpinner = new Spinner<>(1, 100, 1); // Spinner for amount, range 1-100,
+                                                                       // default 1
+            HBox hbox = new HBox(10); // HBox to arrange CheckBox and Spinner
 
             {
                 amountSpinner.setPrefWidth(70);
@@ -169,13 +164,11 @@ public class ItemMenuController {
         });
     }
 
-
-    // Method to handle the Add Ingredients button
-    /*
-     * Show the dialog to add a new menu item
+    /**
+     * Shows the modal for adding a new menu item and handles the insertion into the
+     * database.
      * 
-     * @param event the ActionEvent that triggered the method
-     * 
+     * @param event the action event from the button click
      */
     public void showAddItemDialog(ActionEvent event) {
         // Create a new Stage for the dialog
@@ -348,10 +341,9 @@ public class ItemMenuController {
         dialog.showAndWait();
     }
 
-    // Method to handle the Edit Item button
-    /*
-     * Show the dialog to edit a menu item
-     * 
+    /**
+     * Shows the modal for editing a menu item and handles the update in the
+     * database.
      */
     public void showEditItemDialog() {
         MenuItem selectedItem = menuTable.getSelectionModel().getSelectedItem();
@@ -489,16 +481,12 @@ public class ItemMenuController {
         dialog.showAndWait();
     }
 
-    // Load all ingredients, marking those that are currently selected for the given
-    // menu item
-    /*
-     * Load all ingredients into the ListView, marking the ones that are currently
-     * selected for the given menu item
+    /**
+     * Queries the database for all ingredients and loads them into the ListView,
+     * marking the ones that are already selected by the menu item.
      * 
-     * @param menuItemId the ID of the menu item
-     * 
+     * @param menuItemId         the ID of the menu item
      * @param ingredientListView the ListView to load the ingredients into
-     * 
      */
     private void loadAllIngredientsWithCurrentSelection(int menuItemId, ListView<InventoryItem> ingredientListView) {
         ObservableList<InventoryItem> ingredients = FXCollections.observableArrayList();
@@ -576,12 +564,11 @@ public class ItemMenuController {
         });
     }
 
-    // Method to handle the deleting menu items (change on_menu to false)
-    /*
-     * Show the dialog to delete a menu item
+    /**
+     * Shows a confirmation alert for deleting a menu item and handles the deletion
+     * in the database.
      * 
-     * @param event the ActionEvent that triggered the method
-     * 
+     * @param event the action event from the button click
      */
     public void showDeleteItemDialog(ActionEvent event) {
         // Get the selected item
@@ -627,11 +614,10 @@ public class ItemMenuController {
         }
     }
 
-    // Switch to manager menu
-    /*
-     * Switch to the manager menu
+    /**
+     * Switches to the manager menu
      * 
-     * @param event the ActionEvent that triggered the method
+     * @param event the action event from the button click
      */
     public void switchToManager(ActionEvent event) {
         try {

@@ -237,8 +237,8 @@ public class EmployeeController {
     };
 
     /**
-     * Shows the modal to delete an employee and handles the deletion in the
-     * database.
+     * Shows the confirmation alert to delete an employee and handles the deletion
+     * in the database.
      */
     public void showDeleteEmployeeModal() {
         // get the selected employee

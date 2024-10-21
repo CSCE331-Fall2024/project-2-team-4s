@@ -81,7 +81,7 @@ public class InventoryRestockController {
     }
 
     /**
-     * Loads the inventory items from the database and populates the TableView.
+     * Queries the database for inventory items and loads them into the TableView.
      */
     private void loadInventoryItems() {
         ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
@@ -341,8 +341,8 @@ public class InventoryRestockController {
     }
 
     /**
-     * shows the modal to delete an inventory item and handles the deletion from the
-     * database.
+     * Shows the confirmation alert to delete an inventory item and handles the
+     * deletion from the database.
      * 
      * @param event the action event from the button click
      */
@@ -388,8 +388,8 @@ public class InventoryRestockController {
     }
 
     /**
-     * Loads the recommended restock items from the database (based on min_stock)
-     * and populates the TableView.
+     * Queries the database for inventory items that need restocking and loads them
+     * into the TableView.
      */
     private void loadRestockRecommendations() {
         ObservableList<InventoryItem> recommendedRestockItems = FXCollections.observableArrayList();
@@ -418,7 +418,7 @@ public class InventoryRestockController {
     }
 
     /**
-     * Loads the ingredients from the database and populates the ComboBox.
+     * Queries the database for ingredients and loads them into the ComboBox.
      */
     public void loadIngredientComboBox() {
         ObservableList<String> ingredients = FXCollections.observableArrayList();

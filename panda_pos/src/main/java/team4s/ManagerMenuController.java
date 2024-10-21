@@ -12,10 +12,8 @@ public class ManagerMenuController {
     private Scene scene;
     private Parent root;
 
-    // Switch to employee GUI (Employee.fxml)
-    /*
-     * Switches to the employee GUI (Employee.fxml) when the "Employee" button is
-     * clicked.
+    /**
+     * Switches to the employee management GUI.
      * 
      * @param event the ActionEvent object
      */
@@ -33,10 +31,8 @@ public class ManagerMenuController {
         }
     }
 
-    // Switch to inventory restock GUI (InventoryRestock.fxml)
-    /*
-     * Switches to the inventory restock GUI (InventoryRestock.fxml) when the
-     * "Inventory Restock" button is clicked.
+    /**
+     * Switches to the inventory and restock GUI.
      * 
      * @param event the ActionEvent object
      */
@@ -54,10 +50,8 @@ public class ManagerMenuController {
         }
     }
 
-    // Switch to item menu GUI (ItemMenu.fxml)
-    /*
-     * Switches to the item menu GUI (ItemMenu.fxml) when the "Item Menu" button is
-     * clicked.
+    /**
+     * Switches to the item menu GUI.
      * 
      * @param event the ActionEvent object
      */
@@ -75,10 +69,8 @@ public class ManagerMenuController {
         }
     }
 
-    // Switch to reports GUI (Reports.fxml)
-    /*
-     * Switches to the reports GUI (Reports.fxml) when the "Reports" button is
-     * clicked.
+    /**
+     * Switches to the reports GUI.
      * 
      * @param event the ActionEvent object
      */
@@ -96,9 +88,8 @@ public class ManagerMenuController {
         }
     }
 
-    // Switch to menu GUI (Menu.fxml)
-    /*
-     * Switches to the menu GUI (Menu.fxml) when the "Menu" button is clicked.
+    /**
+     * Switches to the main menu.
      * 
      * @param event the ActionEvent object
      */

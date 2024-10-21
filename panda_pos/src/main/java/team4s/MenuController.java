@@ -25,8 +25,7 @@ public class MenuController {
     private boolean isManager = false;
     private Connection conn;
 
-    // Show modal to validate the user for access to the manager GUI
-    /*
+    /**
      * Shows a modal to validate the user for access to the manager GUI.
      */
     public void showValidateManager() {
@@ -100,10 +99,8 @@ public class MenuController {
         }
     }
 
-    // Switch to manager GUI (Manager.fxml)
-    /*
-     * Switches to the manager GUI (Manager.fxml) when the "Manager" button is
-     * clicked.
+    /**
+     * Switches to the manager GUI.
      * 
      * @param event the ActionEvent object
      */
@@ -125,10 +122,8 @@ public class MenuController {
         }
     }
 
-    // Switch to cashier GUI (Cashier.fxml)
-    /*
-     * Switches to the cashier GUI (Cashier.fxml) when the "Cashier" button is
-     * clicked.
+    /**
+     * Switches to the cashier GUI.
      * 
      * @param event the ActionEvent object
      */
