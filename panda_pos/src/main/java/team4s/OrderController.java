@@ -1,6 +1,10 @@
 package team4s;
 
+import java.io.IOException;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -12,6 +16,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,6 +62,36 @@ public class OrderController {
     private int selectedEmployeeId; // To store the selected employee's ID
     private int selectedCustomerId;
     private String customerFullName;
+    @FXML
+    private Button goBackButton;
+
+    /**
+ * Handles the action when the "Go Back" button is clicked.
+ * This method loads the main menu by switching the scene from the current order page.
+ * It uses the FXMLLoader to load the FXML file for the main menu and sets the new scene on the stage.
+ * If an IOException occurs during loading, it is caught and logged, displaying an error alert.
+ *
+ * @throws IOException if the FXML file for the main menu cannot be loaded.
+ */
+    @FXML
+    private void goBackToMainMenu() {
+        try {
+            // Load the main menu FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Menu.fxml"));
+            Parent mainMenuRoot = loader.load();
+
+            // Get the current stage
+            Stage stage = (Stage) goBackButton.getScene().getWindow();
+
+            // Set the main menu scene
+            Scene mainMenuScene = new Scene(mainMenuRoot);
+            stage.setScene(mainMenuScene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Failed to load the main menu.");
+        }
+    }
 
     /**
  * Displays a dialog to allow the selection of an employee from a list.

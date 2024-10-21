@@ -38,6 +38,7 @@
             </HBox>
             <Label fx:id="selectedEmployeeLabel" text="Selected Employee: NONE" />
             <Label fx:id="customerLabel" text="Selected Customer: NONE" />
+            <Button fx:id="goBackButton" text="Go Back" onAction="#goBackToMainMenu" />
         </VBox>
     </VBox>
 
