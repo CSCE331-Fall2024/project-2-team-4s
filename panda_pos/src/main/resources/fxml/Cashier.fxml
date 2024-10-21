@@ -23,6 +23,7 @@
             <Button fx:id="drinksButton" text="Drinks (Prices May Vary)" onAction="#selectDrinks" />
             <Button fx:id="sideButton" text="Side ($4.4)" onAction="#selectSide" />
             <Button fx:id="entreeButton" text="Entree ($5.2)" onAction="#selectEntree"/>
+            <Button fx:id="disposablesButton" text="Disposables" onAction="#selectDisposables"/>
         </HBox>
 
         <!-- 60% for dynamic buttons -->
@@ -54,6 +55,7 @@
         <HBox spacing="10">
             <Button fx:id="confirmButton" text="Confirm Order" onAction="#handleConfirmButton" />
             <Button fx:id="cancelButton" text="Cancel Order" onAction="#cancelOrder" />
+            <Button fx:id="requestRestockButton" text="Request Restock" onAction="#requestRestockForMenuItem"/>
         </HBox>
     </VBox>
 
