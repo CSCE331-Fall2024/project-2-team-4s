@@ -1,5 +1,8 @@
 package team4s;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +21,7 @@ import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 
 import javafx.collections.FXCollections;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -38,18 +42,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
-import java.io.FileWriter;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
+import javafx.stage.Stage;
 
 public class ReportsController {
     private Stage stage;
@@ -89,7 +85,10 @@ public class ReportsController {
     private DatePicker endDay;
     @FXML
     private ScrollPane chartScrollPane;
-
+    
+    /**
+     * Initialize the report gui by setting up the customization features (and hiding most of them initially) and populating the different graph types into the dropdown
+     */
     @FXML
     public void initialize() {
         populateGraphTypeComboBox();
@@ -110,12 +109,21 @@ public class ReportsController {
         endTimeComboBox.setValue(21); 
     }
     //creates the dropdown menu for the graph types
+
+    /**
+     * populates the dropdown menu for the different graph types that can be made
+     */
     private void populateGraphTypeComboBox() {
         graphTypeComboBox.setItems(FXCollections.observableArrayList("Product Usage", "X-report", "Z-report", "custom"));
         graphTypeComboBox.setOnAction(this::handleGraphTypeSelection);
     }
 
-    //updates the gui based on the selected graph type
+    /**
+     * updates the gui based on the selected graph type and allows the user to change the date and time parameters
+     * also displays a warning for when custom is selected as the graph type, because we were unable to implement it in time
+     * 
+     * @param event the action event from the button click
+     */
     @FXML
     private void handleGraphTypeSelection(ActionEvent event) {
         String selectedGraphType = graphTypeComboBox.getValue();
@@ -151,7 +159,13 @@ public class ReportsController {
         }
     }
 
-    //determines what graph to create, based on all of the inputted data
+    /**
+     * determines what graph to create, based on all of the inputted data
+     * also displays a warning if the start time value is larger than the end time value
+     * as well as another warning if the start day is after the end day
+     * 
+     * @param event the action event from the button click
+     */
     @FXML
     private void generateReport(ActionEvent event) {
         chartArea.getChildren().clear();
@@ -202,6 +216,15 @@ public class ReportsController {
                 System.out.println("Unknown graph type selected.");
         }
     }
+    /**
+     * Generates product usage charts based on ingredient usage data within a specified timeframe
+     * 
+     * @param startDate the start date that the query will find
+     * @param endDate the last day that the query will collect data for
+     * @param startHour the hour for each day that the query will begin collecting data for (inclusive)
+     * @param endHour the hour at which the query data collection will stop (exclusive)
+     * @return a list of BarCharts that are classified by their unit type
+     */
     public List<BarChart<String, Number>> productUsageChart(LocalDate startDate, LocalDate endDate, int startHour, int endHour) {
         List<BarChart<String, Number>> unitBarCharts = new ArrayList<>();
     
@@ -281,6 +304,14 @@ public class ReportsController {
         // Return a bar chart for each different unit, as a list
         return unitBarCharts;  
     }
+    /**
+     * generates the line chart for an X report in order to display total sales per hour within a given time frame and a specific day
+     * 
+     * @param selectedDate the date that will be used in the query in order to process the correct data
+     * @param startHour the hour for each day that the query will begin collecting data for (inclusive)
+     * @param endHour the hour at which the query data collection will stop (exclusive)
+     * @return a lineChart that depicts that total sales per hour for a given timeframe for a specific day
+     */
     private LineChart<String, Number> x_report_hourly_sales(LocalDate selectedDate, int startHour, int endHour){
 
         LocalDateTime currentTime = LocalDateTime.now();
@@ -342,6 +373,12 @@ public class ReportsController {
         return totalSalesChart;
 
     }
+    /**
+     * generates the line chart for a Z report in order to display total sales per hour for a specific day
+     * 
+     * @param selectedDate the date that will be used in the query in order to process the correct data
+     * @return a lineChart that depicts that total sales per hour for an entire workday
+     */
     private LineChart<String, Number> z_report_hourly_sales(LocalDate selectedDate){
 
         LocalDateTime currentTime = LocalDateTime.now();
@@ -403,7 +440,14 @@ public class ReportsController {
         return totalSalesChart;
     }
 
-    // Create the BarChart for Items Sold per Hour
+    /**
+     * generates the bar chart for items sold per hour for a specific time frame on a specific day
+     * 
+     * @param selectedDate the date that will be used in the query in order to process the correct data
+     * @param startHour the hour for each day that the query will begin collecting data for (inclusive)
+     * @param endHour the hour at which the query data collection will stop (exclusive)
+     * @return a barChart that depicts the number of items sold per hour for a given timeframe for a specific day
+     */
     private BarChart<String, Number> x_report_items_sold(LocalDate selectedDate, int startHour, int endHour) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
@@ -439,7 +483,12 @@ public class ReportsController {
         return itemsSoldChart;
     }
 
-    // Create the BarChart for Items Sold per Hour
+    /**
+     * generates the bar chart for items sold per hour for a specific day
+     * 
+     * @param selectedDate the date that will be used in the query in order to process the correct data
+     * @return a barChart that depicts the number of items sold per hour for all work hours specific day
+     */
     private BarChart<String, Number> z_report_items_sold(LocalDate selectedDate) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
@@ -474,7 +523,15 @@ public class ReportsController {
         itemsSoldChart.getData().add(itemsSoldSeries);
         return itemsSoldChart;
     }
-    //transaction types for an x report
+    
+    /**
+     * generates a line chart showing each of the transaction types and how many times they are used each hour for a specific time frame on a specific day
+     * 
+     * @param selectedDate the date that will be used in the query in order to process the correct data
+     * @param startHour the hour for each day that the query will begin collecting data for (inclusive)
+     * @param endHour the hour at which the query data collection will stop (exclusive)
+     * @return a LineChart displaying the number of transactions per hour for each transaction type for a given time window on a specific day
+     */
     private LineChart<String, Number> transactionTypes_xreport(LocalDate selectedDate, int startHour, int endHour) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
@@ -538,7 +595,12 @@ public class ReportsController {
         return transactionTypeChart;
     }
 
-    //transaction type for z report
+    /**
+     * generates a line chart showing each of the transaction types and how many times they are used each hour for a specific day
+     * 
+     * @param selectedDate the date that will be used in the query in order to process the correct data
+     * @return a LineChart displaying the number of transactions per hour for each transaction type for a specific day
+     */
     private LineChart<String, Number> transactionTypes_zreport(LocalDate selectedDate) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
@@ -599,7 +661,13 @@ public class ReportsController {
     
         return transactionTypeChart;
     }
-    
+
+    /**
+     * exports the selected chart as a PNG image
+     * 
+     * @param chart the created report that is selected and will be exported
+     * @param filename the name of the file that the chart image will be saved as on your computer
+     */
     public void exportAsPNG(Node chart, String fileName) {
         // Create a FileChooser to specify where to save the image
         FileChooser fileChooser = new FileChooser();
@@ -625,6 +693,12 @@ public class ReportsController {
         }
     
     }
+
+    /**
+     * exports the selected chart as a CSV file
+     * 
+     * @param chart the selected chart in a XYChart format so that it can be exported as a CSV
+     */
     private void exportAsCSV(XYChart<String, Number> chart) {
         // File chooser dialog for saving the CSV
         FileChooser fileChooser = new FileChooser();
@@ -647,7 +721,13 @@ public class ReportsController {
             }
         }
     }
-    //called when the exportPNG button is pressed
+
+    /**
+     * Handles the export of the currently selected graph as a PNG file
+     * Also displays a warning if no graph is selected
+     * 
+     *@param event the action event from the button click
+     */
     @FXML
     private void handleExportAsPNG(ActionEvent event) {
         if (selectedGraph != null) {
@@ -679,7 +759,12 @@ public class ReportsController {
         }
     }
 
-    // Method to wrap a graph in a VBox and handle selection
+    /**
+     * wraps each of the graphs into their own VBox so that one of them can be selected, and then exported
+     * 
+     *@param graph the graph that is being wrapped, so that it can be signalled as selected
+     *@return a VBOX containing the selected graph
+     */
     private VBox wrapGraphForSelection(Node graph) {
         VBox graphContainer = new VBox(graph);
         graphContainer.setStyle("-fx-border-color: transparent; -fx-border-width: 2;");
@@ -696,17 +781,23 @@ public class ReportsController {
             // Store the selected graph
             selectedGraph = graph;
 
-            // If the selected graph is an instance of XYChart, store it in selectedChart
+            
             if (graph instanceof XYChart) {
-                selectedChart = (XYChart<String, Number>) graph;  // Cast to XYChart for CSV export
+                selectedChart = (XYChart<String, Number>) graph;  
             } else {
-                selectedChart = null;  // If it's not an XYChart, set selectedChart to null
+                selectedChart = null; 
             }
         });
 
         return graphContainer;
     }
-    //called when the exportCSV button is pressed
+    
+    /**
+     * Handles the export of the currently selected graph as a CSV file
+     * Also displays a warning if no graph is selected
+     * 
+     *@param event the action event from the button click
+     */
     @FXML
     private void handleExportAsCSV(ActionEvent event) {
         if (selectedChart == null) {
@@ -721,7 +812,12 @@ public class ReportsController {
             exportAsCSV(selectedChart);
         }
     }
-     //used to reset the graph ui back to its original form
+
+    /**
+     * used to reset the reports ui back to its original form
+     * 
+     *@param event the action event from the button click
+     */
      @FXML
      private void resetForm(ActionEvent event) {
          graphTypeComboBox.getSelectionModel().clearSelection();
@@ -747,7 +843,11 @@ public class ReportsController {
          chartArea.getChildren().clear();
      }
  
-     //switches the screen back to the main manager page
+     /**
+     * used to switches the screen back to the main manager page
+     * 
+     *@param event the action event from the button click
+     */
      public void switchToManager(ActionEvent event) {
          try {
              FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
