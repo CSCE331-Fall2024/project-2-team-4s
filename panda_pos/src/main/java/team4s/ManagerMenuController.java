@@ -15,7 +15,7 @@ public class ManagerMenuController {
     /**
      * Switches to the employee management GUI.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToEmployee(ActionEvent event) {
         try {
@@ -34,7 +34,7 @@ public class ManagerMenuController {
     /**
      * Switches to the inventory and restock GUI.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToInventoryRestock(ActionEvent event) {
         try {
@@ -53,7 +53,7 @@ public class ManagerMenuController {
     /**
      * Switches to the item menu GUI.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToItemMenu(ActionEvent event) {
         try {
@@ -72,7 +72,7 @@ public class ManagerMenuController {
     /**
      * Switches to the reports GUI.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToReports(ActionEvent event) {
         try {
@@ -91,7 +91,7 @@ public class ManagerMenuController {
     /**
      * Switches to the main menu.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToMenu(ActionEvent event) {
         try {

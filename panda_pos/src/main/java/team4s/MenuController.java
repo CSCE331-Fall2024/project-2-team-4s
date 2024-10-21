@@ -102,7 +102,7 @@ public class MenuController {
     /**
      * Switches to the manager GUI.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToManager(ActionEvent event) {
         showValidateManager();
@@ -125,7 +125,7 @@ public class MenuController {
     /**
      * Switches to the cashier GUI.
      * 
-     * @param event the ActionEvent object
+     * @param event the action event from the button click
      */
     public void switchToCashier(ActionEvent event) {
         try {

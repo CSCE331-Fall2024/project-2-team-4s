@@ -112,7 +112,7 @@ public class InventoryRestockController {
      * Shows the modal to add a new inventory item and handles the insertion into
      * the database.
      */
-    public void showAddInventoryItemDialog(ActionEvent event) {
+    public void showAddInventoryItemDialog() {
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -343,10 +343,8 @@ public class InventoryRestockController {
     /**
      * Shows the confirmation alert to delete an inventory item and handles the
      * deletion from the database.
-     * 
-     * @param event the action event from the button click
      */
-    public void showDeleteInventoryItemDialog(ActionEvent event) {
+    public void showDeleteInventoryItemDialog() {
         // Get the selected inventory item
         InventoryItem selectedItem = inventoryTable.getSelectionModel().getSelectedItem();
 
@@ -442,8 +440,10 @@ public class InventoryRestockController {
         ingredientComboBox.setItems(ingredients);
     }
 
-    // Add to restock order
-    public void addToRestockOrder(ActionEvent event) {
+    /**
+     * Adds the selected ingredient and quantity to the restock order table.
+     */
+    public void addToRestockOrder() {
         String ingredientName = ingredientComboBox.getValue();
         String quantityText = quantityTextField.getText();
 
@@ -501,10 +501,8 @@ public class InventoryRestockController {
 
     /**
      * Removes the selected item from the restock order.
-     * 
-     * @param event the action event from the button click
      */
-    public void removeFromRestockOrder(ActionEvent event) {
+    public void removeFromRestockOrder() {
         RestockInventoryItem selectedItem = restockOrderTable.getSelectionModel().getSelectedItem();
 
         if (selectedItem != null) {
@@ -527,10 +525,8 @@ public class InventoryRestockController {
 
     /**
      * Clears the restock order table and resets the order total.
-     * 
-     * @param event the action event from the button click
      */
-    public void clearRestockOrder(ActionEvent event) {
+    public void clearRestockOrder() {
         restockOrderTable.getItems().clear();
         orderTotal = 0.0;
         orderTotalLabel.setText("Order Total: $0.00");
@@ -538,10 +534,8 @@ public class InventoryRestockController {
 
     /**
      * Submits the restock order and updates the inventory in the database.
-     * 
-     * @param event the action event from the button click
      */
-    public void submitRestockOrder(ActionEvent event) {
+    public void submitRestockOrder() {
         if (restockOrderTable.getItems().isEmpty()) {
             // Show an error alert if the order is empty
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -556,7 +550,7 @@ public class InventoryRestockController {
         Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
         confirmationAlert.setTitle("Confirm Restock Order");
         confirmationAlert.setHeaderText("Are you sure you want to submit this order?");
-        confirmationAlert.setContentText("Order Total: $" + orderTotal);
+        confirmationAlert.setContentText(String.format("Order Total: $%.2f", orderTotal));
 
         Optional<ButtonType> result = confirmationAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {

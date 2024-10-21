@@ -167,10 +167,8 @@ public class ItemMenuController {
     /**
      * Shows the modal for adding a new menu item and handles the insertion into the
      * database.
-     * 
-     * @param event the action event from the button click
      */
-    public void showAddItemDialog(ActionEvent event) {
+    public void showAddItemDialog() {
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -567,10 +565,8 @@ public class ItemMenuController {
     /**
      * Shows a confirmation alert for deleting a menu item and handles the deletion
      * in the database.
-     * 
-     * @param event the action event from the button click
      */
-    public void showDeleteItemDialog(ActionEvent event) {
+    public void showDeleteItemDialog() {
         // Get the selected item
         MenuItem selectedItem = menuTable.getSelectionModel().getSelectedItem();
 
