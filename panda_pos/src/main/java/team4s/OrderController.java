@@ -72,11 +72,9 @@ public class OrderController {
      * new scene on the stage.
      * If an IOException occurs during loading, it is caught and logged, displaying
      * an error alert.
-     *
-     * @throws IOException if the FXML file for the main menu cannot be loaded.
      */
     @FXML
-    private void goBackToMainMenu() {
+    public void goBackToMainMenu() {
         try {
             // Load the main menu FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Menu.fxml"));
@@ -141,7 +139,7 @@ public class OrderController {
      * @return a map where the keys are employee names and the values are their
      *         corresponding IDs.
      */
-    private Map<String, Integer> loadEmployeesFromDatabase() {
+    public Map<String, Integer> loadEmployeesFromDatabase() {
         Map<String, Integer> employeeMap = new HashMap<>();
 
         String query = "SELECT employee_id, first_name, last_name FROM employee"; // Adjust column names as needed
@@ -259,7 +257,7 @@ public class OrderController {
      * These items are displayed on the UI, allowing the user to select a disposable
      * item for the order.
      */
-    private void loadDisposables() {
+    public void loadDisposables() {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
 
         // Add a label for picking a disposable item
@@ -292,7 +290,7 @@ public class OrderController {
      * @param disposableName the name of the disposable item being added to the
      *                       order.
      */
-    private void addToOrderDisposable(String disposableName) {
+    public void addToOrderDisposable(String disposableName) {
         String orderItem = "Disposable (" + disposableName + ")";
         currentOrder.add(orderItem);
         currentOrderList.getItems().add(orderItem);
@@ -308,10 +306,10 @@ public class OrderController {
     /**
      * Fetches the menu_item_id from the menu_item table based on the item's name.
      *
-     * @param itemName the name of the menu item.
-     * @return the ID of the menu item, or -1 if the item is not found.
+     * @param itemName     the name of the menu item.
+     * @param servingsUsed the number of servings used for the item.
      */
-    private void updateInventoryServing(String itemName, int servingsUsed) {
+    public void updateInventoryServing(String itemName, int servingsUsed) {
         String query = "UPDATE inventory SET current_stock = current_stock - ? WHERE ingredient_name = ?";
 
         try (Connection conn = Database.connect();
@@ -336,7 +334,7 @@ public class OrderController {
      * @param itemName the name of the menu item.
      * @return the ID of the menu item, or -1 if the item is not found.
      */
-    private int getMenuItemId(String itemName) {
+    public int getMenuItemId(String itemName) {
         String query = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -359,7 +357,7 @@ public class OrderController {
      * restock operation.
      */
     @FXML
-    private void requestRestockForMenuItem() {
+    public void requestRestockForMenuItem() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
         if (selectedItem == null || (!selectedItem.startsWith("Entree") && !selectedItem.startsWith("Side"))) {
             showAlert("No Item Selected", "Please select a valid menu item (entree or side) to restock.");
@@ -390,7 +388,7 @@ public class OrderController {
      * @param menuItemId the ID of the menu item to restock.
      * @return true if ingredients are available, false otherwise.
      */
-    private boolean canRestockServings(int menuItemId) {
+    public boolean canRestockServings(int menuItemId) {
         String query = "SELECT ingredient_id, ingredient_amount FROM inventory_menu_item WHERE menu_item_id = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -417,7 +415,7 @@ public class OrderController {
      * @param itemName the name of the menu item.
      * @return the number of available servings for the item, or 0 if not found.
      */
-    private int getAvailableServings(String itemName) {
+    public int getAvailableServings(String itemName) {
         String query = "SELECT current_servings FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -441,7 +439,7 @@ public class OrderController {
      * @param amountNeeded the required amount of the ingredient.
      * @return true if the current stock is sufficient, false otherwise.
      */
-    private boolean hasEnoughIngredients(int ingredientId, double amountNeeded) {
+    public boolean hasEnoughIngredients(int ingredientId, double amountNeeded) {
         String query = "SELECT current_stock FROM inventory WHERE ingredient_id = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -463,7 +461,7 @@ public class OrderController {
      *
      * @param menuItemId the ID of the menu item to restock.
      */
-    private void restockServings(int menuItemId) {
+    public void restockServings(int menuItemId) {
         String query = "SELECT ingredient_id, ingredient_amount FROM inventory_menu_item WHERE menu_item_id = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -497,7 +495,7 @@ public class OrderController {
      * @param ingredientId the ID of the ingredient to update.
      * @param amountUsed   the amount to subtract from the current stock.
      */
-    private void decrementInventory(int ingredientId, double amountUsed) {
+    public void decrementInventory(int ingredientId, double amountUsed) {
         String query = "UPDATE inventory SET current_stock = current_stock - ? WHERE ingredient_id = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -515,7 +513,7 @@ public class OrderController {
      * @param plateType the type of plate selected (e.g., "Bowl", "Plate", "Bigger
      *                  Plate").
      */
-    private void selectPlate(String plateType) {
+    public void selectPlate(String plateType) {
         // Reset button styles
         resetButtonStyles();
 
@@ -542,7 +540,7 @@ public class OrderController {
     /**
      * Resets the styles of all buttons to their default state.
      */
-    private void resetButtonStyles() {
+    public void resetButtonStyles() {
         // Reset all button styles to default
         bowlButton.setStyle(null);
         plateButton.setStyle(null);
@@ -563,7 +561,7 @@ public class OrderController {
      * Loads side options from the menu_item table and dynamically creates buttons
      * for each available side.
      */
-    private void showSideButtons() {
+    public void showSideButtons() {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
 
         // Add a label for picking a side
@@ -594,7 +592,7 @@ public class OrderController {
      *
      * @param selectedSide the name of the selected side.
      */
-    private void loadEntreeButtons(String selectedSide) {
+    public void loadEntreeButtons(String selectedSide) {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
         selectedEntrees.clear(); // Clear previously selected entrees
         this.selectedSide = selectedSide; // Set the selected side
@@ -632,7 +630,7 @@ public class OrderController {
      * @param entreeButton the button representing the selected entree.
      * @param entreeName   the name of the selected entree.
      */
-    private void handleEntreeSelection(Button entreeButton, String entreeName) {
+    public void handleEntreeSelection(Button entreeButton, String entreeName) {
         int maxEntrees = 0;
 
         // Determine the maximum number of entrees based on the plate type
@@ -682,7 +680,7 @@ public class OrderController {
      * @param entreeButton the button representing the entree.
      * @param count        the number of times the entree has been selected.
      */
-    private void changeButtonColor(Button entreeButton, int count) {
+    public void changeButtonColor(Button entreeButton, int count) {
         String color;
         switch (count) {
             case 1:
@@ -707,7 +705,7 @@ public class OrderController {
      *
      * @param side the name of the selected side.
      */
-    private void addToOrder(String side) {
+    public void addToOrder(String side) {
         double platePrice = fetchPriceFromDatabase(selectedPlateType); // Fetch price for the plate type
         double sidePrice = fetchPriceFromDatabase(side); // Fetch price for the side
 
@@ -743,7 +741,7 @@ public class OrderController {
      *
      * @param item the name of the appetizer to add.
      */
-    private void addToOrderAppetizer(String item) {
+    public void addToOrderAppetizer(String item) {
         int availableServings = getAvailableServings(item);
         if (availableServings <= 0) {
             showAlert("Out of Stock", "No servings available for " + item);
@@ -771,7 +769,7 @@ public class OrderController {
      *
      * @param item the name of the drink to be added.
      */
-    private void addToOrderDrink(String item) {
+    public void addToOrderDrink(String item) {
         double drinkPrice = fetchPriceFromDatabase(item); // Fetch price for the drink
         String orderItem = "Drink (" + item + ")\n$" + String.format("%.2f", drinkPrice);
 
@@ -790,7 +788,7 @@ public class OrderController {
      *
      * @param side the name of the side to be added.
      */
-    private void addToOrderSide(String side) {
+    public void addToOrderSide(String side) {
         int availableServings = getAvailableServings(side);
         if (availableServings <= 0) {
             showAlert("Out of Stock", "No servings available for " + side);
@@ -820,7 +818,7 @@ public class OrderController {
      *
      * @param entree the name of the entree to be added.
      */
-    private void addToOrderEntree(String entree) {
+    public void addToOrderEntree(String entree) {
         int availableServings = getAvailableServings(entree);
         if (availableServings <= 0) {
             showAlert("Out of Stock", "No servings available for " + entree);
@@ -851,7 +849,7 @@ public class OrderController {
      * @param itemName the name of the item to fetch the price for.
      * @return the price of the item, or 0.0 if not found.
      */
-    private double fetchPriceFromDatabase(String itemName) {
+    public double fetchPriceFromDatabase(String itemName) {
         String query = "SELECT item_price FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -873,14 +871,14 @@ public class OrderController {
     /**
      * Updates the order total in the UI.
      */
-    private void updateOrderTotal() {
+    public void updateOrderTotal() {
         orderTotalLabel.setText(String.format("Total: $%.2f", orderTotal));
     }
 
     /**
      * Resets all selections, clearing selected entrees, side, and dynamic buttons.
      */
-    private void resetSelections() {
+    public void resetSelections() {
         selectedEntrees.clear();
         selectedSide = "";
         dynamicButtons.getChildren().clear();
@@ -895,7 +893,7 @@ public class OrderController {
      * @param category the category of items to load (e.g., "Side", "Entree",
      *                 "Drink", "Appetizer").
      */
-    private void loadItems(String category) {
+    public void loadItems(String category) {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
 
         String query = "SELECT item_name, item_price FROM menu_item WHERE item_category = ?";
@@ -958,7 +956,7 @@ public class OrderController {
      * and removes the item from the UI.
      */
     @FXML
-    private void deleteSelectedItem() {
+    public void deleteSelectedItem() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             // Calculate the price of the item being deleted
@@ -981,7 +979,7 @@ public class OrderController {
      * @param orderItem the string representing the order item.
      * @return the total price of the order item.
      */
-    private double calculateOrderItemPrice(String orderItem) {
+    public double calculateOrderItemPrice(String orderItem) {
         double totalPrice = 0.0;
 
         if (orderItem.startsWith("Appetizer")) {
@@ -1070,7 +1068,7 @@ public class OrderController {
      * @param itemType    the category of the item being edited.
      * @param preFillItem the name of the item to pre-fill in the selection dialog.
      */
-    private void showSelectionDialog(String type, String itemType, String preFillItem) {
+    public void showSelectionDialog(String type, String itemType, String preFillItem) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit " + itemType);
         dialog.setHeaderText("Edit your " + itemType);
@@ -1109,7 +1107,7 @@ public class OrderController {
      *
      * @param appetizer the name of the selected appetizer.
      */
-    private void updateAppetizerOrder(String appetizer) {
+    public void updateAppetizerOrder(String appetizer) {
         // Subtract the price of the old item (generic Appetizer price) from the total
         double oldPrice = fetchPriceFromDatabase("Appetizer"); // Always use "Appetizer" price
         orderTotal -= oldPrice;
@@ -1134,7 +1132,7 @@ public class OrderController {
      *
      * @param drink the name of the selected drink.
      */
-    private void updateDrinkOrder(String drink) {
+    public void updateDrinkOrder(String drink) {
         // Subtract the price of the old item from the total
         double oldPrice = calculateOrderItemPrice(currentOrder.get(editingIndex));
         orderTotal -= oldPrice;
@@ -1159,7 +1157,7 @@ public class OrderController {
      * @param title   the title of the alert dialog.
      * @param message the message content of the alert dialog.
      */
-    private void showAlert(String title, String message) {
+    public void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -1177,7 +1175,7 @@ public class OrderController {
      * @param preFillSide    the side to pre-fill in the selection dialog.
      * @param preFillEntrees the entrees to pre-fill in the selection dialog.
      */
-    private void showSelectionDialog(String type, String itemType, int maxEntrees, String preFillSide,
+    public void showSelectionDialog(String type, String itemType, int maxEntrees, String preFillSide,
             List<String> preFillEntrees) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit " + selectedPlateType); // Use selectedPlateType here
@@ -1232,7 +1230,7 @@ public class OrderController {
      * @param side    the new selected side.
      * @param entrees the list of new selected entrees.
      */
-    private void updateOrder(String side, List<String> entrees) {
+    public void updateOrder(String side, List<String> entrees) {
         StringBuilder orderItem = new StringBuilder(selectedPlateType + " + " + side);
         for (String entree : entrees) {
             if (entree != null) {
@@ -1253,7 +1251,7 @@ public class OrderController {
      * @param category the category of items to load (e.g., Side, Entree).
      * @param comboBox the ComboBox to populate with items from the database.
      */
-    private void loadComboBoxItems(String category, ComboBox<String> comboBox) {
+    public void loadComboBoxItems(String category, ComboBox<String> comboBox) {
         String query = "SELECT item_name FROM menu_item WHERE item_category = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1292,7 +1290,7 @@ public class OrderController {
      * Updates the total cost based on the new quantity.
      */
     @FXML
-    private void increaseItemQuantity() {
+    public void increaseItemQuantity() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             final int[] currentQuantity = { 1 }; // Use an array to store currentQuantity
@@ -1453,7 +1451,7 @@ public class OrderController {
      * @param orderItem the order item string.
      * @return the quantity of the item, or 1 if no quantity is specified.
      */
-    private int extractItemQuantity(String orderItem) {
+    public int extractItemQuantity(String orderItem) {
         if (orderItem.contains("x")) {
             try {
                 // Find the index of "x" and extract only the number after "x"
@@ -1481,7 +1479,7 @@ public class OrderController {
      * @param paymentType  the selected payment type (e.g., Credit/Debit, Dining
      *                     Dollars, Gift Card).
      */
-    private void placeOrderInDatabase(double totalWithTax, String paymentType) {
+    public void placeOrderInDatabase(double totalWithTax, String paymentType) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet generatedKeys = null;
@@ -1590,7 +1588,7 @@ public class OrderController {
      * @param servingsUsed the number of servings to subtract from the menu item's
      *                     available servings.
      */
-    private void updateMenuItemServing(String itemName, int servingsUsed) {
+    public void updateMenuItemServing(String itemName, int servingsUsed) {
         String query = "UPDATE menu_item SET current_servings = current_servings - ? WHERE item_name = ?";
 
         try (Connection conn = Database.connect();
@@ -1615,7 +1613,7 @@ public class OrderController {
      * @param orderItem the order string that contains the item name.
      * @return the extracted item name from the order string.
      */
-    private String extractItemName(String orderItem) {
+    public String extractItemName(String orderItem) {
         return orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")")); // Adjust parsing logic based on
                                                                                         // your format
     }
@@ -1626,7 +1624,7 @@ public class OrderController {
      * @param itemName the name of the item for which to fetch the menu item ID.
      * @return the menu item ID, or -1 if the item is not found in the database.
      */
-    private int fetchMenuItemId(String itemName) {
+    public int fetchMenuItemId(String itemName) {
         String query = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
                 PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -1734,7 +1732,7 @@ public class OrderController {
      *
      * @return a map of customer names and their corresponding customer IDs.
      */
-    private Map<String, Integer> loadCustomersFromDatabase() {
+    public Map<String, Integer> loadCustomersFromDatabase() {
         Map<String, Integer> customerMap = new HashMap<>();
 
         String query = "SELECT customer_id, first_name FROM customer"; // Adjust table and column names
@@ -1766,7 +1764,7 @@ public class OrderController {
      * @param emailField     the text field for the customer's email.
      * @param phoneField     the text field for the customer's phone number.
      */
-    private void loadCustomerDetails(int customerId, TextField firstNameField, TextField lastNameField,
+    public void loadCustomerDetails(int customerId, TextField firstNameField, TextField lastNameField,
             TextField emailField, TextField phoneField) {
         String query = "SELECT first_name, last_name, email, phone FROM customer WHERE customer_id = ?";
 
@@ -1796,7 +1794,7 @@ public class OrderController {
      * @param email     the email address of the new customer.
      * @param phone     the phone number of the new customer.
      */
-    private void saveNewCustomer(String firstName, String lastName, String email, String phone) {
+    public void saveNewCustomer(String firstName, String lastName, String email, String phone) {
         String query = "INSERT INTO customer (first_name, last_name, email, phone) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = Database.connect();
