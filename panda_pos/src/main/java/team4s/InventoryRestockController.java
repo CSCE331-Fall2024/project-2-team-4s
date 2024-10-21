@@ -57,7 +57,10 @@ public class InventoryRestockController {
     @FXML
     private Label orderTotalLabel;
 
-    // initialize inventory items in the TableView
+    /*
+     * Initialize and establish connection
+     * 
+     */
     public void initialize() {
         try {
             conn = Database.connect();
