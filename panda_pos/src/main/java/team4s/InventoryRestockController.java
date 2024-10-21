@@ -57,9 +57,9 @@ public class InventoryRestockController {
     @FXML
     private Label orderTotalLabel;
 
-    /*
-     * Initialize and establish connection
-     * 
+    /**
+     * Initializes the inventory and restock tables, the ingredient combo box, and
+     * the restock order table.
      */
     public void initialize() {
         try {
@@ -80,9 +80,8 @@ public class InventoryRestockController {
         }
     }
 
-    /*
-     * Load inventory items into the table view
-     * 
+    /**
+     * Queries the database for inventory items and loads them into the TableView.
      */
     private void loadInventoryItems() {
         ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
@@ -109,12 +108,11 @@ public class InventoryRestockController {
         inventoryTable.setItems(inventoryItems);
     }
 
-    /*
-     * Add a new inventory item
-     * 
+    /**
+     * Shows the modal to add a new inventory item and handles the insertion into
+     * the database.
      */
-    // Method to handle the Add Inventory Item button
-    public void showAddInventoryItemDialog(ActionEvent event) {
+    public void showAddInventoryItemDialog() {
         // Create a new Stage for the dialog
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -220,10 +218,9 @@ public class InventoryRestockController {
         dialog.showAndWait();
     }
 
-    // Method to handle the Edit Inventory Item button
-    /*
-     *  Show the dialog to edit an inventory item
-     * 
+    /**
+     * Shows the modal to edit an inventory item and handles the update in the
+     * database.
      */
     public void showEditInventoryItemDialog() {
         InventoryItem selectedItem = inventoryTable.getSelectionModel().getSelectedItem();
@@ -343,14 +340,11 @@ public class InventoryRestockController {
         dialog.showAndWait();
     }
 
-    // Method to handle the Delete Inventory Item button
-    /*
-     * Show the dialog to delete an inventory item
-     * 
-     * @param event the ActionEvent object
-     * 
+    /**
+     * Shows the confirmation alert to delete an inventory item and handles the
+     * deletion from the database.
      */
-    public void showDeleteInventoryItemDialog(ActionEvent event) {
+    public void showDeleteInventoryItemDialog() {
         // Get the selected inventory item
         InventoryItem selectedItem = inventoryTable.getSelectionModel().getSelectedItem();
 
@@ -364,8 +358,20 @@ public class InventoryRestockController {
             // Wait for user confirmation
             Optional<ButtonType> result = confirmationAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
+                String deleteQuery = "DELETE FROM inventory WHERE ingredient_id = ?";
+
                 // If user confirms, proceed with the deletion
-                deleteItemFromInventoryDatabase(selectedItem);
+                try {
+                    conn = Database.connect(); // Open a new connection
+                    PreparedStatement stmt = conn.prepareStatement(deleteQuery);
+                    stmt.setInt(1, selectedItem.getIngredientID());
+                    stmt.executeUpdate();
+                    conn.close(); // Close the connection
+                    System.out.println("Inventory item deleted from database: " + selectedItem.getIngredientName());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 // Remove the item from the table view
                 inventoryTable.getItems().remove(selectedItem);
             }
@@ -379,29 +385,10 @@ public class InventoryRestockController {
         }
     }
 
-    // Method to delete the selected item from the database
-    /*
-     * Delete an inventory item from the database
-     * 
-     * @param item the InventoryItem object to delete
-     * 
+    /**
+     * Queries the database for inventory items that need restocking and loads them
+     * into the TableView.
      */
-    private void deleteItemFromInventoryDatabase(InventoryItem item) {
-        String deleteQuery = "DELETE FROM inventory WHERE ingredient_id = ?";
-
-        try {
-            conn = Database.connect(); // Open a new connection
-            PreparedStatement stmt = conn.prepareStatement(deleteQuery);
-            stmt.setInt(1, item.getIngredientID());
-            stmt.executeUpdate();
-            conn.close(); // Close the connection
-            System.out.println("Inventory item deleted from database: " + item.getIngredientName());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Load recommended restock items
     private void loadRestockRecommendations() {
         ObservableList<InventoryItem> recommendedRestockItems = FXCollections.observableArrayList();
 
@@ -428,7 +415,9 @@ public class InventoryRestockController {
         recommendedRestockTable.setItems(recommendedRestockItems);
     }
 
-    // load the ingredientComboBox
+    /**
+     * Queries the database for ingredients and loads them into the ComboBox.
+     */
     public void loadIngredientComboBox() {
         ObservableList<String> ingredients = FXCollections.observableArrayList();
 
@@ -451,8 +440,10 @@ public class InventoryRestockController {
         ingredientComboBox.setItems(ingredients);
     }
 
-    // Add to restock order
-    public void addToRestockOrder(ActionEvent event) {
+    /**
+     * Adds the selected ingredient and quantity to the restock order table.
+     */
+    public void addToRestockOrder() {
         String ingredientName = ingredientComboBox.getValue();
         String quantityText = quantityTextField.getText();
 
@@ -508,8 +499,10 @@ public class InventoryRestockController {
         }
     }
 
-    // Remove from restock order
-    public void removeFromRestockOrder(ActionEvent event) {
+    /**
+     * Removes the selected item from the restock order.
+     */
+    public void removeFromRestockOrder() {
         RestockInventoryItem selectedItem = restockOrderTable.getSelectionModel().getSelectedItem();
 
         if (selectedItem != null) {
@@ -530,15 +523,19 @@ public class InventoryRestockController {
         }
     }
 
-    // Clear restock order
-    public void clearRestockOrder(ActionEvent event) {
+    /**
+     * Clears the restock order table and resets the order total.
+     */
+    public void clearRestockOrder() {
         restockOrderTable.getItems().clear();
         orderTotal = 0.0;
         orderTotalLabel.setText("Order Total: $0.00");
     }
 
-    // Submit restock order
-    public void submitRestockOrder(ActionEvent event) {
+    /**
+     * Submits the restock order and updates the inventory in the database.
+     */
+    public void submitRestockOrder() {
         if (restockOrderTable.getItems().isEmpty()) {
             // Show an error alert if the order is empty
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);
@@ -553,7 +550,7 @@ public class InventoryRestockController {
         Alert confirmationAlert = new Alert(AlertType.CONFIRMATION);
         confirmationAlert.setTitle("Confirm Restock Order");
         confirmationAlert.setHeaderText("Are you sure you want to submit this order?");
-        confirmationAlert.setContentText("Order Total: $" + orderTotal);
+        confirmationAlert.setContentText(String.format("Order Total: $%.2f", orderTotal));
 
         Optional<ButtonType> result = confirmationAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -589,12 +586,10 @@ public class InventoryRestockController {
         }
     }
 
-    // Switch to manager menu
-    /*
-     * Switch to the Manager Menu
+    /**
+     * Switches to the manager menu
      * 
-     * @param event the ActionEvent object
-     * 
+     * @param event the action event from the button click
      */
     public void switchToManager(ActionEvent event) {
         try {

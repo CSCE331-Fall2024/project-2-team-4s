@@ -28,21 +28,18 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-
 public class EmployeeController {
     private Stage stage;
     private Scene scene;
     private Parent root;
     private Connection conn;
-    /**
-     * Initializes the database connection and loads the employees into the table view.
-     * 
-     * 
-     */
+
     @FXML
     private TableView<Employee> employeeTable;
 
-    // initialize the employee table view
+    /**
+     * Initializes the employee screen by loading the employees from the database.
+     */
     public void initialize() {
         try {
             conn = Database.connect();
@@ -57,11 +54,10 @@ public class EmployeeController {
             System.err.println("Database connection error");
         }
     }
-    /*
-     * Load employees into the table view
-     * 
-     */
 
+    /**
+     * Queries the database for all employees and loads them into the table view.
+     */
     private void loadEmployees() {
         ObservableList<Employee> employees = FXCollections.observableArrayList();
 
@@ -86,11 +82,11 @@ public class EmployeeController {
         // set the employees in the table view
         employeeTable.setItems(employees);
     }
-    /*
-     * Show the modal to add a new employee
-     * 
-     */
 
+    /**
+     * Shows the modal to add a new employee and handles the insertion into the
+     * database.
+     */
     public void showAddEmployeeModal() {
         // create a stage for the modal
         Stage modal = new Stage();
@@ -157,11 +153,10 @@ public class EmployeeController {
         modal.setScene(modalScene);
         modal.showAndWait();
     }
-    /*
-     * Show the modal to edit an employee
-     * 
-     */
 
+    /**
+     * Shows the modal to edit an employee and handles the update in the database.
+     */
     public void showEditEmployeeModal() {
         // get the selected employee
         Employee selectedEmployee = employeeTable.getSelectionModel().getSelectedItem();
@@ -240,11 +235,11 @@ public class EmployeeController {
         modal.setScene(modalScene);
         modal.showAndWait();
     };
-    /*
-     * Delete an employee
-     * 
-     */
 
+    /**
+     * Shows the confirmation alert to delete an employee and handles the deletion
+     * in the database.
+     */
     public void showDeleteEmployeeModal() {
         // get the selected employee
         Employee selectedEmployee = employeeTable.getSelectionModel().getSelectedItem();
@@ -291,13 +286,11 @@ public class EmployeeController {
         }
     };
 
-    /*
-     * Switch to manager menu
+    /**
+     * Switches to manager menu.
      * 
-     * @param event the action event
+     * @param event the action event from the button click
      */
-
-    // Switch to manager menu
     public void switchToManager(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ManagerMenu.fxml"));
