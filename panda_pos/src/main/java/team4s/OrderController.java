@@ -58,7 +58,10 @@ public class OrderController {
     private int selectedCustomerId;
     private String customerFullName;
 
-    // Method to display the employee selection pop-up
+    /**
+ * Displays a dialog to allow the selection of an employee from a list.
+ * The selected employee's ID is stored and their name is shown in the UI.
+ */
     public void showEmployeeSelectionDialog() {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Select Employee");
@@ -94,7 +97,11 @@ public class OrderController {
         dialog.showAndWait();
     }
 
-    // Method to load employee data from the database
+    /**
+ * Loads employee data from the database and returns a map of employee names to IDs.
+ *
+ * @return a map where the keys are employee names and the values are their corresponding IDs.
+ */
     private Map<String, Integer> loadEmployeesFromDatabase() {
         Map<String, Integer> employeeMap = new HashMap<>();
 
@@ -119,25 +126,37 @@ public class OrderController {
         return employeeMap;
     }
 
-    // Method to handle Bowl button click
+    /**
+ * Handles the event when the "Bowl" button is clicked.
+ * This method sets the selected plate type to "Bowl".
+ */
     @FXML
     public void selectBowl() {
         selectPlate("Bowl");
     }
 
-    // Method to handle Plate button click
+    /**
+ * Handles the event when the "Plate" button is clicked.
+ * This method sets the selected plate type to "Plate".
+ */
     @FXML
     public void selectPlate() {
         selectPlate("Plate");
     }
 
-    // Method to handle Bigger Plate button click
+    /**
+ * Handles the event when the "Bigger Plate" button is clicked.
+ * This method sets the selected plate type to "Bigger Plate".
+ */
     @FXML
     public void selectBiggerPlate() {
         selectPlate("Bigger Plate");
     }
 
-    // Method to handle Appetizer button click
+    /**
+ * Handles the event when the "Appetizer" button is clicked.
+ * This method resets the button styles and loads the available appetizer items.
+ */
     @FXML
     public void selectAppetizer() {
         resetButtonStyles();
@@ -146,7 +165,10 @@ public class OrderController {
         loadItems("Appetizer");
     }
 
-    // Method to handle Drinks button click
+    /**
+ * Handles the event when the "Drinks" button is clicked.
+ * This method resets the button styles and loads the available drink items.
+ */
     @FXML
     public void selectDrinks() {
         resetButtonStyles();
@@ -155,7 +177,10 @@ public class OrderController {
         loadItems("Drink");
     }
 
-    // Method to handle Side button click
+    /**
+ * Handles the event when the "Side" button is clicked.
+ * This method resets the button styles and loads the available side items.
+ */
     @FXML
     public void selectSide() {
         resetButtonStyles();
@@ -164,7 +189,10 @@ public class OrderController {
         loadItems("Side");
     }
 
-    // Method to handle Entree button click
+    /**
+ * Handles the event when the "Entree" button is clicked.
+ * This method resets the button styles and loads the available entree items.
+ */
     @FXML
     public void selectEntree() {
         resetButtonStyles();
@@ -173,6 +201,10 @@ public class OrderController {
         loadItems("Entree");
     }
 
+    /**
+ * Handles the event when the "Disposables" button is clicked.
+ * This method resets the button styles and loads the available disposable items from the inventory.
+ */
     @FXML
     public void selectDisposables() {
         resetButtonStyles();
@@ -181,7 +213,10 @@ public class OrderController {
         loadDisposables(); // Load disposables from inventory
     }
 
-    // Load disposable items from the inventory table
+    /**
+ * Loads disposable items from the inventory table and dynamically creates buttons for each item.
+ * These items are displayed on the UI, allowing the user to select a disposable item for the order.
+ */
     private void loadDisposables() {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
         
@@ -207,7 +242,11 @@ public class OrderController {
         }
     }
 
-    // Add disposable item to the order and subtract servings from the inventory
+    /**
+ * Adds a disposable item to the current order and updates the inventory by subtracting one serving from the stock.
+ *
+ * @param disposableName the name of the disposable item being added to the order.
+ */
     private void addToOrderDisposable(String disposableName) {
         String orderItem = "Disposable (" + disposableName + ")";
         currentOrder.add(orderItem);
@@ -220,7 +259,12 @@ public class OrderController {
         resetSelections();
     }
 
-    // Method to update the inventory by subtracting the number of servings for the specified item
+    /**
+ * Fetches the menu_item_id from the menu_item table based on the item's name.
+ *
+ * @param itemName the name of the menu item.
+ * @return the ID of the menu item, or -1 if the item is not found.
+ */
     private void updateInventoryServing(String itemName, int servingsUsed) {
         String query = "UPDATE inventory SET current_stock = current_stock - ? WHERE ingredient_name = ?";
 
@@ -240,7 +284,12 @@ public class OrderController {
         }
     }
 
-    // Fetch menu_item_id from menu_item table based on item name
+/**
+ * Fetches the menu_item_id from the menu_item table based on the item's name.
+ *
+ * @param itemName the name of the menu item.
+ * @return the ID of the menu item, or -1 if the item is not found.
+ */
     private int getMenuItemId(String itemName) {
         String query = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
@@ -258,7 +307,10 @@ public class OrderController {
     }
 
 
-    
+/**
+ * Handles the request to restock servings for a selected menu item (entree or side).
+ * Ensures that sufficient ingredients are available before performing the restock operation.
+ */
     @FXML
     private void requestRestockForMenuItem() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
@@ -284,7 +336,12 @@ public class OrderController {
     }
     
 
-    // Check if ingredients are available to restock servings
+    /**
+ * Checks if sufficient ingredients are available in the inventory to restock servings for a menu item.
+ *
+ * @param menuItemId the ID of the menu item to restock.
+ * @return true if ingredients are available, false otherwise.
+ */
     private boolean canRestockServings(int menuItemId) {
         String query = "SELECT ingredient_id, ingredient_amount FROM inventory_menu_item WHERE menu_item_id = ?";
         try (Connection conn = Database.connect();
@@ -306,7 +363,12 @@ public class OrderController {
         return true;
     }
 
-    // Fetch available servings for a menu item
+    /**
+ * Retrieves the available servings for a specified menu item from the database.
+ *
+ * @param itemName the name of the menu item.
+ * @return the number of available servings for the item, or 0 if not found.
+ */
     private int getAvailableServings(String itemName) {
         String query = "SELECT current_servings FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
@@ -324,7 +386,13 @@ public class OrderController {
     }
 
 
-    // Check if sufficient ingredients are available in the inventory
+    /**
+ * Checks if there are enough ingredients in the inventory to meet the specified requirement.
+ *
+ * @param ingredientId  the ID of the ingredient.
+ * @param amountNeeded  the required amount of the ingredient.
+ * @return true if the current stock is sufficient, false otherwise.
+ */
     private boolean hasEnoughIngredients(int ingredientId, double amountNeeded) {
         String query = "SELECT current_stock FROM inventory WHERE ingredient_id = ?";
         try (Connection conn = Database.connect();
@@ -341,7 +409,11 @@ public class OrderController {
         return false;
     }
 
-    // Perform the restock operation by updating the servings and decrementing inventory
+   /**
+ * Restocks servings for a menu item by decrementing the inventory and increasing the available servings.
+ *
+ * @param menuItemId the ID of the menu item to restock.
+ */
     private void restockServings(int menuItemId) {
         String query = "SELECT ingredient_id, ingredient_amount FROM inventory_menu_item WHERE menu_item_id = ?";
         try (Connection conn = Database.connect();
@@ -369,7 +441,12 @@ public class OrderController {
         }
     }
 
-    // Decrement the ingredient stock in the inventory
+    /**
+ * Decrements the stock of an ingredient in the inventory by the specified amount.
+ *
+ * @param ingredientId  the ID of the ingredient to update.
+ * @param amountUsed    the amount to subtract from the current stock.
+ */
     private void decrementInventory(int ingredientId, double amountUsed) {
         String query = "UPDATE inventory SET current_stock = current_stock - ? WHERE ingredient_id = ?";
         try (Connection conn = Database.connect();
@@ -383,7 +460,11 @@ public class OrderController {
     }
 
 
-
+    /**
+ * Handles the plate selection for the given plate type and updates the UI.
+ *
+ * @param plateType the type of plate selected (e.g., "Bowl", "Plate", "Bigger Plate").
+ */
     private void selectPlate(String plateType) {
         // Reset button styles
         resetButtonStyles();
@@ -408,6 +489,9 @@ public class OrderController {
         showSideButtons();
     }
 
+    /**
+ * Resets the styles of all buttons to their default state.
+ */
     private void resetButtonStyles() {
         // Reset all button styles to default
         bowlButton.setStyle(null);
@@ -425,7 +509,9 @@ public class OrderController {
         }
     }
     
-    // Load side buttons from the database
+    /**
+ * Loads side options from the menu_item table and dynamically creates buttons for each available side.
+ */
     private void showSideButtons() {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
         
@@ -451,7 +537,11 @@ public class OrderController {
         }
     }
 
-    // Load all entree buttons based on the selected side
+    /**
+ * Loads entree options based on the selected side and dynamically creates buttons for each available entree.
+ *
+ * @param selectedSide the name of the selected side.
+ */
     private void loadEntreeButtons(String selectedSide) {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
         selectedEntrees.clear(); // Clear previously selected entrees
@@ -482,7 +572,13 @@ public class OrderController {
     }
 
 
-
+/**
+ * Handles the selection of an entree, ensuring the maximum number of entrees for the selected plate type is not exceeded.
+ * Updates the UI to reflect the selected entrees.
+ *
+ * @param entreeButton the button representing the selected entree.
+ * @param entreeName   the name of the selected entree.
+ */
     private void handleEntreeSelection(Button entreeButton, String entreeName) {
         int maxEntrees = 0;
 
@@ -526,7 +622,12 @@ public class OrderController {
         }
     }
 
-    // Method to change button color based on selection count
+   /**
+ * Changes the color of an entree button based on the number of times it has been selected.
+ *
+ * @param entreeButton the button representing the entree.
+ * @param count        the number of times the entree has been selected.
+ */
     private void changeButtonColor(Button entreeButton, int count) {
         String color;
         switch (count) {
@@ -546,7 +647,11 @@ public class OrderController {
         entreeButton.setStyle("-fx-background-color: " + color);
     }
 
-    // Adjusted addToOrder to handle multiple counts for entrees
+    /**
+ * Adds a plate with the selected side and entrees to the order and updates the total price.
+ *
+ * @param side the name of the selected side.
+ */
     private void addToOrder(String side) {
         double platePrice = fetchPriceFromDatabase(selectedPlateType); // Fetch price for the plate type
         double sidePrice = fetchPriceFromDatabase(side); // Fetch price for the side
@@ -574,7 +679,12 @@ public class OrderController {
         resetSelections();
     }
     
-
+/**
+ * Adds an appetizer to the order if it has available servings, and updates the total price.
+ * If no servings are available, an alert is shown.
+ *
+ * @param item the name of the appetizer to add.
+ */
     private void addToOrderAppetizer(String item) {
         int availableServings = getAvailableServings(item);
         if (availableServings <= 0) {
@@ -599,7 +709,11 @@ public class OrderController {
     }
     
     
-    
+    /**
+ * Adds a drink to the current order and updates the total price.
+ *
+ * @param item the name of the drink to be added.
+ */
     private void addToOrderDrink(String item) {
         double drinkPrice = fetchPriceFromDatabase(item); // Fetch price for the drink
         String orderItem = "Drink (" + item + ")\n$" + String.format("%.2f", drinkPrice);
@@ -614,7 +728,11 @@ public class OrderController {
         resetSelections();
     }
     
-
+/**
+ * Adds a side to the current order and updates the total price.
+ *
+ * @param side the name of the side to be added.
+ */
     private void addToOrderSide(String side) {
         int availableServings = getAvailableServings(side);
         if (availableServings <= 0) {
@@ -641,7 +759,11 @@ public class OrderController {
     }
     
     
-
+/**
+ * Adds an entree to the current order and updates the total price.
+ *
+ * @param entree the name of the entree to be added.
+ */
     private void addToOrderEntree(String entree) {
         int availableServings = getAvailableServings(entree);
         if (availableServings <= 0) {
@@ -670,7 +792,12 @@ public class OrderController {
     
     
     
-    // Fetch the price of an item from the database
+    /**
+ * Fetches the price of an item from the database.
+ *
+ * @param itemName the name of the item to fetch the price for.
+ * @return the price of the item, or 0.0 if not found.
+ */
     private double fetchPriceFromDatabase(String itemName) {
         String query = "SELECT item_price FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
@@ -691,7 +818,9 @@ public class OrderController {
     }
     
     
-
+/**
+ * Updates the order total in the UI.
+ */
     private void updateOrderTotal() {
         orderTotalLabel.setText(String.format("Total: $%.2f", orderTotal));
     }
@@ -700,7 +829,9 @@ public class OrderController {
     
     
 
-    // Reset selections for all items
+   /**
+ * Resets all selections, clearing selected entrees, side, and dynamic buttons.
+ */
     private void resetSelections() {
         selectedEntrees.clear();
         selectedSide = "";
@@ -708,7 +839,12 @@ public class OrderController {
         resetButtonStyles();
     }
     
-    // Load items (sides or entrees) based on category
+   /**
+ * Loads menu items (such as sides, entrees, drinks, or appetizers) based on their category and dynamically
+ * adds buttons to the UI for user selection.
+ *
+ * @param category the category of items to load (e.g., "Side", "Entree", "Drink", "Appetizer").
+ */
     private void loadItems(String category) {
         dynamicButtons.getChildren().clear(); // Clear previous buttons
     
@@ -750,7 +886,10 @@ public class OrderController {
     }
     
 
-    // Confirm order
+    /**
+ * Confirms the current order by displaying a dialog with order details and payment type options.
+ * The order is then placed in the database with the selected payment type.
+ */
     @FXML
     public void confirmOrder() {
         StringBuilder orderDetails = new StringBuilder("Order confirmed: ");
@@ -764,7 +903,9 @@ public class OrderController {
         System.out.println(orderDetails);
     }
 
-    // Delete selected item from the order
+    /**
+ * Deletes the selected item from the current order, updates the total price, and removes the item from the UI.
+ */
     @FXML
     private void deleteSelectedItem() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
@@ -783,7 +924,12 @@ public class OrderController {
         }
     }
 
-
+/**
+ * Calculates the price of a specific order item.
+ *
+ * @param orderItem the string representing the order item.
+ * @return the total price of the order item.
+ */
     private double calculateOrderItemPrice(String orderItem) {
         double totalPrice = 0.0;
     
@@ -812,7 +958,10 @@ public class OrderController {
     }
 
 
-    // Edit selected item from the order
+    /**
+ * Edits the selected item from the current order.
+ * Opens the appropriate selection dialog based on the type of item selected (Appetizer, Drink, Side, Entree, or Plate).
+ */
     @FXML
     public void editSelectedItem() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
@@ -862,7 +1011,14 @@ public class OrderController {
         }
     }
 
-    // Show a selection dialog based on item type
+    /**
+ * Displays a selection dialog for editing an item (Appetizer or Drink).
+ * Loads the items into a ComboBox for user selection.
+ *
+ * @param type        the type of the item to edit (Appetizer or Drink).
+ * @param itemType    the category of the item being edited.
+ * @param preFillItem the name of the item to pre-fill in the selection dialog.
+ */
     private void showSelectionDialog(String type, String itemType, String preFillItem) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit " + itemType);
@@ -897,7 +1053,11 @@ public class OrderController {
         dialog.showAndWait();
     }
 
-    // Update method for appetizers
+    /**
+ * Updates the current order with the new selected appetizer.
+ *
+ * @param appetizer the name of the selected appetizer.
+ */
     private void updateAppetizerOrder(String appetizer) {
         // Subtract the price of the old item (generic Appetizer price) from the total
         double oldPrice = fetchPriceFromDatabase("Appetizer"); // Always use "Appetizer" price
@@ -919,7 +1079,11 @@ public class OrderController {
     }
 
 
-    // Update method for drinks
+    /**
+ * Updates the current order with the new selected drink.
+ *
+ * @param drink the name of the selected drink.
+ */
     private void updateDrinkOrder(String drink) {
         // Subtract the price of the old item from the total
         double oldPrice = calculateOrderItemPrice(currentOrder.get(editingIndex));
@@ -942,7 +1106,12 @@ public class OrderController {
 
 
 
-    // Show a pop-up alert dialog
+    /**
+ * Displays an alert dialog with the provided title and message.
+ *
+ * @param title   the title of the alert dialog.
+ * @param message the message content of the alert dialog.
+ */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
@@ -951,7 +1120,16 @@ public class OrderController {
         alert.showAndWait();
     }
 
-    // Show a selection dialog based on item type
+    /**
+ * Displays a selection dialog for editing an item (Plate, Side, or Entree).
+ * Allows the user to edit a plate order by choosing the side and entrees.
+ *
+ * @param type          the type of the item to edit (Plate).
+ * @param itemType      the category of the item being edited (Side or Entree).
+ * @param maxEntrees    the maximum number of entrees allowed for the plate.
+ * @param preFillSide   the side to pre-fill in the selection dialog.
+ * @param preFillEntrees the entrees to pre-fill in the selection dialog.
+ */
     private void showSelectionDialog(String type, String itemType, int maxEntrees, String preFillSide, List<String> preFillEntrees) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Edit " + selectedPlateType);  // Use selectedPlateType here
@@ -999,7 +1177,12 @@ public class OrderController {
         dialog.showAndWait();
     }
 
-    // Update the current order at the selected index instead of adding a new one
+    /**
+ * Updates the current order at the selected index with the new side and entrees.
+ *
+ * @param side    the new selected side.
+ * @param entrees the list of new selected entrees.
+ */
     private void updateOrder(String side, List<String> entrees) {
         StringBuilder orderItem = new StringBuilder(selectedPlateType + " + " + side); 
         for (String entree : entrees) {
@@ -1015,7 +1198,12 @@ public class OrderController {
         resetSelections();
     }
 
-    // Method to load items into ComboBox
+    /**
+ * Loads items into the provided ComboBox based on the specified category.
+ *
+ * @param category the category of items to load (e.g., Side, Entree).
+ * @param comboBox the ComboBox to populate with items from the database.
+ */
     private void loadComboBoxItems(String category, ComboBox<String> comboBox) {
         String query = "SELECT item_name FROM menu_item WHERE item_category = ?";
         try (Connection conn = Database.connect(); 
@@ -1030,7 +1218,9 @@ public class OrderController {
         }
     }
 
-
+    /**
+ * Cancels the current order by clearing the order list, resetting selections, and setting the total to zero.
+ */
     @FXML
     public void cancelOrder() {
         // Clear the order list and reset the total
@@ -1045,7 +1235,10 @@ public class OrderController {
         orderTotal = 0.0;
         updateOrderTotal();
     }
-
+/**
+ * Increases the quantity of the selected item in the order by prompting the user for a new quantity.
+ * Updates the total cost based on the new quantity.
+ */
     @FXML
     private void increaseItemQuantity() {
         String selectedItem = currentOrderList.getSelectionModel().getSelectedItem();
@@ -1112,7 +1305,10 @@ public class OrderController {
             showAlert("No Item Selected", "Please select an item from the order list to change its quantity.");
         }
     }
-
+/**
+ * Handles the confirmation of the order by verifying that an employee is selected, 
+ * displaying a summary of the order and payment type options, and placing the order in the database.
+ */
     @FXML
     public void handleConfirmButton() {
         // Check if an employee has been selected (customer selection is optional now)
@@ -1191,7 +1387,12 @@ public class OrderController {
     }
     
 
-    // Extract the item quantity from the order string (e.g., "Entree (Chicken) x2")
+    /**
+ * Extracts the item quantity from the order string (e.g., "Entree (Chicken) x2").
+ *
+ * @param orderItem the order item string.
+ * @return the quantity of the item, or 1 if no quantity is specified.
+ */
     private int extractItemQuantity(String orderItem) {
         if (orderItem.contains("x")) {
             try {
@@ -1211,7 +1412,13 @@ public class OrderController {
         return 1;
     }
 
-
+/**
+ * Places the current order in the database by creating a transaction entry 
+ * and updating the inventory and menu item serving counts for each item in the order.
+ *
+ * @param totalWithTax  the total cost of the order including tax.
+ * @param paymentType   the selected payment type (e.g., Credit/Debit, Dining Dollars, Gift Card).
+ */
     private void placeOrderInDatabase(double totalWithTax, String paymentType) {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -1297,7 +1504,12 @@ public class OrderController {
     }
 
     
-    // Method to update the menu_item table by subtracting the number of servings for the specified item
+    /**
+ * Updates the menu_item table by subtracting the number of servings used for the specified item.
+ *
+ * @param itemName      the name of the item in the menu.
+ * @param servingsUsed  the number of servings to subtract from the menu item's available servings.
+ */
     private void updateMenuItemServing(String itemName, int servingsUsed) {
         String query = "UPDATE menu_item SET current_servings = current_servings - ? WHERE item_name = ?";
 
@@ -1318,12 +1530,23 @@ public class OrderController {
     }
 
 
-    // Extract the item name from the order string
+   /**
+ * Extracts the item name from the order string.
+ *
+ * @param orderItem the order string that contains the item name.
+ * @return the extracted item name from the order string.
+ */
     private String extractItemName(String orderItem) {
         return orderItem.substring(orderItem.indexOf("(") + 1, orderItem.indexOf(")"));  // Adjust parsing logic based on your format
     }
 
-    // Fetch menu item ID from the menu_item table
+    
+/**
+ * Fetches the menu item ID from the menu_item table based on the item name.
+ *
+ * @param itemName the name of the item for which to fetch the menu item ID.
+ * @return the menu item ID, or -1 if the item is not found in the database.
+ */
     private int fetchMenuItemId(String itemName) {
         String query = "SELECT menu_item_id FROM menu_item WHERE item_name = ?";
         try (Connection conn = Database.connect();
@@ -1339,6 +1562,10 @@ public class OrderController {
         return -1;  // Return -1 if item is not found
     }
 
+    /**
+ * Displays a dialog to either select an existing customer or add a new customer.
+ * If an existing customer is selected, their details are auto-filled. A new customer can also be added manually.
+ */
     public void showCustomerDialog() {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Add Customer");
@@ -1418,7 +1645,11 @@ public class OrderController {
 
     }
     
-    // Method to load customers from the database into the ComboBox
+    /**
+ * Loads the list of customers from the customer table in the database into a map, mapping customer names to their IDs.
+ *
+ * @return a map of customer names and their corresponding customer IDs.
+ */
     private Map<String, Integer> loadCustomersFromDatabase() {
         Map<String, Integer> customerMap = new HashMap<>();
     
@@ -1441,7 +1672,15 @@ public class OrderController {
         return customerMap;
     }
     
-    // Method to load selected customer details into the fields
+    /**
+ * Loads the details of a customer from the database and fills the provided text fields with the customer's data.
+ *
+ * @param customerId      the ID of the customer to load details for.
+ * @param firstNameField  the text field for the customer's first name.
+ * @param lastNameField   the text field for the customer's last name.
+ * @param emailField      the text field for the customer's email.
+ * @param phoneField      the text field for the customer's phone number.
+ */
     private void loadCustomerDetails(int customerId, TextField firstNameField, TextField lastNameField, TextField emailField, TextField phoneField) {
         String query = "SELECT first_name, last_name, email, phone FROM customer WHERE customer_id = ?";
     
@@ -1462,7 +1701,14 @@ public class OrderController {
         }
     }
     
-    // Method to save a new customer to the database
+    /**
+ * Saves a new customer to the database by inserting their details into the customer table.
+ *
+ * @param firstName the first name of the new customer.
+ * @param lastName  the last name of the new customer.
+ * @param email     the email address of the new customer.
+ * @param phone     the phone number of the new customer.
+ */
     private void saveNewCustomer(String firstName, String lastName, String email, String phone) {
         String query = "INSERT INTO customer (first_name, last_name, email, phone) VALUES (?, ?, ?, ?)";
     
