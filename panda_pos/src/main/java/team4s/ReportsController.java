@@ -113,7 +113,7 @@ public class ReportsController {
     /**
      * populates the dropdown menu for the different graph types that can be made
      */
-    private void populateGraphTypeComboBox() {
+    public void populateGraphTypeComboBox() {
         graphTypeComboBox.setItems(FXCollections.observableArrayList("Product Usage", "X-report", "Z-report", "custom"));
         graphTypeComboBox.setOnAction(this::handleGraphTypeSelection);
     }
@@ -125,7 +125,7 @@ public class ReportsController {
      * @param event the action event from the button click
      */
     @FXML
-    private void handleGraphTypeSelection(ActionEvent event) {
+    public void handleGraphTypeSelection(ActionEvent event) {
         String selectedGraphType = graphTypeComboBox.getValue();
     
         if("Product Usage".equals(selectedGraphType)){
@@ -167,7 +167,7 @@ public class ReportsController {
      * @param event the action event from the button click
      */
     @FXML
-    private void generateReport(ActionEvent event) {
+    public void generateReport(ActionEvent event) {
         chartArea.getChildren().clear();
         String graphType = graphTypeComboBox.getValue();
         // get the current day in formatter, and the current hour in formatter2
@@ -312,7 +312,7 @@ public class ReportsController {
      * @param endHour the hour at which the query data collection will stop (exclusive)
      * @return a lineChart that depicts that total sales per hour for a given timeframe for a specific day
      */
-    private LineChart<String, Number> x_report_hourly_sales(LocalDate selectedDate, int startHour, int endHour){
+    public LineChart<String, Number> x_report_hourly_sales(LocalDate selectedDate, int startHour, int endHour){
 
         LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH");
@@ -379,7 +379,7 @@ public class ReportsController {
      * @param selectedDate the date that will be used in the query in order to process the correct data
      * @return a lineChart that depicts that total sales per hour for an entire workday
      */
-    private LineChart<String, Number> z_report_hourly_sales(LocalDate selectedDate){
+    public LineChart<String, Number> z_report_hourly_sales(LocalDate selectedDate){
 
         LocalDateTime currentTime = LocalDateTime.now();
         DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("HH");
@@ -448,7 +448,7 @@ public class ReportsController {
      * @param endHour the hour at which the query data collection will stop (exclusive)
      * @return a barChart that depicts the number of items sold per hour for a given timeframe for a specific day
      */
-    private BarChart<String, Number> x_report_items_sold(LocalDate selectedDate, int startHour, int endHour) {
+    public BarChart<String, Number> x_report_items_sold(LocalDate selectedDate, int startHour, int endHour) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
 
@@ -489,7 +489,7 @@ public class ReportsController {
      * @param selectedDate the date that will be used in the query in order to process the correct data
      * @return a barChart that depicts the number of items sold per hour for all work hours specific day
      */
-    private BarChart<String, Number> z_report_items_sold(LocalDate selectedDate) {
+    public BarChart<String, Number> z_report_items_sold(LocalDate selectedDate) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
 
@@ -532,7 +532,7 @@ public class ReportsController {
      * @param endHour the hour at which the query data collection will stop (exclusive)
      * @return a LineChart displaying the number of transactions per hour for each transaction type for a given time window on a specific day
      */
-    private LineChart<String, Number> transactionTypes_xreport(LocalDate selectedDate, int startHour, int endHour) {
+    public LineChart<String, Number> transactionTypes_xreport(LocalDate selectedDate, int startHour, int endHour) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
 
@@ -601,7 +601,7 @@ public class ReportsController {
      * @param selectedDate the date that will be used in the query in order to process the correct data
      * @return a LineChart displaying the number of transactions per hour for each transaction type for a specific day
      */
-    private LineChart<String, Number> transactionTypes_zreport(LocalDate selectedDate) {
+    public LineChart<String, Number> transactionTypes_zreport(LocalDate selectedDate) {
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Time (Hours)");
     
@@ -699,7 +699,7 @@ public class ReportsController {
      * 
      * @param chart the selected chart in a XYChart format so that it can be exported as a CSV
      */
-    private void exportAsCSV(XYChart<String, Number> chart) {
+    public void exportAsCSV(XYChart<String, Number> chart) {
         // File chooser dialog for saving the CSV
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Chart Data");
@@ -729,7 +729,7 @@ public class ReportsController {
      *@param event the action event from the button click
      */
     @FXML
-    private void handleExportAsPNG(ActionEvent event) {
+    public void handleExportAsPNG(ActionEvent event) {
         if (selectedGraph != null) {
             WritableImage image = selectedGraph.snapshot(new SnapshotParameters(), null);
 
@@ -765,7 +765,7 @@ public class ReportsController {
      *@param graph the graph that is being wrapped, so that it can be signalled as selected
      *@return a VBOX containing the selected graph
      */
-    private VBox wrapGraphForSelection(Node graph) {
+    public VBox wrapGraphForSelection(Node graph) {
         VBox graphContainer = new VBox(graph);
         graphContainer.setStyle("-fx-border-color: transparent; -fx-border-width: 2;");
 
@@ -799,7 +799,7 @@ public class ReportsController {
      *@param event the action event from the button click
      */
     @FXML
-    private void handleExportAsCSV(ActionEvent event) {
+    public void handleExportAsCSV(ActionEvent event) {
         if (selectedChart == null) {
             // Warning popup if no chart is selected
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -819,7 +819,7 @@ public class ReportsController {
      *@param event the action event from the button click
      */
      @FXML
-     private void resetForm(ActionEvent event) {
+     public void resetForm(ActionEvent event) {
          graphTypeComboBox.getSelectionModel().clearSelection();
 
          datePicker.setValue(LocalDate.now());
