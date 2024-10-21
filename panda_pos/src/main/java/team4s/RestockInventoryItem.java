@@ -11,12 +11,12 @@ public class RestockInventoryItem {
     /**
      * Constructs a RestockInventoryItem with the specified details.
      * 
-     * @param ingredient_id
-     * @param ingredient_name
-     * @param quantity
-     * @param price
-     * @param unit
-     * @param total_price
+     * @param ingredient_id   the unique ID of the ingredient
+     * @param ingredient_name the name of the ingredient
+     * @param quantity        the quantity of the ingredient in the order
+     * @param price           the price of the ingredient
+     * @param unit            the unit of the ingredient
+     * @param total_price     the total price of the ingredient in the order
      */
     public RestockInventoryItem(int ingredient_id, String ingredient_name, int quantity, double price, String unit,
             double total_price) {
